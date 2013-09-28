@@ -1,12 +1,7 @@
 "use strict";
 
-var tabList = {};
-
-var tabOpened = false;
-
-function getTabList() {
-    return tabList;
-}
+var tabList = {},
+    tabOpened = false;
 
 // This will execute whenever a tab has completed "loading"
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
@@ -17,20 +12,22 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
 
 chrome.tabs.onActivated.addListener(function(tabInfo) {
     var tabId = tabInfo.tabId;
+
     chrome.tabs.get(tabId, function(tab) {
-        if (typeof tabList[tabId]["screencap"] === "undefined") {
-            captureScreen(tab);
-        }
+        captureScreen(tab);
     });
 });
 
 function captureScreen(tab) {
+    var tabId = tab.tabId;
+
     chrome.tabs.captureVisibleTab(tab.windowId, { format: "png"}, function(imgBlob) {
         if (typeof tabList[tabId] === "undefined") {
             tabList[tabId] =  {};
         }
+
         tabList[tabId]["screencap"] = imgBlob;
-        chrome.runtime.sendMessage(null, tabList, null)
+        chrome.runtime.sendMessage(tabList, null)
 
         // Work in progress code for shrinking the image
         var canvas = null,
@@ -59,4 +56,3 @@ chrome.browserAction.onClicked.addListener(function(tab) {
 
   });
 });
-
