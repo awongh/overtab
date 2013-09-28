@@ -1,15 +1,39 @@
 {
   "manifest_version": 2,
+  "name"       : "tabs",
+  "description": "chrome tab manager",
+  "version"    : "0.1",
+  "icons": {
+    "32" : "images/icon32.png",
+    "48" : "images/icon48.png",
+    "128": "images/icon128.png"
+  },
+  "browser_action" : {
+    "default_title": "tabs",
+    "default_icon" : "images/icon.png"
+  },
 
-  "name": "overtab",
-  "description": "Be over your tabs.",
-  "version": "0.1",
-
-  "permissions": [
-    "https://secure.flickr.com/"
-  ],
-  "browser_action": {
+  "background": {
     "scripts": ["eventPage.js"],
     "persistent": false
-  }
+  },
+  "homepage_url"          : "http://overtab.com",
+  "minimum_chrome_version": "13.0",
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js"     : [
+                  "js/app.js"
+      ]
+    }
+  ],
+  "options_page": "options.html",
+  "permissions" : [
+    "background",
+    "tabs",
+    "tabCapture",
+    "storage",
+    "history",
+    "<all_urls>"
+  ]
 }
