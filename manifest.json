@@ -1,0 +1,15 @@
+{
+  "manifest_version": 2,
+
+  "name": "overtab",
+  "description": "Be over your tabs.",
+  "version": "0.1",
+
+  "permissions": [
+    "https://secure.flickr.com/"
+  ],
+  "browser_action": {
+    "scripts": ["eventPage.js"],
+    "persistent": false
+  }
+}
