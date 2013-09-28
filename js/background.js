@@ -19,24 +19,26 @@ chrome.tabs.onActivated.addListener(function(tabInfo) {
 });
 
 function captureScreen(tab) {
-    var tabId = tab.tabId;
+    chrome.tabs.captureVisibleTab(tab.windowId, {format: "png"}, function(imgBlob) {
+        // Check to see if this is a Chrome internal page. If so, don't capture it
+        if (!tab.url.match(/^chrome:\/\//)) {
+            if (typeof tabList[tab.id] === "undefined") {
+                tabList[tab.id] =  {};
+            }
 
-    chrome.tabs.captureVisibleTab(tab.windowId, { format: "png"}, function(imgBlob) {
-        if (typeof tabList[tabId] === "undefined") {
-            tabList[tabId] =  {};
+            tabList[tab.id]["screencap"] = imgBlob;
+            chrome.runtime.sendMessage("", tabList, function() {})
+
+            // Work in progress code for shrinking the image
+            var canvas = null,
+                ctx = null;
+
+            canvas = document.querySelector("#use-me");
+
+            ctx = canvas.getContext('2d');
+            // Img Blog is a Data URI that cannot be directly drawn into Canvas
+            //ctx.drawImage(imgBlob, 0, 0, document.body.offsetWidth, document.body.offsetHeight);
         }
-
-        tabList[tabId]["screencap"] = imgBlob;
-        chrome.runtime.sendMessage(tabList, null)
-
-        // Work in progress code for shrinking the image
-        var canvas = null,
-            ctx = null;
-
-        canvas = document.querySelector("#use-me");
-
-        ctx = canvas.getContext('2d');
-        ctx.drawImage(imgBlob, 0, 0, document.body.offsetWidth, document.body.offsetHeight);
     });
 }
 
