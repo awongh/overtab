@@ -23,15 +23,15 @@
       "matches": ["<all_urls>"],
       "js"     : [
                   "js/angular.min.js",
-                  "js/app.js",
+                  "js/app.js"
       ]
     }
   ],
   //"options_page": "options.html",
   "permissions" : [
+    "experimental",
     "background",
     "tabs",
-    "tabCapture",
     "storage",
     "history",
     "<all_urls>"
