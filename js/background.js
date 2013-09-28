@@ -2,6 +2,8 @@
 
 var tabList = {};
 
+var tabOpened = false;
+
 function getTabList() {
     return tabList;
 }
@@ -42,9 +44,19 @@ function captureScreen(tab) {
 }
 
 chrome.browserAction.onClicked.addListener(function(tab) {
+  console.log( tabOpened );
+
+  if( tabOpened ){
+    
+    //do something else
+    return true;
+  }
+
   chrome.tabs.create({'url': chrome.extension.getURL('index.html')}, function(tab) {
     // Tab opened.
     console.log("opened");
+    tabOpened = true;
+
   });
 });
 
