@@ -16,7 +16,8 @@
   },
 
   "background": {
-    "page": "background.html"
+    "page": "background.html",
+    "persistent": true
   },
   "homepage_url"          : "http://overtab.co",
   "minimum_chrome_version": "13.0",
@@ -25,8 +26,11 @@
       "matches": ["<all_urls>"],
       "js"     : [
                   "js/angular.min.js",
+                  "js/mainController.js",
+                  "js/background.js",
                   "js/app.js"
-      ]
+      ],
+      "all_frames": true
     }
   ],
   //"options_page": "options.html",
@@ -36,5 +40,6 @@
     "storage",
     "history",
     "<all_urls>"
-  ]
+  ],
+  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'"
 }

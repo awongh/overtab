@@ -4,6 +4,7 @@ var tabList = {},
     tabOpened = false;
 
 // This will execute whenever a tab has completed "loading"
+/*
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
     if (changeInfo.status === "complete") {
         captureScreen(tab);
@@ -41,20 +42,40 @@ function captureScreen(tab) {
         }
     });
 }
+*/
 
 chrome.browserAction.onClicked.addListener(function(tab) {
   console.log( tabOpened );
 
-  if( tabOpened ){
-    
-    //do something else
-    return true;
+  if( !tabOpened ){
+
+    chrome.tabs.create({'url': chrome.extension.getURL('index.html')}, function(tab) {
+      // Tab opened.
+      console.log("opened");
+      tabOpened = true;
+
+    });
+
+  }else{
+    console.log( "here" );
+
+    var tabs = [ 
+      { id:2 },
+      { id:2 },
+      { id:2 },
+      { id:2 },
+      { id:2 },
+      { id:2 },
+      { id:2 },
+      { id:2 },
+      { id:2 },
+      { id:2 },
+      { id:2 },
+      { id:2 }
+    ]; 
+
+    chrome.runtime.sendMessage(null, tabs, function(response) {
+        console.log(response.farewell);
+    });
   }
-
-  chrome.tabs.create({'url': chrome.extension.getURL('index.html')}, function(tab) {
-    // Tab opened.
-    console.log("opened");
-    tabOpened = true;
-
-  });
 });
