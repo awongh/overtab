@@ -7,7 +7,11 @@
     </head>
     <body ng-app>
         <div ng-controller="mainController">
-            <tab-container></tab-container>
+            <ul>
+                <li ng-repeat="tab in tabs">
+                    {{tab.property}}
+                </li>
+            </ul>
         </div>
     </body>
 </html>

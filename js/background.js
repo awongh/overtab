@@ -9,7 +9,6 @@ function getTabList() {
 // This will execute whenever a tab has completed "loading"
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
     if (changeInfo.status === "complete") {
-        tabList[tabId] =  {};
         captureScreen(tab);
     }
 });
@@ -25,6 +24,9 @@ chrome.tabs.onActivated.addListener(function(tabInfo) {
 
 function captureScreen(tab) {
     chrome.tabs.captureVisibleTab(tab.windowId, { format: "png"}, function(imgBlob) {
+        if (typeof tabList[tabId] === "undefined") {
+            tabList[tabId] =  {};
+        }
         tabList[tabId]["screencap"] = imgBlob;
         chrome.runtime.sendMessage(null, tabList, null)
 
