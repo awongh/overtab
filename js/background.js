@@ -38,3 +38,11 @@ function captureScreen(tab) {
         ctx.drawImage(imgBlob, 0, 0, document.body.offsetWidth, document.body.offsetHeight);
     });
 }
+
+chrome.browserAction.onClicked.addListener(function(tab) {
+  chrome.tabs.create({'url': chrome.extension.getURL('index.html')}, function(tab) {
+    // Tab opened.
+    console.log("opened");
+  });
+});
+
