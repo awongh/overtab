@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name"       : "tabs",
   "description": "chrome tab manager",
-  "version"    : "0.1.9",
+  "version"    : "0.2.4",
   "icons": {
     "19" : "images/OverTab_19.png",
     "32" : "images/OverTab_32.png",
@@ -19,8 +19,10 @@
     "page": "background.html",
     "persistent": true
   },
+
   "homepage_url"          : "http://overtab.co",
   "minimum_chrome_version": "13.0",
+
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
