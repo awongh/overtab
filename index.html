@@ -11,7 +11,7 @@
         <div ng-controller="mainController" ng-init="init()">
             <ul>
                 <li ng-repeat="tab in tabs">
-                    <img width="150px" src="{{tab.screencap}}">{{tab.id}}
+                    {{tab.id}} <img width="150px" src="{{tab.screencap}}"> {{tab.title}}
                 </li>
             </ul>
         </div>
