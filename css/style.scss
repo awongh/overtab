@@ -1,0 +1,28 @@
+$green: #71b451;
+$torquoise: #296976;
+
+#tab-graph {
+    .tab-node {
+        padding: 1em;
+        border-radius: .3em;
+        background-color: lighten($torquoise, 40%);
+        border: .2em solid $green;
+        width: 200px;
+
+        .thumbnail {
+            overflow: hidden;
+            margin: 0 auto;
+            width: 150px;
+            height: 150px;
+
+            img {
+                width: 100%;
+            }
+        }
+
+        .title {
+            margin-top: 1em;
+            color: darken($torquoise, 20%);
+        }
+    }
+}

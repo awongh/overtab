@@ -14,7 +14,6 @@ var mainController = function($scope) {
         chrome.runtime.onMessage.addListener( function(request, sender, sendResponse) {
             if( request.tabList && request.tabListIndex) {
                 $scope.$apply(function() {
-                    console.log("applying...!", request.tabList);
                     $scope.tabs = request.tabList;
                     $scope.tabsList = request.tabListIndex;
                 });

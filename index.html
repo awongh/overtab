@@ -1,19 +1,22 @@
 <!DOCTYPE html>
-<html ng-csp>
+<html>
     <head>
         <title>OverTab | Be over your tabs.</title>
+        <link rel="stylesheet" type="text/css" href="css/style.css" />
         <script src="js/angular.min.js"></script>
         <script src="js/mainController.js"></script>
         <script src="js/app.js"></script>
         <script src="js/mainController.js"></script>
     </head>
+
     <body ng-app>
-        <div ng-controller="mainController" ng-init="init()">
-            <ul>
-                <li ng-repeat="tab in tabs">
-                    {{tab.id}} <img width="150px" src="{{tab.screencap}}"> {{tab.title}}
-                </li>
-            </ul>
+
+        <div ng-controller="mainController" ng-init="init()" id="tab-graph">
+            <div ng-repeat="tab in tabs" class="tab-node">
+                <div class="thumbnail"><img width="150px" src="{{tab.screencap}}"></div>
+                <div class="title">{{tab.title}}</div>
+            </div>
         </div>
+
     </body>
 </html>

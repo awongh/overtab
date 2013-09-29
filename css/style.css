@@ -1,1 +1,16 @@
-/* empty */
+#tab-graph .tab-node {
+  padding: 1em;
+  border-radius: .3em;
+  background-color: #92cdd9;
+  border: 0.2em solid #71b451;
+  width: 200px; }
+  #tab-graph .tab-node .thumbnail {
+    overflow: hidden;
+    margin: 0 auto;
+    width: 150px;
+    height: 150px; }
+    #tab-graph .tab-node .thumbnail img {
+      width: 100%; }
+  #tab-graph .tab-node .title {
+    margin-top: 1em;
+    color: #0f262a; }
