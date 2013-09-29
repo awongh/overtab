@@ -3,6 +3,7 @@ $torquoise: #296976;
 
 #tab-graph {
     .tab-node {
+        float: left;
         padding: 1em;
         border-radius: .3em;
         background-color: lighten($torquoise, 40%);
@@ -23,6 +24,8 @@ $torquoise: #296976;
         .title {
             margin-top: 1em;
             color: darken($torquoise, 20%);
+            overflow-x: hidden;
+            text-overflow: ellipsis;
         }
     }
 }
