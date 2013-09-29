@@ -77,8 +77,8 @@ function removeTab(tab) {
         }
     }
 
-    tabPosition = [tabListIndex[tabId]];
-    tabList.remove([tabListIndex[tabId]]);
+    tabPosition = tabListIndex[tabId];
+    tabList.remove(tabListIndex[tabId]);
     delete tabListIndex[tabId];
 
     reIndex(tabPosition);
