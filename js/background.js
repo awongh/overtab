@@ -23,6 +23,7 @@ function addTab(tab) {
                 // Add the tab object and index lookup into their respective arrays
                 tabList.push(tabObject);
                 tabListIndex[tabObject.id] = tabList.length - 1;
+                updateTabLists();
             });
         }
     } else if (typeof tab.id !== "undefined") { // The object is (probably) a tab object, yay!
@@ -31,17 +32,21 @@ function addTab(tab) {
             // Add the tab index and object into their respective arrays
             tabList.push(tab);
             tabListIndex[tab.id] = tabList.length - 1;
+            updateTabLists();
         }
     }
-    updateTabLists();
 }
 
 function removeTab(tab) {
     updateTabLists();
 }
 
+function tabExists(tab) {
+    return typeof tabListIndex[tab.id] !== "undefined" ? true : false;
+}
+
 function updateTabLists() {
-    chrome.runtime.sendMessage("", {tabList: tabList, tabListIndex: tabListIndex}, function() {})
+    chrome.runtime.sendMessage("", {tabList: tabList, tabListIndex: tabListIndex}, function() {});
 }
 
 // This will execute whenever a tab has completed "loading"
@@ -62,7 +67,7 @@ chrome.tabs.onActivated.addListener(function(tabInfo) {
 function captureScreen(tab) {
 
     // Check to see if this is a Chrome internal page. If so, don't capture it
-    if (tab.url.match(/^http.*:\/\//)) {
+    if (tab.url.match(/^http.*:\/\//) && !tabExists(tab)) {
         chrome.tabs.captureVisibleTab(tab.windowId, {format: "png"}, function(imgBlob) {
             tab["screencap"] = imgBlob;
             tab["timestamp"] = Date.getTime();
@@ -78,6 +83,12 @@ function captureScreen(tab) {
     }
 }
 
+chrome.runtime.onMessage.addListener( function( request, sender, sendResponse) {
+    if ( request.message === "getList" ) {
+        updateTabLists();
+    }
+});
+
 chrome.browserAction.onClicked.addListener(function(tab) {
   console.log( tabOpened );
 
@@ -90,26 +101,5 @@ chrome.browserAction.onClicked.addListener(function(tab) {
 
     });
 
-  } else {
-    console.log( "here" );
-
-    var tabs = [ 
-      { id:2 },
-      { id:2 },
-      { id:2 },
-      { id:2 },
-      { id:2 },
-      { id:2 },
-      { id:2 },
-      { id:2 },
-      { id:2 },
-      { id:2 },
-      { id:2 },
-      { id:2 }
-    ]; 
-
-    chrome.runtime.sendMessage(null, tabs, function(response) {
-        console.log(response.farewell);
-    });
   }
 });
