@@ -122,40 +122,41 @@ function sanitizeTab(dirtyTab, callback) {
 }
 
 // Updates an existing tab entry, and calls the given callback afterwards (optional)
+// If the tab doesn't exist yet, invoke the addTab function instead
 function updateTab(tab, callback) {
 
     sanitizeTab(tab, function(tab) {
+        var updated = false;
 
         if (tabList[tabListIndex[tab.id]]) {
             if (tabList[tabListIndex[tab.id]].url !== tab.url) {
                 tabList[tabListIndex[tab.id]].url = tab.url;
                 delete tabList[tabListIndex[tab.id]]["screencap"];
                 delete tabList[tabListIndex[tab.id]]["timestamp"];
+                updated = true;
             }
 
-            tabList[tabListIndex[tab.id]].title = tab.title;
-            tabList[tabListIndex[tab.id]].status = tab.status;
-            tabList[tabListIndex[tab.id]].pinned = tab.pinned;
+            if (tabList[tabListIndex[tab.id]].status !== tab.status) {
+                tabList[tabListIndex[tab.id]].status = tab.status;
+                updated = true;
+            }
+
+            if (tabList[tabListIndex[tab.id]].title !== tab.title) {
+                tabList[tabListIndex[tab.id]].title = tab.title;
+                updated = true;
+            }
+
+            //**Add new properties to track for updating here**//
+
+            if (updated) {
+                updateTabLists();
+            }
 
             if (typeof callback !== "undefined") {
                 callback(tab);
             }
         } else {
-            addTab(tab, function(tab) {
-                if (tabList[tabListIndex[tab.id]].url !== tab.url) {
-                    tabList[tabListIndex[tab.id]].url = tab.url;
-                    delete tabList[tabListIndex[tab.id]]["screencap"];
-                    delete tabList[tabListIndex[tab.id]]["timestamp"];
-                }
-
-                tabList[tabListIndex[tab.id]].title = tab.title;
-                tabList[tabListIndex[tab.id]].status = tab.status;
-                tabList[tabListIndex[tab.id]].pinned = tab.pinned;
-
-                if (typeof callback !== "undefined") {
-                    callback(tab);
-                }
-            });
+            addTab(tab, callback(tab));
         }
     });
 }
