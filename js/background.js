@@ -95,38 +95,67 @@ function removeTab(tab) {
     updateTabLists();
 }
 
-function sanitizeTab(tab, callback) {
-    var tabId = null,
-        tabPosition = null;
+// This function will accept tab object, tab id, tab info, and a callback function.
+// It will always pass into the callback function a tab object
+function sanitizeTab(dirtyTab, callback) {
+    var dirtyTabId = null;
 
-    if (typeof tab.tabId !== "undefined") { // The user passed in a tabInfo object, not a tab object
-        // Is this tab still in our index?
-        if (typeof tabListIndex[tab.tabId] !== "undefined") {
-            tabId = tab.tabId;
-        } else {
-            return false;
+    if (typeof dirtyTab === "undefined") {
+        return false;
+    } else {
+        if (typeof dirtyTab.tabId !== "undefined" || typeof dirtyTab === "number") {
+            dirtyTabId = dirtyTab.tabId || dirtyTab;
         }
-    } else if (typeof tab.id !== "undefined") { // The object is (probably) a tab object, yay!
-        // Is this tab still in our index?
-        if (typeof tabListIndex[tab.id] !== "undefined") {
-            tabId = tab.id;
-        } else {
-            return false;
-        }
-    } else if (typeof tab === "number") { // The variable is the tab ID as an integer
-        // Is this tab still in our index?
-        if (typeof tabListIndex[tab] !== "undefined") {
-            tabId = tab;
-        } else {
-            return false;
-        }
-    }}
+    }
+
+    // The input was a tab ID, so fetch the actual tab object
+    if (typeof dirtyTabId !== "undefined" && dirtyTabId !== null) {
+        chrome.tabs.get(dirtyTabId, function(tabObject) {
+            if (typeof tabObject !== "undefined" && (tabObject.url.match(/^http.*:\/\//) || dirtyTab.title === "New Tab" )) {
+                callback(tabObject);
+            }
+        });
+    // The input was a tab object, run the callback directly on it :)
+    } else if (typeof dirtyTab.id !== "undefined" && (dirtyTab.url.match(/^http.*:\/\//) || dirtyTab.title === "New Tab" )) {
+        callback(dirtyTab);
+    }
+}
 
 // Updates an existing tab entry, and calls the given callback afterwards (optional)
 function updateTab(tab, callback) {
+
     sanitizeTab(tab, function(tab) {
-        if (typeof callback !== "undefined") {
-            callback(tab);
+
+        if (tabList[tabListIndex[tab.id]]) {
+            if (tabList[tabListIndex[tab.id]].url !== tab.url) {
+                tabList[tabListIndex[tab.id]].url = tab.url;
+                delete tabList[tabListIndex[tab.id]]["screencap"];
+                delete tabList[tabListIndex[tab.id]]["timestamp"];
+            }
+
+            tabList[tabListIndex[tab.id]].title = tab.title;
+            tabList[tabListIndex[tab.id]].status = tab.status;
+            tabList[tabListIndex[tab.id]].pinned = tab.pinned;
+
+            if (typeof callback !== "undefined") {
+                callback(tab);
+            }
+        } else {
+            addTab(tab, function(tab) {
+                if (tabList[tabListIndex[tab.id]].url !== tab.url) {
+                    tabList[tabListIndex[tab.id]].url = tab.url;
+                    delete tabList[tabListIndex[tab.id]]["screencap"];
+                    delete tabList[tabListIndex[tab.id]]["timestamp"];
+                }
+
+                tabList[tabListIndex[tab.id]].title = tab.title;
+                tabList[tabListIndex[tab.id]].status = tab.status;
+                tabList[tabListIndex[tab.id]].pinned = tab.pinned;
+
+                if (typeof callback !== "undefined") {
+                    callback(tab);
+                }
+            });
         }
     });
 }
@@ -143,10 +172,12 @@ function reIndex(tabPosition) {
     }
 }
 
+// Expect an actual tab object
 function tabExists(tab) {
     return typeof tabListIndex[tab.id] !== "undefined" ? true : false;
 }
 
+// Expect an actual tab object
 function screencapExists(tab) {
     if (tabExists(tab)) {
         return typeof tabList[tabListIndex[tab.id]].screencap !== "undefined" ? true : false;
@@ -162,17 +193,15 @@ function updateTabLists() {
 // This will execute whenever a tab has completed "loading"
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
 
-    updateTab(tab);
-    console.log("Being updated: ", changeInfo);
-    if (changeInfo.status === "complete") {
-        chrome.tabs.query({ currentWindow: true, windowId: tab.windowId, active: true, status: "complete" }, function(tabs) {
-            console.log(tabs);
-            console.log(tab);
-            if (tabs.length > 0 && tabs[0].id == tab.id) {
-                captureScreen(tab);
-            }
-        });
-    }
+    updateTab(tab, function() {
+        if (changeInfo.status === "complete") {
+            chrome.tabs.query({ currentWindow: true, windowId: tab.windowId, active: true, status: "complete" }, function(tabs) {
+                if (tabs.length > 0 && tabs[0].id == tab.id) {
+                    captureScreen(tab);
+                }
+            });
+        }
+    });
 });
 
 chrome.tabs.onCreated.addListener(function(tab) {
@@ -182,21 +211,27 @@ chrome.tabs.onCreated.addListener(function(tab) {
 chrome.tabs.onActivated.addListener(function(tabInfo) {
     var tabId = tabInfo.tabId;
 
-    chrome.tabs.get(tabId, function(tab) {
-        addTab(tab, function(tab) {
-            chrome.tabs.query({ currentWindow: true, windowId: tab.windowId, active: true, status: "complete" }, function(tabs) {
-                if (tabs.length > 0 && tabs[0].id == tab.id) {
-                    captureScreen(tab);
-                }
+    sanitizeTab(tabId, function(tab) {
+
+        console.log("First");
+        if (!screencapExists(tab)) {
+            console.log("Screencap doesn't exist (good)");
+            updateTab(tab, function(tab) {
+                console.log("Adding tab");
+
+                chrome.tabs.query({ currentWindow: true, windowId: tab.windowId, active: true, status: "complete" }, function(tabs) {
+                    if (tabs.length > 0 && tabs[0].id == tab.id) {
+                        captureScreen(tab);
+                    }
+                });
             });
-        });
+        }
     });
 });
 
 function captureScreen(tab) {
 
-    // Check to see if this is a Chrome internal page. If so, don't capture it
-    if ((tab.url.match(/^http.*:\/\//) || tab.title === "New Tab") && !screencapExists(tab)) {
+    sanitizeTab(tab, function(tab) {
         chrome.tabs.captureVisibleTab(tab.windowId, {format: "png"}, function(imgBlob) {
             tab["screencap"] = imgBlob;
             tab["timestamp"] = Date.getTime();
@@ -211,7 +246,7 @@ function captureScreen(tab) {
             // Img Blog is a Data URI that cannot be directly drawn into Canvas
             //ctx.drawImage(imgBlob, 0, 0, document.body.offsetWidth, document.body.offsetHeight);
         });
-    }
+    });
 }
 
 chrome.runtime.onMessage.addListener( function( request, sender, sendResponse) {
