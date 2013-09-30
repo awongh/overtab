@@ -5,7 +5,8 @@ var tabList = [],
     tabOpened = false,
     canvas = null,
     image = null,
-    Date = new Date();
+    Date = new Date(),
+    overTab = null;
 
 Array.prototype.remove = function(from, to) {
     var rest = this.slice((to || from) + 1 || this.length);
@@ -262,14 +263,18 @@ chrome.browserAction.onClicked.addListener(function(tab) {
     if ( !tabOpened ) {
 
         chrome.tabs.create({'url': chrome.extension.getURL('index.html')}, function(tab) {
-        // Tab opened.
-        console.log("opened");
-        tabOpened = true;
-
-    });
-  }
+            // Tab opened.
+            tabOpened = true;
+            overTab = tab.id;
+        });
+    } else {
+        // Focus on OverTab ID
+    }
 });
 
 chrome.tabs.onRemoved.addListener(function( tabId, removeInfo ) {
     removeTab(tabId);
+    if (tabId === overTab) {
+        tabOpened = false;
+    }
 });
