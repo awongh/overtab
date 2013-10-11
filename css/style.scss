@@ -1,14 +1,33 @@
 $green: #71b451;
 $torquoise: #296976;
+$background: #e8e8e8;
+
+body {
+    font-family: sans-serif;
+    background-color: $background;
+}
+
+.tab-domain{
+    background-color: #daf9fa;
+    padding:10px;
+    margin:10px;
+    float: left;
+}
 
 #tab-graph {
+    .tab-node + .tab-node {
+        margin-right: 5px;
+    }
+
     .tab-node {
+        margin: 5px;
+        margin-left: 10px;
         float: left;
-        padding: 1em;
-        border-radius: .3em;
-        background-color: lighten($torquoise, 40%);
-        border: .2em solid $green;
-        width: 200px;
+        padding: 10px; 
+        border-radius: .3rem;
+        background-color: darken($background, 4%);
+        width: 150px;
+        font-size: .8rem;
 
         .thumbnail {
             overflow: hidden;
@@ -25,6 +44,7 @@ $torquoise: #296976;
             margin-top: 1em;
             color: darken($torquoise, 20%);
             overflow-x: hidden;
+            white-space: nowrap;
             text-overflow: ellipsis;
         }
     }

@@ -14,10 +14,12 @@
             <div class="tab-filter">
                 <p><label>Filter: </label><input ng-model="tabFilter" type="text"></p>
             </div>
+            <div ng-repeat="domain in tree | filter:tabFilter" class="tab-domain">
 
-            <div ng-repeat="tab in tabs | filter:tabFilter" class="tab-node">
-                <div class="thumbnail"><img width="150px" src="{{tab.screencap}}"></div>
-                <div class="title">{{tab.title}}</div>
+                <div ng-repeat="tab in domain | filter:tabFilter" class="tab-node">
+                    <div class="thumbnail"><img width="150px" src="{{tab.screencap}}"></div>
+                    <div class="title">{{tab.title}}</div>
+                </div>
             </div>
         </div>
 

@@ -6,6 +6,7 @@ Array.prototype.remove = function(from, to) {
     return this.push.apply(this, rest);
 };
 
+/* Refactor in progress???
 var overtab = {
     // The list which we will use to hold all the tab objects
     tabList: [],
@@ -21,6 +22,7 @@ var overtab = {
 
 
 }
+*/
 var tabList = [],
     tabListIndex = {}, // For checking to see if a tab already exists, and for reverse lookup of the tab in tabList array
     tabOpened = false,
@@ -38,7 +40,7 @@ document.addEventListener("DOMContentLoaded", function() {
 function addScreencap(tab) {
     if (typeof tabListIndex[tab.id] !== "undefined") {
         tabList[tabListIndex[tab.id]].screencap = tab.screencap;
-        updateTabLists();
+        sendSingleTab(tabList[tabListIndex[tab.id]]);
     }
 }
 
@@ -53,8 +55,8 @@ function addTab(tab, callback) {
                     // Add the tab object and index lookup into their respective arrays
                     tabList.push(tabObject);
                     tabListIndex[tabObject.id] = tabList.length - 1;
-                    updateTabLists();
-                    
+                    sendSingleTab(tabObject);
+
                     if (typeof callback !== "undefined") {
                         callback(tabObject);
                     }
@@ -67,7 +69,7 @@ function addTab(tab, callback) {
             // Add the tab index and object into their respective arrays
             tabList.push(tab);
             tabListIndex[tab.id] = tabList.length - 1;
-            updateTabLists();
+            sendSingleTab(tab);
 
             if (typeof callback !== "undefined") {
                 callback(tab);
@@ -108,7 +110,7 @@ function removeTab(tab) {
     delete tabListIndex[tabId];
 
     reIndex(tabPosition);
-    updateTabLists();
+    sendRemoveTab(tabId);
 }
 
 // This function will accept tab object, tab id, tab info, and a callback function.
@@ -165,7 +167,7 @@ function updateTab(tab, callback) {
             //**Add new properties to track for updating here**//
 
             if (updated) {
-                updateTabLists();
+                sendTabLists();
             }
 
             if (typeof callback !== "undefined") {
@@ -203,8 +205,20 @@ function screencapExists(tab) {
     }
 }
 
-function updateTabLists() {
-    chrome.runtime.sendMessage("", {tabList: tabList, tabListIndex: tabListIndex}, function() {});
+function sendTabLists() {
+    chrome.runtime.sendMessage(null, {message: "sendTabLists", tabList: tabList, tabListIndex: tabListIndex}, function() {});
+}
+
+function sendSingleTab( tab ) {
+    sanitizeTab(tab, function(tab) {
+        chrome.runtime.sendMessage(null, { message:"sendSingleTab", tab: tab });
+    });
+}
+
+function sendRemoveTab( tab ) {
+    sanitizeTab(tab, function(tab) {
+        chrome.runtime.sendMessage(null, { message:"sendRemoveTab", tabId: tab.id });
+    });
 }
 
 // This will execute whenever a tab has completed "loading"
@@ -268,7 +282,7 @@ function captureScreen(tab) {
 
 chrome.runtime.onMessage.addListener( function( request, sender, sendResponse) {
     if ( request.message === "getList" ) {
-        updateTabLists();
+        sendTabLists();
     }
 });
 
@@ -291,5 +305,6 @@ chrome.tabs.onRemoved.addListener(function( tabId, removeInfo ) {
     removeTab(tabId);
     if (tabId === overTab) {
         tabOpened = false;
+        overTab = null;
     }
 });
