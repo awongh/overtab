@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name"       : "tabs",
   "description": "chrome tab manager",
-  "version"    : "0.5.2",
+  "version"    : "0.5.4",
   "icons": {
     "19" : "images/OverTab_19.png",
     "32" : "images/OverTab_32.png",
@@ -16,7 +16,7 @@
   },
 
   "background": {
-    "page": "background.html",
+    "page": "html/background.html",
     "persistent": true
   },
 
@@ -27,10 +27,10 @@
     {
       "matches": ["<all_urls>"],
       "js"     : [
-                  "js/angular.min.js",
-                  "js/mainController.js",
                   "js/background.js",
-                  "js/app.js"
+                  "js/angular-app/angular.min.js",
+                  "js/angular-app/controllers/mainController.js",
+                  "js/angular-app/modules/app.js"
       ],
       "all_frames": true
     }

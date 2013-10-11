@@ -1,5 +1,26 @@
 "use strict";
 
+Array.prototype.remove = function(from, to) {
+    var rest = this.slice((to || from) + 1 || this.length);
+    this.length = from < 0 ? this.length + from : from;
+    return this.push.apply(this, rest);
+};
+
+var overtab = {
+    // The list which we will use to hold all the tab objects
+    tabList: [],
+
+    // For checking to see if a tab already exists, and for reverse lookup of the tab in tabList array
+    tabListIndex: {},
+
+    tabOpened: false,
+    canvas: null,
+    image: null,
+    Date: new Date(),
+    overTab: null,
+
+
+}
 var tabList = [],
     tabListIndex = {}, // For checking to see if a tab already exists, and for reverse lookup of the tab in tabList array
     tabOpened = false,
@@ -7,12 +28,6 @@ var tabList = [],
     image = null,
     Date = new Date(),
     overTab = null;
-
-Array.prototype.remove = function(from, to) {
-    var rest = this.slice((to || from) + 1 || this.length);
-    this.length = from < 0 ? this.length + from : from;
-    return this.push.apply(this, rest);
-};
 
 document.addEventListener("DOMContentLoaded", function() {
     canvas = document.querySelector('canvas');
@@ -262,7 +277,7 @@ chrome.browserAction.onClicked.addListener(function(tab) {
 
     if ( !tabOpened ) {
 
-        chrome.tabs.create({'url': chrome.extension.getURL('index.html')}, function(tab) {
+        chrome.tabs.create({'url': chrome.extension.getURL('html/index.html')}, function(tab) {
             // Tab opened.
             tabOpened = true;
             overTab = tab.id;
