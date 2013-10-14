@@ -106,7 +106,7 @@ function removeTab(tab) {
     }
 
     tabPosition = tabListIndex[tabId];
-    tabList.remove(tabListIndex[tabId]);
+    tabList.remove(tabPosition);
     delete tabListIndex[tabId];
 
     reIndex(tabPosition);
@@ -167,7 +167,7 @@ function updateTab(tab, callback) {
             //**Add new properties to track for updating here**//
 
             if (updated) {
-                sendTabLists();
+                sendSingleTab(tab);
             }
 
             if (typeof callback !== "undefined") {
@@ -215,10 +215,8 @@ function sendSingleTab( tab ) {
     });
 }
 
-function sendRemoveTab( tab ) {
-    sanitizeTab(tab, function(tab) {
-        chrome.runtime.sendMessage(null, { message:"sendRemoveTab", tabId: tab.id });
-    });
+function sendRemoveTab( tabId ) {
+    chrome.runtime.sendMessage(null, { message:"sendRemoveTab", tabId: tabId });
 }
 
 // This will execute whenever a tab has completed "loading"
@@ -244,11 +242,8 @@ chrome.tabs.onActivated.addListener(function(tabInfo) {
 
     sanitizeTab(tabId, function(tab) {
 
-        console.log("First");
         if (!screencapExists(tab)) {
-            console.log("Screencap doesn't exist (good)");
             updateTab(tab, function(tab) {
-                console.log("Adding tab");
 
                 chrome.tabs.query({ currentWindow: true, windowId: tab.windowId, active: true, status: "complete" }, function(tabs) {
                     if (tabs.length > 0 && tabs[0].id == tab.id) {
@@ -287,7 +282,6 @@ chrome.runtime.onMessage.addListener( function( request, sender, sendResponse) {
 });
 
 chrome.browserAction.onClicked.addListener(function(tab) {
-    console.log( tabOpened );
 
     if ( !tabOpened ) {
 
