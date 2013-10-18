@@ -1,34 +1,19 @@
 var domainExtractionFilter = function() {
     return function(uri) {
-        if (str == null || str.length == 0)
-            return "";
-        
-        str = cleanURL(str).toLowerCase();
-        
-        var i = str.indexOf("/");
-        if (i > -1)
-            str = str.substring(0, i);
-            
-        var parts = str.split('.');
-        
-        var len = parts.length;
-        
-        if (len < 3)
-            return str;
+        var domainSplits = uri.split('//'),
+            protocol = domainSplits[0],
+            dir;
 
-        var lastPart = parts[len-1];
-        var secondPart;
-                
-        secondPart = parts[len-2];
-        
-        var two = 2;
-        
-        if (lastPart == "uk" && secondPart == "co")
-            ++two;
-        
-        if (len >= 0)
-            return parts.splice(len-two, two).join('.');
-        
-        return "";
+        switch (protocol) {
+            case 'file:':
+                dir = domainSplits[1].split('/');
+                dir.shift();
+                dir.pop();
+                return dir.join('/');
+                break;
+            default:
+                return domainSplits[1].split('/')[0];
+                break;
+        }
     }
-}
+};

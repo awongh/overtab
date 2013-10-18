@@ -1,5 +1,13 @@
 "use strict";
 
+Object.size = function(obj) {
+    var size = 0, key;
+    for (key in obj) {
+        if (obj.hasOwnProperty(key)) size++;
+    }
+    return size;
+};
+
 Array.prototype.remove = function(from, to) {
     console.log("Length? ", from < 0 ? this.length + from : from);
     window.lol = this;
@@ -8,14 +16,16 @@ Array.prototype.remove = function(from, to) {
     return this.push.apply(this, rest);
 };
 
-var mainController = function($scope, $injector) {
-    var $filter = $injector.get('$filter');
+var mainController = function($scope, $filter) {
+    //var $filter = $injector.get('$filter');
 
     $scope.tabs = [];
     $scope.tabIndex = {};
 
     $scope.tree = {};
     $scope.tree['undefined'] = {};
+
+    $scope.treeIndex = {};
 
     // Do stuff here
     $scope.init = function() {
@@ -43,11 +53,12 @@ var mainController = function($scope, $injector) {
                     console.log("Single: ", request.tab);
                     if (request.tab) {
                         var tab = request.tab,
-                            domain = $filter('domainExtraction')(tab.url);
+                            domain = $filter('domainExtraction')(tab.url),
+                            oldDomain;
 
                         // This is a new domain!
                         if (typeof $scope.tree[domain] === "undefined") {
-                            $scope.tree[request.tab.favIconUrl] = {};
+                            $scope.tree[domain] = {};
                         }
 
                         if (typeof $scope.tabIndex[tab.id] === 'undefined') {
@@ -56,7 +67,11 @@ var mainController = function($scope, $injector) {
 
                             $scope.tree[domain][tab.id] = tab;
                         } else {
-                            $scope.tabs[tab.id] = tab;
+                            oldDomain = $filter('domainExtraction')($scope.tabs[$scope.tabIndex[tab.id]].url);
+                            if ( oldDomain !== domain ) {
+                                delete $scope.tree[oldDomain][tab.id];
+                            }
+                            $scope.tabs[$scope.tabIndex[tab.id]] = tab;
                             $scope.tree[domain][tab.id] = tab;
                             // Fetch the non-loaded version of the tab from the 'undefined' favIconUrl pile, and remove it
                             if (typeof $scope.tree["undefined"][tab.id] !== "undefined") {
@@ -97,6 +112,10 @@ var mainController = function($scope, $injector) {
         });
 
         chrome.runtime.sendMessage(null, {message: "getList"}, function() {});
+    }
+
+    $scope.emptyDomain = function(domain) {
+        return Object.size(domain) === 1 ? true : false;
     }
 
     $scope.reIndex = function(tabPosition) {
