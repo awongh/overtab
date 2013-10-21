@@ -15,7 +15,7 @@
 
         <div ng-controller="mainController" ng-init="init()" id="tab-graph">
             <div class="tab-filter">
-                <p><label>Filter: </label><input ng-model="tabFilter" type="text"></p>
+                <p><input ng-model="tabFilter" type="text" placeholder="filter"></p>
             </div>
 
             <div ng-repeat="domain in tree" class="tab-domain" ng-class="emptyDomain(domain)" style="background-color: {{fill($index)}};">
