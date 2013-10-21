@@ -2,6 +2,10 @@ $green: #71b451;
 $torquoise: #296976;
 $background: #e8e8e8;
 
+.hidden {
+    display: none;
+}
+
 body {
     font-family: sans-serif;
     background-color: $background;
@@ -20,6 +24,7 @@ body {
     }
 
     .tab-node {
+        cursor: pointer;
         margin: 5px;
         margin-left: 10px;
         float: left;

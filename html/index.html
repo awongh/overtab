@@ -17,8 +17,8 @@
             <div class="tab-filter">
                 <p><label>Filter: </label><input ng-model="tabFilter" type="text"></p>
             </div>
-            <div ng-repeat="domain in tree" class="tab-domain" ng-hide="emptyDomain(domain)" style="background-color:{{fill($index)}};">
 
+            <div ng-repeat="domain in tree" class="tab-domain" ng-class="emptyDomain(domain)" style="background-color: {{fill($index)}};">
                 <div ng-repeat="tab in domain | filter:tabFilter" class="tab-node" ng-click="switchToTab(tab.id)">
                     <div class="thumbnail"><img width="150px" src="{{tab.screencap}}"></div>
                     <div class="title">{{tab.title}}</div>

@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name"       : "tabs",
   "description": "chrome tab manager",
-  "version"    : "0.6.4",
+  "version"    : "0.6.5",
   "icons": {
     "19" : "images/OverTab_19.png",
     "32" : "images/OverTab_32.png",

@@ -53,7 +53,6 @@ var mainController = function($scope, $filter) {
                     break;
 
                 case "sendSingleTab":
-                    console.log("Single: ", request.tab);
                     if (request.tab) {
                         var tab = request.tab,
                             domain = $filter('domainExtraction')(tab.url),
@@ -95,8 +94,8 @@ var mainController = function($scope, $filter) {
                             domain = $filter('domainExtraction')($scope.tabs[tabPosition].url);
 
                         $scope.tabs.remove(tabPosition);
-                        delete $scope.tabIndex[tabId];
 
+                        delete $scope.tabIndex[tabId];
                         delete $scope.tree[domain][tabId];
 
                         $scope.reIndex(tabPosition);
@@ -118,7 +117,7 @@ var mainController = function($scope, $filter) {
     }
 
     $scope.emptyDomain = function(domain) {
-        return Object.size(domain) === 1 ? true : false;
+        return Object.size(domain) <= 1 ? 'hidden' : '';
     }
 
     $scope.switchToTab = function(tabId) {

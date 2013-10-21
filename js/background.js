@@ -298,6 +298,7 @@ chrome.browserAction.onClicked.addListener(function(tab) {
 chrome.tabs.onRemoved.addListener(function( tabId, removeInfo ) {
     removeTab(tabId);
     if (tabId === overTabId) {
+        console.log("Closed");
         tabOpened = false;
         overTabId = null;
         overTabWindowId = null;
