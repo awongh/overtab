@@ -17,7 +17,7 @@
             </div>
             <div ng-repeat="domain in tree" class="tab-domain" ng-hide="emptyDomain(domain)">
 
-                <div ng-repeat="tab in domain | filter:tabFilter" class="tab-node">
+                <div ng-repeat="tab in domain | filter:tabFilter" class="tab-node" ng-click="switchToTab(tab.id)">
                     <div class="thumbnail"><img width="150px" src="{{tab.screencap}}"></div>
                     <div class="title">{{tab.title}}</div>
                 </div>

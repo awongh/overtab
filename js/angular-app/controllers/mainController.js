@@ -118,6 +118,10 @@ var mainController = function($scope, $filter) {
         return Object.size(domain) === 1 ? true : false;
     }
 
+    $scope.switchToTab = function(tabId) {
+        chrome.tabs.update(tabId, {'active': true}, function() {} );
+    }
+
     $scope.reIndex = function(tabPosition) {
         for (var tabIndex in $scope.tabIndex) {
             if ($scope.tabIndex.hasOwnProperty(tabIndex)) {

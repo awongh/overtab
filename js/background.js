@@ -36,14 +36,6 @@ document.addEventListener("DOMContentLoaded", function() {
     image = document.querySelector('canvas');
 });
 
-// Function accepts a tab object that should have the key "screencap" populated with an image Data Uri
-function addScreencap(tab) {
-    if (typeof tabListIndex[tab.id] !== "undefined") {
-        tabList[tabListIndex[tab.id]].screencap = tab.screencap;
-        sendSingleTab(tabList[tabListIndex[tab.id]]);
-    }
-}
-
 function addTab(tab, callback) {
 
     if (typeof tab.tabId !== "undefined") { // The user passed in a tabInfo object, not a tab object
@@ -258,11 +250,14 @@ chrome.tabs.onActivated.addListener(function(tabInfo) {
 function captureScreen(tab) {
 
     sanitizeTab(tab, function(tab) {
+
         chrome.tabs.captureVisibleTab(tab.windowId, {format: "png"}, function(imgBlob) {
+
             tab["screencap"] = imgBlob;
-            tab["timestamp"] = Date.getTime();
+            tab["timestampSinceCapture"] = Date.getTime();
             if (tabExists(tab)) {
-                addScreencap(tab);
+                tabList[tabListIndex[tab.id]] = tab;
+                sendSingleTab(tabList[tabListIndex[tab.id]]);
             }
 
             // Work in progress code for shrinking the image
