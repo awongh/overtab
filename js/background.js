@@ -29,7 +29,8 @@ var tabList = [],
     canvas = null,
     image = null,
     Date = new Date(),
-    overTab = null;
+    overTabId = null,
+    overTabWindowId = null;
 
 document.addEventListener("DOMContentLoaded", function() {
     canvas = document.querySelector('canvas');
@@ -283,10 +284,13 @@ chrome.browserAction.onClicked.addListener(function(tab) {
         chrome.tabs.create({'url': chrome.extension.getURL('html/index.html')}, function(tab) {
             // Tab opened.
             tabOpened = true;
-            overTab = tab.id;
+            overTabId = tab.id;
+            overTabWindowId = tab.windowId;
         });
     } else {
         // Focus on OverTab ID
+        chrome.tabs.update(overTabId, {'active': true}, function() {} );
+        chrome.windows.update(overTabWindowId, {'focused': true}, function() {} );
     }
 });
 
