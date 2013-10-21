@@ -296,8 +296,9 @@ chrome.browserAction.onClicked.addListener(function(tab) {
 
 chrome.tabs.onRemoved.addListener(function( tabId, removeInfo ) {
     removeTab(tabId);
-    if (tabId === overTab) {
+    if (tabId === overTabId) {
         tabOpened = false;
-        overTab = null;
+        overTabId = null;
+        overTabWindowId = null;
     }
 });
