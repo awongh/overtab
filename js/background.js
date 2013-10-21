@@ -280,10 +280,11 @@ chrome.runtime.onMessage.addListener( function( request, sender, sendResponse) {
 chrome.browserAction.onClicked.addListener(function(tab) {
 
     if ( !tabOpened ) {
-
+        // Prevents mashing the button and opening duplicate Overtab tabs
+        tabOpened = true;
         chrome.tabs.create({'url': chrome.extension.getURL('html/index.html')}, function(tab) {
+
             // Tab opened.
-            tabOpened = true;
             overTabId = tab.id;
             overTabWindowId = tab.windowId;
         });
