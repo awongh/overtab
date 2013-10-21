@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
         <title>OverTab | Be over your tabs.</title>
         <link rel="stylesheet" type="text/css" href="/css/style.css" />
         <script src="/js/angular-app/angular.min.js"></script>
+        <script src="/js/d3.js"></script>
         <script src="/js/angular-app/filters/domainExtractionFilter.js"></script>
         <script src="/js/angular-app/controllers/mainController.js"></script>
         <script src="/js/angular-app/modules/app.js"></script>
@@ -15,7 +17,7 @@
             <div class="tab-filter">
                 <p><label>Filter: </label><input ng-model="tabFilter" type="text"></p>
             </div>
-            <div ng-repeat="domain in tree" class="tab-domain" ng-hide="emptyDomain(domain)">
+            <div ng-repeat="domain in tree" class="tab-domain" ng-hide="emptyDomain(domain)" style="background-color:{{fill($index)}};">
 
                 <div ng-repeat="tab in domain | filter:tabFilter" class="tab-node" ng-click="switchToTab(tab.id)">
                     <div class="thumbnail"><img width="150px" src="{{tab.screencap}}"></div>

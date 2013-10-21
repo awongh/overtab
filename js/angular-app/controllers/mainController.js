@@ -18,6 +18,7 @@ Array.prototype.remove = function(from, to) {
 
 var mainController = function($scope, $filter) {
     //var $filter = $injector.get('$filter');
+    $scope.fill = null;
 
     $scope.tabs = [];
     $scope.tabIndex = {};
@@ -30,6 +31,8 @@ var mainController = function($scope, $filter) {
     // Do stuff here
     $scope.init = function() {
         console.log( "init" );
+
+        $scope.fill = d3.scale.category20c();
 
         chrome.runtime.onMessage.addListener( function(request, sender, sendResponse) {
 
