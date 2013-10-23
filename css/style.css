@@ -8,13 +8,10 @@ body {
 
 .tab-domain {
   background-color: #daf9fa;
-  padding: 5px;
+  padding: 0px;
   margin: 5px;
   float: left;
   border-radius: .3rem; }
-
-#tab-graph {
-  width: 4000px; }
 
 .tab-filter input {
   border: none;
@@ -25,13 +22,11 @@ body {
   -webkit-box-shadow: inset 0 0 3px #050405;
   color: #bfbfbf; }
 
-#tab-graph .tab-node + .tab-node {
-  margin-right: 5px; }
 #tab-graph .tab-node {
   cursor: pointer;
-  margin: 5px;
+  margin: 6px 4px 6px 4px;
   float: left;
-  padding: 10px;
+  padding: 5px;
   border-radius: .3rem;
   background-color: #2e2d2e;
   width: 150px;
@@ -44,7 +39,7 @@ body {
     #tab-graph .tab-node .thumbnail img {
       width: 100%; }
   #tab-graph .tab-node .title {
-    margin-top: 1em;
+    margin-top: 0.5em;
     color: #bfbfbf;
     overflow-x: hidden;
     white-space: nowrap;

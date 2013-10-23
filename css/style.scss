@@ -15,14 +15,13 @@ body {
 
 .tab-domain{
     background-color: #daf9fa;
-    padding:5px;
+    padding:0px;
     margin:5px;
     float: left;
     border-radius: .3rem;
 }
 
 #tab-graph {
-  width:4000px;
 }
 
 .tab-filter input{
@@ -37,14 +36,13 @@ body {
 
 #tab-graph {
     .tab-node + .tab-node {
-        margin-right: 5px;
     }
 
     .tab-node {
         cursor: pointer;
-        margin: 5px;
+        margin: 6px 4px 6px 4px;
         float: left;
-        padding: 10px; 
+        padding: 5px; 
         border-radius: .3rem;
         background-color: darken($background, 4%);
         width: 150px;
@@ -62,7 +60,7 @@ body {
         }
 
         .title {
-            margin-top: 1em;
+            margin-top: 0.5em;
             color: $text;
             overflow-x: hidden;
             white-space: nowrap;

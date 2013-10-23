@@ -20,19 +20,20 @@ var mainController = function($scope, $filter) {
     //var $filter = $injector.get('$filter');
     $scope.fill = null;
 
+    $scope.windowHeight = 0;
+    $scope.windowWidth= 0;
+
     $scope.tabs = [];
     $scope.tabIndex = {};
-
-    $scope.tree = {};
-    $scope.tree['undefined'] = {};
-
-    $scope.treeIndex = {};
 
     // Do stuff here
     $scope.init = function() {
         console.log( "init" );
+        
+        $scope.windowHeight = ( window.inerHeight - 100 ); //correct for filter heder
+        $scope.windowWidth = window.innerWidth;
 
-        $scope.fill = d3.scale.category20c();
+        $scope.fill = d3.scale.category20();
 
         chrome.runtime.onMessage.addListener( function(request, sender, sendResponse) {
 
@@ -44,10 +45,9 @@ var mainController = function($scope, $filter) {
 
                         angular.forEach($scope.tabs, function(tab, k){
                             var domain = $filter('domainExtraction')(tab.url);
-                            if (typeof $scope.tree[domain] === "undefined") {
-                                $scope.tree[domain] = {};
-                            }
-                            $scope.tree[domain][tab.id] = tab;
+                            tab["searchDomain"] = domain;
+                            tab["domainInt"] = $scope.getDomainInt( domain );
+                            $scope.setWindowWidth();
                         });
                     }
                     break;
@@ -58,27 +58,21 @@ var mainController = function($scope, $filter) {
                             domain = $filter('domainExtraction')(tab.url),
                             oldDomain;
 
-                        // This is a new domain!
-                        if (typeof $scope.tree[domain] === "undefined") {
-                            $scope.tree[domain] = {};
-                        }
-
                         if (typeof $scope.tabIndex[tab.id] === 'undefined') {
                             $scope.tabIndex[tab.id] = $scope.tabs.length;
                             $scope.tabs[$scope.tabIndex[tab.id]] = tab;
+                            tab["searchDomain"] = domain;
+                            tab["domainInt"] = $scope.getDomainInt( domain );
 
-                            $scope.tree[domain][tab.id] = tab;
+                            $scope.setWindowWidth();
                         } else {
                             oldDomain = $filter('domainExtraction')($scope.tabs[$scope.tabIndex[tab.id]].url);
                             if ( oldDomain !== domain ) {
-                                delete $scope.tree[oldDomain][tab.id];
+                                tab["searchDomain"] = domain;
+                                tab["domainInt"] = $scope.domainInt( domain );
                             }
                             $scope.tabs[$scope.tabIndex[tab.id]] = tab;
-                            $scope.tree[domain][tab.id] = tab;
                             // Fetch the non-loaded version of the tab from the 'undefined' favIconUrl pile, and remove it
-                            if (typeof $scope.tree["undefined"][tab.id] !== "undefined") {
-                                delete $scope.tree["undefined"][tab.id];
-                            }
                         }
                     }
                     break;
@@ -90,15 +84,14 @@ var mainController = function($scope, $filter) {
                     console.log("Index: ",$scope.tabIndex[request.tabId]);
                     if (request.tabId) {
                         var tabId = request.tabId,
-                            tabPosition = $scope.tabIndex[tabId],
-                            domain = $filter('domainExtraction')($scope.tabs[tabPosition].url);
+                            tabPosition = $scope.tabIndex[tabId];
 
                         $scope.tabs.remove(tabPosition);
 
                         delete $scope.tabIndex[tabId];
-                        delete $scope.tree[domain][tabId];
 
                         $scope.reIndex(tabPosition);
+                        $scope.setWindowWidth();
                     }
                     console.log("AFTER:");
                     console.log("ID: ", request.tabId, "Length: ", $scope.tabs.length);
@@ -132,5 +125,35 @@ var mainController = function($scope, $filter) {
                 }
             }
         }
+    }
+
+    $scope.getDomainInt = function( domain ) {
+      var domainInt = 0,
+          scale = "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+          word = domain.toUpperCase();
+
+      for( var i=0; i < word.length; i++ ){
+        domainInt += scale.indexOf( word[i] );
+      }
+
+      return domainInt;
+    }
+
+    $scope.setWindowWidth = function() {
+      var s = $scope.tabs.length;
+
+      //calculate an imaginary grid 
+      var nodeWidth = 150 + 14;
+      var nodeHeight = 180 + 12;
+
+      var curr_per_col = Math.floor( $scope.windowHeight / nodeHeight );
+      var curr_per_row = Math.floor( $scope.windowWidth / nodeWidth );
+
+      console.log( "nodes per col:",curr_per_col, "nodes per row:" ,curr_per_row, "est size",Math.floor(curr_per_col * curr_per_row), "size",s);
+
+      if( Math.floor(curr_per_col * curr_per_row) < s ){
+        //window.innerWidth = $scope.windowWidth + nodeWidth;
+        $scope.windowWidth = $scope.windowWidth + nodeWidth;
+      }
     }
 }
