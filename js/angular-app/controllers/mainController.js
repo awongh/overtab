@@ -17,6 +17,12 @@ Array.prototype.remove = function(from, to) {
 };
 
 var mainController = function($scope, $filter) {
+    //css margins for calculating horiz scroll:
+    $scope.headerMargin = 80;
+    $scope.nodeTopBottomMargin = 18;
+    $scope.bodyXMargin = 16;
+    $scope.nodeMargin = 38;
+
     //var $filter = $injector.get('$filter');
     $scope.fill = null;
 
@@ -29,9 +35,9 @@ var mainController = function($scope, $filter) {
     // Do stuff here
     $scope.init = function() {
         console.log( "init" );
-        
-        $scope.windowHeight = ( window.inerHeight - 100 ); //correct for filter heder
-        $scope.windowWidth = window.innerWidth;
+
+        $scope.windowHeight = ( window.innerHeight - $scope.headerMargin ); //correct for filter heder
+        $scope.windowWidth = ( window.innerWidth - $scope.bodyXMargin );
 
         $scope.fill = d3.scale.category20();
 
@@ -48,7 +54,10 @@ var mainController = function($scope, $filter) {
                             tab["searchDomain"] = domain;
                             tab["domainInt"] = $scope.getDomainInt( domain );
                             $scope.setWindowWidth();
+                            console.log( "last tab list set" );
                         });
+                        //we have an existing set of tabs. is there a finished rendering function?
+                        //window.scrollTo( window.outerWidth, 0);
                     }
                     break;
 
@@ -69,7 +78,7 @@ var mainController = function($scope, $filter) {
                             oldDomain = $filter('domainExtraction')($scope.tabs[$scope.tabIndex[tab.id]].url);
                             if ( oldDomain !== domain ) {
                                 tab["searchDomain"] = domain;
-                                tab["domainInt"] = $scope.domainInt( domain );
+                                tab["domainInt"] = $scope.getDomainInt( domain );
                             }
                             $scope.tabs[$scope.tabIndex[tab.id]] = tab;
                             // Fetch the non-loaded version of the tab from the 'undefined' favIconUrl pile, and remove it
@@ -143,17 +152,22 @@ var mainController = function($scope, $filter) {
       var s = $scope.tabs.length;
 
       //calculate an imaginary grid 
-      var nodeWidth = 150 + 14;
-      var nodeHeight = 180 + 12;
+      //make sure to keep this up to date w/ css
+      var nodeWidth = 150 + $scope.nodeMargin;;
+      var nodeHeight = 180 + $scope.nodeTopBottomMargin;
 
       var curr_per_col = Math.floor( $scope.windowHeight / nodeHeight );
+
       var curr_per_row = Math.floor( $scope.windowWidth / nodeWidth );
 
-      console.log( "nodes per col:",curr_per_col, "nodes per row:" ,curr_per_row, "est size",Math.floor(curr_per_col * curr_per_row), "size",s);
-
       if( Math.floor(curr_per_col * curr_per_row) < s ){
-        //window.innerWidth = $scope.windowWidth + nodeWidth;
+        window.innerWidth = $scope.windowWidth + nodeWidth;
         $scope.windowWidth = $scope.windowWidth + nodeWidth;
+
+        setTimeout(function() {
+          window.scrollTo( ( window.innerWidth ), 0);
+        },1)
       }
+
     }
 }
