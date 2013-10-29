@@ -56,8 +56,11 @@ var mainController = function($scope, $filter) {
                             $scope.setWindowWidth();
                             console.log( "last tab list set" );
                         });
+
                         //we have an existing set of tabs. is there a finished rendering function?
-                        //window.scrollTo( window.outerWidth, 0);
+                        setTimeout(function() {
+                          window.scrollTo( window.innerWidth, 0);
+                        },1000)
                     }
                     break;
 
@@ -153,7 +156,7 @@ var mainController = function($scope, $filter) {
 
       //calculate an imaginary grid 
       //make sure to keep this up to date w/ css
-      var nodeWidth = 150 + $scope.nodeMargin;;
+      var nodeWidth = 150 + $scope.nodeMargin;
       var nodeHeight = 180 + $scope.nodeTopBottomMargin;
 
       var curr_per_col = Math.floor( $scope.windowHeight / nodeHeight );
@@ -168,6 +171,5 @@ var mainController = function($scope, $filter) {
           window.scrollTo( ( window.innerWidth ), 0);
         },1)
       }
-
     }
 }

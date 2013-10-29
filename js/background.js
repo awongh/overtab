@@ -19,8 +19,6 @@ var overtab = {
     image: null,
     Date: new Date(),
     overTab: null,
-
-
 }
 */
 var tabList = [],
@@ -28,7 +26,7 @@ var tabList = [],
     tabOpened = false,
     canvas = null,
     image = null,
-    Date = new Date(),
+    date = new Date(),
     overTabId = null,
     overTabWindowId = null;
 
@@ -255,7 +253,7 @@ function captureScreen(tab) {
         chrome.tabs.captureVisibleTab(tab.windowId, {format: "png"}, function(imgBlob) {
 
             tab["screencap"] = imgBlob;
-            tab["timestampSinceCapture"] = Date.getTime();
+            tab["timestampSinceCapture"] = date.getTime();
             if (tabExists(tab)) {
                 tabList[tabListIndex[tab.id]] = tab;
                 sendSingleTab(tabList[tabListIndex[tab.id]]);
