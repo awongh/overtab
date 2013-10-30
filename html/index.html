@@ -18,12 +18,10 @@
                 <p><input ng-model="tabFilter" type="text" placeholder="filter"></p>
             </div>
 
-            <div ng-repeat="domain in tree" class="tab-domain" ng-hide="emptyDomain(domain)" style="background-color: {{fill($index)}};">
-                <div ng-repeat="tab in domain" class="tab-node" ng-hide="filtering(tab, tabFilter)" ng-click="switchToTab(tab.id, tab.windowId)" style="border: 9px solid {{fill(tab.domainInt)}};">
-                    <div class="favicon"><img width="32px" src="{{tab.favIconUrl}}"></div>
-                    <div class="thumbnail"><img width="150px" src="{{tab.screencap}}"></div>
-                    <div class="title">{{tab.title}}</div>
-                </div>
+            <div ng-repeat="tab in tabs | filter:tabFilter" class="tab-node" ng-click="switchToTab(tab.id, tab.windowId)" style="border: 9px solid {{fill(tab.domainInt)}};">
+                <div class="favicon"><img width="32px" src="{{tab.favIconUrl}}"></div>
+                <div class="thumbnail"><img width="150px" src="{{tab.screencap}}"></div>
+                <div class="title">{{tab.title}}</div>
             </div>
         </div>
 
