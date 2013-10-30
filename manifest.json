@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name"       : "tabs",
   "description": "chrome tab manager",
-  "version"    : "0.6.5",
+  "version"    : "0.6.6",
   "icons": {
     "19" : "images/OverTab_19.png",
     "32" : "images/OverTab_32.png",
@@ -44,10 +44,8 @@
   },
   //"options_page": "options.html",
   "permissions" : [
-    "background",
     "tabs",
     "storage",
-    "history",
     "<all_urls>"
   ],
   "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'"

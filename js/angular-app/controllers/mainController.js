@@ -122,11 +122,26 @@ var mainController = function($scope, $filter) {
     }
 
     $scope.emptyDomain = function(domain) {
-        return Object.size(domain) <= 1 ? 'hidden' : '';
+        return Object.size(domain) === 0 ? true : false;
     }
 
-    $scope.switchToTab = function(tabId) {
+    $scope.filtering = function(tab, tabFilter) {
+        var filterText;
+        if (tabFilter) {
+            filterText = tabFilter.toLowerCase();
+            if (tab.title.toLowerCase().indexOf(filterText) !== -1 || tab.url.indexOf(filterText) !== -1) {
+                return false;
+            } else {
+                return true;
+            }
+        } else {
+            return false;
+        }
+    }
+
+    $scope.switchToTab = function(tabId, windowId) {
         chrome.tabs.update(tabId, {'active': true}, function() {} );
+        chrome.windows.update(windowId, {'focused': true}, function() {} );
     }
 
     $scope.reIndex = function(tabPosition) {
