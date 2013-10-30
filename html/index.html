@@ -8,6 +8,8 @@
         <script src="/js/d3.js"></script>
         <script src="/js/angular-app/filters/domainExtractionFilter.js"></script>
         <script src="/js/angular-app/controllers/mainController.js"></script>
+        <script src="/js/angular-app/directives/nodeColor.js"></script>
+        <script src="/js/angular-app/directives/edgeRender.js"></script>
         <script src="/js/angular-app/modules/app.js"></script>
     </head>
 
@@ -18,11 +20,16 @@
                 <p><input ng-model="tabFilter" type="text" placeholder="filter"></p>
             </div>
 
-            <div ng-repeat="tab in tabs | filter:tabFilter" class="tab-node" ng-click="switchToTab(tab.id)" style="border: 9px solid {{fill(tab.domainInt)}};">
+            <div ng-repeat="tab in tabs | filter:tabFilter" class="tab-node" ng-click="switchToTab(tab.id)" node-color>
                 <div class="thumbnail"><img width="150px" src="{{tab.screencap}}"></div>
                 <div class="title">{{tab.title}}</div>
             </div>
-        </div>
 
+
+
+        <div class="edge-cont">
+          <div ng-repeat="edge in edges" class="edge" edgeRender></div>
+        </div>
+        </div>
     </body>
 </html>

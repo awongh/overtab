@@ -8,3 +8,6 @@ var overtabApp = angular.module('overtab', [])
         }])
     .filter('domainExtraction', domainExtractionFilter)
     .controller('mainController', ['$scope', '$filter', mainController])
+    .directive('nodeColor', nodeColor)
+    .directive('edgeRender', edgeRender)
+

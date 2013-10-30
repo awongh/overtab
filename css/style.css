@@ -44,3 +44,13 @@ body {
     overflow-x: hidden;
     white-space: nowrap;
     text-overflow: ellipsis; }
+
+.edge-cont {
+  position: absolute;
+  top: 0;
+  left: 0; }
+
+.edge {
+  border-top: 3px solid #fff;
+  position: absolute;
+  width: 400px; }

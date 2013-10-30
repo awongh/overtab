@@ -68,3 +68,15 @@ body {
         }
     }
 }
+
+.edge-cont {
+  position:absolute;
+  top:0;
+  left:0;
+}
+
+.edge {
+  border-top:3px solid #fff;
+  position:absolute;
+  width:400px;
+}
