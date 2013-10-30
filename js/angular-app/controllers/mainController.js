@@ -130,28 +130,27 @@ var mainController = function($scope, $filter) {
                         var tabId = request.tabId,
                             tabPosition = $scope.tabIndex[tabId];
 
-                        $scope.tabs.remove(tabPosition);
-
-                        delete $scope.tabIndex[tabId];
-
-                        $scope.reIndex(tabPosition);
-
                         //remove edge
-
-
-                        if(typeof tab.openerTabId !== "undefined"){
+                        if(typeof $scope.tabs[ $scope.tabIndex[tabId] ].openerTabId !== "undefined" 
+                            && $scope.edgesIndex[tabId] !== "undefined" ){
                           var edgePosition = $scope.edgesIndex[tabId];
 
                           $scope.edges.remove( edgePosition );
                           delete $scope.edgesIndex[tabId];
 
                           //look in parent edges
-                          for( var i=0; i<$scope.edgesParentIndex[tabId].length; i++ ){
-                            if( $scope.edgesParentIndex[tabId][i] === tabId ){
-                              delete $scope.edgesParentIndex[tabId][i];
+                          if( $scope.edgesParentIndex[tabId] !== undefined ){
+                            for( var i=0; i<$scope.edgesParentIndex[tabId].length; i++ ){
+                              if( $scope.edgesParentIndex[tabId][i] === tabId ){
+                                delete $scope.edgesParentIndex[tabId][i];
+                              }
                             }
                           }
                         }
+
+                        $scope.tabs.remove(tabPosition);
+                        delete $scope.tabIndex[tabId];
+                        $scope.reIndex(tabPosition);
 
                         $scope.setWindowWidth();
                     }
