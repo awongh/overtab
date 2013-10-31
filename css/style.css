@@ -25,12 +25,12 @@ body {
 #tab-graph .tab-node {
   cursor: pointer;
   margin: 6px 4px 6px 4px;
-  float: left;
+  -webkit-flex: 0 0 auto;
   padding: 5px;
   border-radius: .3rem;
   background-color: #2e2d2e;
-  width: 150px;
-  font-size: .8rem; }
+  font-size: .8rem;
+  width: 150px; }
   #tab-graph .tab-node .thumbnail {
     overflow: hidden;
     margin: 0 auto;
@@ -43,7 +43,13 @@ body {
     color: #bfbfbf;
     overflow-x: hidden;
     white-space: nowrap;
-    text-overflow: ellipsis; }
+    text-overflow: ellipsis;
+    width: 150px; }
+
+.node-cont {
+  display: -webkit-flex;
+  -webkit-flex-direction: column-reverse;
+  -webkit-flex-wrap: wrap; }
 
 .edge-cont {
   position: absolute;

@@ -41,12 +41,13 @@ body {
     .tab-node {
         cursor: pointer;
         margin: 6px 4px 6px 4px;
-        float: left;
+        -webkit-flex: 0 0 auto;
+
         padding: 5px; 
         border-radius: .3rem;
         background-color: darken($background, 4%);
-        width: 150px;
         font-size: .8rem;
+        width:150px;
 
         .thumbnail {
             overflow: hidden;
@@ -65,8 +66,15 @@ body {
             overflow-x: hidden;
             white-space: nowrap;
             text-overflow: ellipsis;
+            width:150px;
         }
     }
+}
+
+.node-cont{
+  display: -webkit-flex;
+  -webkit-flex-direction: column-reverse;
+  -webkit-flex-wrap: wrap;
 }
 
 .edge-cont {

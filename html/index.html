@@ -20,12 +20,12 @@
                 <p><input ng-model="tabFilter" type="text" placeholder="filter"></p>
             </div>
 
-            <div ng-repeat="tab in tabs | filter:tabFilter" class="tab-node" ng-click="switchToTab(tab.id)" node-color>
-                <div class="thumbnail"><img width="150px" src="{{tab.screencap}}"></div>
-                <div class="title">{{tab.title}}</div>
+            <div class="node-cont" style="height:{{windowHeight}}px">
+              <div ng-repeat="tab in tabs | filter:tabFilter" class="tab-node" ng-click="switchToTab(tab.id)" node-color>
+                  <div class="thumbnail"><img width="150px" src="{{tab.screencap}}"></div>
+                  <div class="title">{{tab.title}}</div>
+              </div>
             </div>
-
-
 
         <div class="edge-cont">
           <div ng-repeat="edge in edges" class="edge" edgeRender></div>

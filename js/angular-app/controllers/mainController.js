@@ -41,10 +41,9 @@ var mainController = function($scope, $filter) {
     $scope.init = function() {
         console.log( "init" );
 
-        $scope.windowHeight = ( window.innerHeight - $scope.headerMargin ); //correct for filter heder
+        //100 is just a guess, we should fix this later with something more scientific
+        $scope.windowHeight = ( window.innerHeight - $scope.headerMargin ) -100; //correct for filter heder
         $scope.windowWidth = ( window.innerWidth - $scope.bodyXMargin );
-
-        //$scope.fill = d3.scale.category20();
 
         chrome.runtime.onMessage.addListener( function(request, sender, sendResponse) {
 
@@ -59,7 +58,6 @@ var mainController = function($scope, $filter) {
                             tab["searchDomain"] = domain;
                             tab["domainInt"] = $scope.getDomainInt( domain );
                             console.log( "send tab lists", domain, $scope.getDomainInt( domain ) );
-                            $scope.setWindowWidth();
                             console.log( "last tab list set" );
                         });
 
@@ -102,7 +100,6 @@ var mainController = function($scope, $filter) {
                             $scope.tabIndex[tab.id] = $scope.tabs.length;
                             $scope.tabs[$scope.tabIndex[tab.id]] = tab;
 
-                            $scope.setWindowWidth();
                         } else {
                             oldDomain = $filter('domainExtraction')($scope.tabs[$scope.tabIndex[tab.id]].url);
 
@@ -152,7 +149,6 @@ var mainController = function($scope, $filter) {
                         delete $scope.tabIndex[tabId];
                         $scope.reIndex(tabPosition);
 
-                        $scope.setWindowWidth();
                     }
                     console.log("AFTER:");
                     console.log("ID: ", request.tabId, "Length: ", $scope.tabs.length);
@@ -199,45 +195,4 @@ var mainController = function($scope, $filter) {
 
       return domainInt;
     }
-
-    $scope.setWindowWidth = function() {
-      var s = $scope.tabs.length;
-
-      //calculate an imaginary grid 
-      //make sure to keep this up to date w/ css
-      var nodeWidth = 150 + $scope.nodeMargin;
-      var nodeHeight = 180 + $scope.nodeTopBottomMargin;
-
-      var curr_per_col = Math.floor( $scope.windowHeight / nodeHeight );
-
-      var curr_per_row = Math.floor( $scope.windowWidth / nodeWidth );
-
-      if( Math.floor(curr_per_col * curr_per_row) < s ){
-        window.innerWidth = $scope.windowWidth + nodeWidth;
-        $scope.windowWidth = $scope.windowWidth + nodeWidth;
-
-        setTimeout(function() {
-          window.scrollTo( ( window.innerWidth ), 0);
-        },1)
-      }
-    }
-
-    $scope.edgePosition = function( edge ){
-      debugger;
-    }
-
-    //we need to think about this as the function that operates on 
-    //nodes: b/c it keeps their position
-    /*
-      dirModule.directive('nodePosition', function() {
-        return {
-            scope: true,
-            link: function (scope, $element, attrs) {
-              //get the things about the thing
-              //set something like $scope.tabs[tabid].xPosition = $element.x;
-              //$element.css("left", $scope.lastX + 'px');
-            }
-        }
-      }); 
-    */
 }
