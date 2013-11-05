@@ -1,5 +1,7 @@
 "use strict";
 
+
+
 Object.size = function(obj) {
     var size = 0, key;
     for (key in obj) {
@@ -9,7 +11,7 @@ Object.size = function(obj) {
 };
 
 Array.prototype.remove = function(from, to) {
-    console.log("Length? ", from < 0 ? this.length + from : from);
+    //console.log("Length? ", from < 0 ? this.length + from : from);
     //wtf??? lol
     window.lol = this;
     var rest = this.slice((to || from) + 1 || this.length);
@@ -33,7 +35,7 @@ var mainController = function($scope, $filter) {
     $scope.tabs = [];
     $scope.tabIndex = {};
 
-    $scope.edges = [];
+    $scope.edges = {};
     $scope.edgesIndex = {};
     $scope.edgesParentIndex = {};
 
@@ -57,8 +59,8 @@ var mainController = function($scope, $filter) {
                             var domain = $filter('domainExtraction')(tab.url);
                             tab["searchDomain"] = domain;
                             tab["domainInt"] = $scope.getDomainInt( domain );
-                            console.log( "send tab lists", domain, $scope.getDomainInt( domain ) );
-                            console.log( "last tab list set" );
+                            //console.log( "send tab lists", domain, $scope.getDomainInt( domain ) );
+                            //console.log( "last tab list set" );
                         });
 
                         //we have an existing set of tabs. is there a finished rendering function?
@@ -74,19 +76,20 @@ var mainController = function($scope, $filter) {
                             domain = $filter('domainExtraction')(tab.url),
                             oldDomain;
 
-                        console.log( tab );
-                        console.log( $scope.edges );
+                        //console.log( tab );
+                        //console.log( $scope.edges );
 
                         if (typeof $scope.tabIndex[tab.id] === 'undefined') {
                             tab["searchDomain"] = domain;
                             tab["domainInt"] = $scope.getDomainInt( domain );
-                            console.log( "send single tab", domain, $scope.getDomainInt( domain ) );
+                            //console.log( "send single tab", domain, $scope.getDomainInt( domain ) );
 
                             //set the edge
                             //openerTabId
-                            if(typeof tab.openerTabId !== "undefined"){
-                              $scope.edgesIndex[tab.id] = $scope.edges.length;
-                              $scope.edges[$scope.edgesIndex[tab.id]] = tab.openerTabId;
+                            if(typeof tab.openerTabId !== 'undefined'){
+                              //$scope.edgesIndex[tab.id] = $scope.edges.length;
+                              //$scope.edges[$scope.edgesIndex[tab.id]] = tab.openerTabId;
+                              $scope.edges[tab.id] = tab.openerTabId;
 
                               if (typeof $scope.edgesParentIndex[tab.openerTabId] === 'undefined') {
 
@@ -104,7 +107,7 @@ var mainController = function($scope, $filter) {
                             oldDomain = $filter('domainExtraction')($scope.tabs[$scope.tabIndex[tab.id]].url);
 
                             if ( oldDomain !== domain ) {
-                                console.log( "tab index IS defined ", domain, $scope.getDomainInt( domain ) );
+                                //console.log( "tab index IS defined ", domain, $scope.getDomainInt( domain ) );
 
                                 //get rid of edge if this is a parent edge
                             }
@@ -119,24 +122,22 @@ var mainController = function($scope, $filter) {
                     break;
 
                 case "sendRemoveTab":
-                    console.log("BEFORE:");
-                    console.log("ID: ", request.tabId, "Length: ", $scope.tabs.length);
-                    console.log("Tab Index: ", $scope.tabIndex);
-                    console.log("Index: ",$scope.tabIndex[request.tabId]);
+                    //console.log("BEFORE:");
+                    //console.log("ID: ", request.tabId, "Length: ", $scope.tabs.length);
+                    //console.log("Tab Index: ", $scope.tabIndex);
+                    //console.log("Index: ",$scope.tabIndex[request.tabId]);
                     if (request.tabId) {
                         var tabId = request.tabId,
                             tabPosition = $scope.tabIndex[tabId];
 
                         //remove edge
                         if(typeof $scope.tabs[ $scope.tabIndex[tabId] ].openerTabId !== "undefined" 
-                            && $scope.edgesIndex[tabId] !== "undefined" ){
-                          var edgePosition = $scope.edgesIndex[tabId];
+                            && typeof $scope.edgesIndex[tabId] !== "undefined" ){
 
-                          $scope.edges.remove( edgePosition );
-                          delete $scope.edgesIndex[tabId];
+                          delete $scope.edges[tabId];
 
                           //look in parent edges
-                          if( $scope.edgesParentIndex[tabId] !== undefined ){
+                          if(typeof $scope.edgesParentIndex[tabId] !== 'undefined' ){
                             for( var i=0; i<$scope.edgesParentIndex[tabId].length; i++ ){
                               if( $scope.edgesParentIndex[tabId][i] === tabId ){
                                 delete $scope.edgesParentIndex[tabId][i];
@@ -150,10 +151,10 @@ var mainController = function($scope, $filter) {
                         $scope.reIndex(tabPosition);
 
                     }
-                    console.log("AFTER:");
-                    console.log("ID: ", request.tabId, "Length: ", $scope.tabs.length);
-                    console.log("Tab Index: ", $scope.tabIndex);
-                    console.log("Index: ",$scope.tabIndex[request.tabId]);
+                    //console.log("AFTER:");
+                    //console.log("ID: ", request.tabId, "Length: ", $scope.tabs.length);
+                    //console.log("Tab Index: ", $scope.tabIndex);
+                    //console.log("Index: ",$scope.tabIndex[request.tabId]);
                     break;
             }
 

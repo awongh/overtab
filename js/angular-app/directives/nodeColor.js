@@ -4,7 +4,7 @@ var nodeColor = function(){
 
   setColor = function( scope, elem, attrs ){
 
-    if(typeof scope.tab.domainInt !== undefined){
+    if(typeof scope.tab.domainInt !== 'undefined'){
       var color = fill( scope.tab.domainInt );
       elem.css( 'border', '9px solid '+color);
     }

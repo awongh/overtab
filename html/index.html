@@ -4,6 +4,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
         <title>OverTab | Be over your tabs.</title>
         <link rel="stylesheet" type="text/css" href="/css/style.css" />
+        <script src="/js/jquery-2.0.3.js"></script>
         <script src="/js/angular-app/angular.min.js"></script>
         <script src="/js/d3.js"></script>
         <script src="/js/angular-app/filters/domainExtractionFilter.js"></script>
@@ -21,14 +22,14 @@
             </div>
 
             <div class="node-cont" style="height:{{windowHeight}}px">
-              <div ng-repeat="tab in tabs | filter:tabFilter" class="tab-node" ng-click="switchToTab(tab.id)" node-color>
+              <div ng-repeat="tab in tabs | filter:tabFilter" class="tab-node" ng-click="switchToTab(tab.id)" id="{{tab.id}}" node-color>
                   <div class="thumbnail"><img width="150px" src="{{tab.screencap}}"></div>
                   <div class="title">{{tab.title}}</div>
               </div>
             </div>
 
         <div class="edge-cont">
-          <div ng-repeat="edge in edges" class="edge" edgeRender></div>
+          <div ng-repeat="(tabId, parentId) in edges" class="edge" edge-render></div>
         </div>
         </div>
     </body>
