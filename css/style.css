@@ -49,14 +49,19 @@ body {
 .node-cont {
   display: -webkit-flex;
   -webkit-flex-direction: column-reverse;
-  -webkit-flex-wrap: wrap; }
+  -webkit-flex-wrap: wrap;
+  position: relative; }
 
 .edge-cont {
   position: absolute;
-  top: 0;
-  left: 0; }
+  top: 80px;
+  left: 0;
+  width: 100%;
+  height: 100%; }
 
 .edge {
-  border: 3px solid #fff;
-  position: absolute;
-  width: 400px; }
+  stroke: #fff;
+  stroke-width: 2; }
+
+svg {
+  position: absolute; }

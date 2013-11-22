@@ -75,16 +75,22 @@ body {
   display: -webkit-flex;
   -webkit-flex-direction: column-reverse;
   -webkit-flex-wrap: wrap;
+  position:relative;
 }
 
 .edge-cont {
   position:absolute;
-  top:0;
+  top:80px;
   left:0;
+  width:100%;
+  height:100%;
 }
 
 .edge {
-  border:3px solid #fff;
+  stroke:#fff;
+  stroke-width:2;
+}
+
+svg{
   position:absolute;
-  width:400px;
 }

@@ -16,21 +16,22 @@
 
     <body ng-app="overtab">
 
-      <div ng-controller="mainController" ng-init="init()" id="tab-graph" style="height:{{windowHeight}}px; width:{{windowWidth}}px;">
+      <div ng-controller="mainController" ng-init="init()" id="tab-graph">
             <div class="tab-filter">
                 <p><input ng-model="tabFilter" type="text" placeholder="filter"></p>
             </div>
 
-            <div class="node-cont" style="height:{{windowHeight}}px">
+            <div id="node-container" class="node-cont" style="height:{{windowHeight}}px; width:{{windowWidth}}px;">
               <div ng-repeat="tab in tabs | filter:tabFilter" class="tab-node" ng-click="switchToTab(tab.id)" id="{{tab.id}}" node-color>
                   <div class="thumbnail"><img width="150px" src="{{tab.screencap}}"></div>
                   <div class="title">{{tab.title}}</div>
               </div>
             </div>
-
-        <div class="edge-cont">
-          <div ng-repeat="(tabId, parentId) in edges" class="edge" edge-render></div>
-        </div>
+            <div class="edge-cont" style="height:{{windowHeight}}px; width:{{windowWidth}}px;">
+              <svg xmlns="http://www.w3.org/2000/svg" version="1.1">
+                <line ng-repeat="(tabId, parentId) in edges" class="edge" edge-render></line>
+              </svg>
+            </div>
         </div>
     </body>
 </html>

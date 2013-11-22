@@ -1,7 +1,5 @@
 "use strict";
 
-
-
 Object.size = function(obj) {
     var size = 0, key;
     for (key in obj) {
@@ -19,7 +17,7 @@ Array.prototype.remove = function(from, to) {
     return this.push.apply(this, rest);
 };
 
-var mainController = function($scope, $filter) {
+var mainController = function($scope, $rootScope, $filter) {
     //css margins for calculating horiz scroll:
     $scope.headerMargin = 80;
     $scope.nodeTopBottomMargin = 18;
@@ -37,6 +35,7 @@ var mainController = function($scope, $filter) {
 
     $scope.edges = {};
     $scope.edgesIndex = {};
+    $scope.edgesList = [];
     $scope.edgesParentIndex = {};
 
     // Do stuff here
@@ -61,7 +60,23 @@ var mainController = function($scope, $filter) {
                             tab["domainInt"] = $scope.getDomainInt( domain );
                             //console.log( "send tab lists", domain, $scope.getDomainInt( domain ) );
                             //console.log( "last tab list set" );
+
+                            //set all the edges
+                            if(typeof tab.openerTabId !== 'undefined'){
+                              $scope.edgesList.push( [ tab.id, tab.openerTabId ] );
+                              $scope.edges[tab.id] = tab.openerTabId;
+
+                              if (typeof $scope.edgesParentIndex[tab.openerTabId] === 'undefined') {
+
+                                $scope.edgesParentIndex[tab.openerTabId] = [tab.id];
+                              }else{
+                                $scope.edgesParentIndex[tab.openerTabId].push( tab.id ); 
+                              }
+                            }
                         });
+
+                        //render the edges
+                        $scope.edgesRender();
 
                         //we have an existing set of tabs. is there a finished rendering function?
                         setTimeout(function() {
@@ -76,9 +91,6 @@ var mainController = function($scope, $filter) {
                             domain = $filter('domainExtraction')(tab.url),
                             oldDomain;
 
-                        //console.log( tab );
-                        //console.log( $scope.edges );
-
                         if (typeof $scope.tabIndex[tab.id] === 'undefined') {
                             tab["searchDomain"] = domain;
                             tab["domainInt"] = $scope.getDomainInt( domain );
@@ -87,8 +99,7 @@ var mainController = function($scope, $filter) {
                             //set the edge
                             //openerTabId
                             if(typeof tab.openerTabId !== 'undefined'){
-                              //$scope.edgesIndex[tab.id] = $scope.edges.length;
-                              //$scope.edges[$scope.edgesIndex[tab.id]] = tab.openerTabId;
+                              $scope.edgesList.push( [ tab.id, tab.openerTabId ] );
                               $scope.edges[tab.id] = tab.openerTabId;
 
                               if (typeof $scope.edgesParentIndex[tab.openerTabId] === 'undefined') {
@@ -99,6 +110,9 @@ var mainController = function($scope, $filter) {
                               }
 
                             }
+
+                            //render the edges
+                            $scope.edgesRender();
 
                             $scope.tabIndex[tab.id] = $scope.tabs.length;
                             $scope.tabs[$scope.tabIndex[tab.id]] = tab;
@@ -131,8 +145,8 @@ var mainController = function($scope, $filter) {
                             tabPosition = $scope.tabIndex[tabId];
 
                         //remove edge
-                        if(typeof $scope.tabs[ $scope.tabIndex[tabId] ].openerTabId !== "undefined" 
-                            && typeof $scope.edgesIndex[tabId] !== "undefined" ){
+                        if(typeof $scope.tabs[ $scope.tabIndex[tabId] ].openerTabId !== "undefined"
+                            && typeof $scope.edges[tabId] !== "undefined" ){
 
                           delete $scope.edges[tabId];
 
@@ -195,5 +209,32 @@ var mainController = function($scope, $filter) {
       }
 
       return domainInt;
+    }
+
+    $scope.edgesRender = function(){
+
+      setTimeout(function(){
+        $scope.windowWidth = document.getElementById('node-container').scrollWidth;
+        $scope.windowHeight = document.getElementById('node-container').scrollHeight;
+
+        for( var i =0; i< $scope.edgesList.length; i++ ){
+          var tabId = $scope.edgesList[i][0];
+          var parentId = $scope.edgesList[i][1];
+
+          //get the positions
+          var edges = $rootScope.edgeCalc( tabId, parentId );
+
+          if( edges ){
+            //get the edge
+            var elem = angular.element( '#'+tabId+'-'+parentId );
+
+            //set the edge
+            angular.element( elem ).attr( "y1", edges.y1);
+            angular.element( elem ).attr( "x1", edges.x1);
+            angular.element( elem ).attr( "y2", edges.y2);
+            angular.element( elem ).attr( "x2", edges.x2);
+          }
+        }
+      },100);
     }
 }
