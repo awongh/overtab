@@ -9,7 +9,6 @@ var overtabApp = angular.module('overtab', [])
     .filter('domainExtraction', domainExtractionFilter)
     .controller('mainController', ['$scope', '$rootScope', '$filter', mainController])
     .directive('nodeColor', nodeColor)
-    .directive('edgeRender', ['$rootScope','$timeout', edgeRender])
 
 overtabApp.run( function($rootScope) { 
   $rootScope.edgeCalc = function( tabOneId, tabTwoId ){

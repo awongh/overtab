@@ -34,7 +34,6 @@ var mainController = function($scope, $rootScope, $filter) {
     $scope.tabIndex = {};
 
     $scope.edges = {};
-    $scope.edgesIndex = {};
     $scope.edgesList = [];
     $scope.edgesParentIndex = {};
 
@@ -164,6 +163,8 @@ var mainController = function($scope, $rootScope, $filter) {
                         delete $scope.tabIndex[tabId];
                         $scope.reIndex(tabPosition);
 
+                        $scope.setWindowSize();
+
                     }
                     //console.log("AFTER:");
                     //console.log("ID: ", request.tabId, "Length: ", $scope.tabs.length);
@@ -211,11 +212,17 @@ var mainController = function($scope, $rootScope, $filter) {
       return domainInt;
     }
 
-    $scope.edgesRender = function(){
-
+    $scope.setWindowSize = function(){
       setTimeout(function(){
         $scope.windowWidth = document.getElementById('node-container').scrollWidth;
         $scope.windowHeight = document.getElementById('node-container').scrollHeight;
+      },1);
+    }
+
+    $scope.edgesRender = function(){
+
+      setTimeout(function(){
+        $scope.setWindowSize();
 
         for( var i =0; i< $scope.edgesList.length; i++ ){
           var tabId = $scope.edgesList[i][0];
