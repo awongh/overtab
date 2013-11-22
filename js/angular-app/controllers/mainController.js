@@ -131,6 +131,10 @@ var mainController = function($scope, $rootScope, $filter) {
                             $scope.tabs[$scope.tabIndex[tab.id]] = tab;
                             // Fetch the non-loaded version of the tab from the 'undefined' favIconUrl pile, and remove it
                         }
+
+                        setTimeout(function() {
+                          window.scrollTo( $scope.windowWidth, 0);
+                        },1000)
                     }
                     break;
 
@@ -144,19 +148,24 @@ var mainController = function($scope, $rootScope, $filter) {
                             tabPosition = $scope.tabIndex[tabId];
 
                         //remove edge
-                        if(typeof $scope.tabs[ $scope.tabIndex[tabId] ].openerTabId !== "undefined"
-                            && typeof $scope.edges[tabId] !== "undefined" ){
+                        if(typeof typeof $scope.edges[tabId] !== "undefined" ){
 
                           delete $scope.edges[tabId];
 
-                          //look in parent edges
-                          if(typeof $scope.edgesParentIndex[tabId] !== 'undefined' ){
-                            for( var i=0; i<$scope.edgesParentIndex[tabId].length; i++ ){
-                              if( $scope.edgesParentIndex[tabId][i] === tabId ){
-                                delete $scope.edgesParentIndex[tabId][i];
-                              }
-                            }
+                        }
+
+                        //let's look through all the edges to make sure its not a parent
+
+                        //look in parent edges
+                        if(typeof $scope.edgesParentIndex[tabId] !== 'undefined' ){
+                          for( var i=0; i<$scope.edgesParentIndex[tabId].length; i++ ){
+                            var id = $scope.edgesParentIndex[tabId][i];
+                            delete $scope.edges[id];
+
+                            delete $scope.edgesParentIndex[tabId][i];
                           }
+
+                          delete $scope.edges[tabId];
                         }
 
                         $scope.tabs.remove(tabPosition);
