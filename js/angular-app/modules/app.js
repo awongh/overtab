@@ -7,7 +7,7 @@ var overtabApp = angular.module('overtab', [])
             overtabApp.register.filter = $filterProvider.register;
         }])
     .filter('domainExtraction', domainExtractionFilter)
-    .controller('mainController', ['$scope', '$rootScope', '$filter', mainController])
+    .controller('mainController', ['$scope', '$rootScope', '$timeout', '$filter', mainController])
     .directive('nodeColor', nodeColor)
 
 overtabApp.run( function($rootScope) { 

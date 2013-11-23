@@ -50,13 +50,13 @@ body {
   display: -webkit-flex;
   -webkit-flex-direction: column-reverse;
   -webkit-flex-wrap: wrap;
-  position: relative;
-  z-index: 999999; }
+  position: relative; }
 
 .edge-cont {
   position: absolute;
   top: 80px;
-  left: 8px; }
+  left: 8px;
+  pointer-events: none; }
 
 .edge {
   stroke: #fff;

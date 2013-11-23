@@ -17,7 +17,7 @@ Array.prototype.remove = function(from, to) {
     return this.push.apply(this, rest);
 };
 
-var mainController = function($scope, $rootScope, $filter) {
+var mainController = function($scope, $rootScope, $timeout, $filter) {
     //css margins for calculating horiz scroll:
     $scope.headerMargin = 80;
     $scope.nodeTopBottomMargin = 18;
@@ -222,15 +222,20 @@ var mainController = function($scope, $rootScope, $filter) {
     }
 
     $scope.setWindowSize = function(){
-      setTimeout(function(){
-        $scope.windowWidth = document.getElementById('node-container').scrollWidth;
-        $scope.windowHeight = document.getElementById('node-container').scrollHeight;
-      },1);
+      var i = document.getElementById('node-container').scrollWidth;
+      var j = document.getElementById('node-container').scrollHeight;
+      console.log( "width", i, "height", j );
+
+      $scope.windowWidth = i; 
+      $scope.windowHeight = j;
+      //$scope.windowWidth = document.getElementById('node-container').scrollWidth;
+      //$scope.windowHeight = document.getElementById('node-container').scrollHeight;
+      //$scope.apply();
     }
 
     $scope.edgesRender = function(){
 
-      setTimeout(function(){
+      $timeout(function(){
         $scope.setWindowSize();
 
         for( var i =0; i< $scope.edgesList.length; i++ ){
@@ -244,13 +249,16 @@ var mainController = function($scope, $rootScope, $filter) {
             //get the edge
             var elem = angular.element( '#'+tabId+'-'+parentId );
 
+            var offset = Math.abs( ( (tabId - parentId) % 10 ) );
+
             //set the edge
-            angular.element( elem ).attr( "y1", edges.y1);
-            angular.element( elem ).attr( "x1", edges.x1);
-            angular.element( elem ).attr( "y2", edges.y2);
+            //offset it the size of one node and the margin of the edge container
+            angular.element( elem ).attr( "y1", edges.y1 - 70);
+            angular.element( elem ).attr( "x1", ( edges.x1 +160 ) );
+            angular.element( elem ).attr( "y2", edges.y2 - 70 + offset );
             angular.element( elem ).attr( "x2", edges.x2);
           }
         }
-      },100);
+      },1000);
     }
 }
