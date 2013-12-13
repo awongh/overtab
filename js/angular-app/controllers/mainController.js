@@ -62,15 +62,21 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
 
                             //set all the edges
                             if(typeof tab.openerTabId !== 'undefined'){
-                              $scope.edgesList.push( [ tab.id, tab.openerTabId ] );
+                              var sibling_count = 0;
+
                               $scope.edges[tab.id] = tab.openerTabId;
 
                               if (typeof $scope.edgesParentIndex[tab.openerTabId] === 'undefined') {
 
                                 $scope.edgesParentIndex[tab.openerTabId] = [tab.id];
                               }else{
+                                //add an offset amount
+                                sibling_count = $scope.edgesParentIndex[tab.openerTabId].length++;
+
                                 $scope.edgesParentIndex[tab.openerTabId].push( tab.id ); 
                               }
+
+                              $scope.edgesList.push( [ tab.id, tab.openerTabId, sibling_count ] );
                             }
                         });
 
@@ -98,15 +104,21 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
                             //set the edge
                             //openerTabId
                             if(typeof tab.openerTabId !== 'undefined'){
-                              $scope.edgesList.push( [ tab.id, tab.openerTabId ] );
+
+                              var sibling_count = 0;
                               $scope.edges[tab.id] = tab.openerTabId;
 
                               if (typeof $scope.edgesParentIndex[tab.openerTabId] === 'undefined') {
 
                                 $scope.edgesParentIndex[tab.openerTabId] = [tab.id];
                               }else{
+
+                                sibling_count = $scope.edgesParentIndex[tab.openerTabId].length++;
+
                                 $scope.edgesParentIndex[tab.openerTabId].push( tab.id ); 
                               }
+
+                              $scope.edgesList.push( [ tab.id, tab.openerTabId, sibling_count ] );
 
                             }
 
@@ -247,16 +259,29 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
 
           if( edges ){
             //get the edge
-            var elem = angular.element( '#'+tabId+'-'+parentId );
+            var elem = angular.element( '#line-'+tabId+'-'+parentId );
 
-            var offset = Math.abs( ( (tabId - parentId) % 10 ) );
+            //offset: 
+            //how many 
+
+            var offset = $scope.edgesList[i][2];
+            offset = offset * 17;
+            console.log( "offset" , offset );
+
+            var node_size = Math.abs( offset * .02 )
 
             //set the edge
             //offset it the size of one node and the margin of the edge container
             angular.element( elem ).attr( "y1", edges.y1 - 70);
             angular.element( elem ).attr( "x1", ( edges.x1 +160 ) );
-            angular.element( elem ).attr( "y2", edges.y2 - 70 + offset );
+            angular.element( elem ).attr( "y2", (edges.y2 - 70) + offset );
             angular.element( elem ).attr( "x2", edges.x2);
+
+            var cir = angular.element( '#circle-'+tabId+'-'+parentId );
+            angular.element( cir ).attr( "cy", edges.y1 - 70);
+            angular.element( cir ).attr( "cx", ( edges.x1 +160 ) );
+            angular.element( cir ).attr( "r", 5 + node_size );
+
           }
         }
       },1000);

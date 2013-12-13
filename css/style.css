@@ -58,9 +58,12 @@ body {
   left: 8px;
   pointer-events: none; }
 
-.edge {
+.edge-line {
   stroke: #fff;
   stroke-width: 2; }
+
+.edge-circle {
+  fill: #fff; }
 
 svg {
   position: absolute; }
