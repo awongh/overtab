@@ -1,3 +1,5 @@
+"use strict";
+
 var overtabApp = angular.module('overtab', [])
     overtabApp.config(['$filterProvider',
         function ($filterProvider) {

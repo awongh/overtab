@@ -247,7 +247,7 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
 
     $scope.edgesRender = function(){
 
-      $timeout(function(){
+      requestAnimationFrame(function(){
         $scope.setWindowSize();
 
         for( var i =0; i< $scope.edgesList.length; i++ ){
@@ -284,6 +284,6 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
 
           }
         }
-      },1000);
+      });
     }
 }
