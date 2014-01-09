@@ -10,7 +10,6 @@
         <script src="/js/angular-app/filters/domainExtractionFilter.js"></script>
         <script src="/js/angular-app/controllers/mainController.js"></script>
         <script src="/js/angular-app/directives/nodeColor.js"></script>
-        <script src="/js/angular-app/directives/edgeRender.js"></script>
         <script src="/js/angular-app/modules/app.js"></script>
     </head>
 
@@ -23,7 +22,7 @@
 
             <div id="node-container" class="node-cont" style="height:{{windowHeight}}px; width:{{windowWidth}}px;">
               <div ng-repeat="tab in tabs | filter:tabFilter" class="tab-node" ng-click="switchToTab(tab.id)" id="{{tab.id}}" node-color>
-                  <div class="thumbnail"><img width="150px" src="{{tab.screencap}}"></div>
+                  <div class="thumbnail"><img width="150px" ng-src="{{tab.screencap}}"></div>
                   <div class="title">{{tab.title}}</div>
               </div>
             </div>
