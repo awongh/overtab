@@ -27,10 +27,7 @@
     {
       "matches": ["<all_urls>"],
       "js"     : [
-                  "js/background.js",
-                  "js/angular-app/angular.min.js",
-                  "js/angular-app/controllers/mainController.js",
-                  "js/angular-app/modules/app.js"
+                  "js/background.js"
       ],
       "all_frames": true
     }
