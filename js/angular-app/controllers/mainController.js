@@ -255,48 +255,85 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
           var parentId = $scope.edgesList[i][1];
 
           //get the positions
-          var edges = $scope.edgeCalc( tabId, parentId );
+          var edges = $scope.edgeCalc( tabId, parentId, i );
 
           if( edges ){
 
             //get the edge
             var elem = angular.element( '#line-'+tabId+'-'+parentId );
 
-            var offset = $scope.edgesList[i][2];
-            offset = offset * 17;
-            //console.log( "offset" , offset );
-
-            //set the size of the circle depending on how many connections there are
-            var node_size = Math.abs( offset * .02 )
-
-            var side_offset = 0;
-
             //set the edge
             //offset it the size of one node and the margin of the edge container
-            angular.element( elem ).attr( "y1", edges.y1 - 70 + offset );
-            angular.element( elem ).attr( "x1", edges.x1 + side_offset );
-            angular.element( elem ).attr( "y2", edges.y2 - 70 );
-            angular.element( elem ).attr( "x2", edges.x2 + side_offset );
+            angular.element( elem ).attr( "y1", edges.y1 );
+            angular.element( elem ).attr( "x1", edges.x1 );
+            angular.element( elem ).attr( "y2", edges.y2 );
+            angular.element( elem ).attr( "x2", edges.x2 );
 
             //set a circle at the parent
             //TODO: logic to not render if its already a parent
             var cir = angular.element( '#circle-'+tabId+'-'+parentId );
-            angular.element( cir ).attr( "cy", edges.y2 - 70);
-            angular.element( cir ).attr( "cx", ( edges.x2 ) );
+            angular.element( cir ).attr( "cy", edges.y2 );
+            angular.element( cir ).attr( "cx", edges.x2 );
             angular.element( cir ).attr( "r", 5 + node_size );
-
-
-            //angular.element( elem ).attr( "x1", ( edges.x1 +160 ) );
           }
         }
       });
     }
 
-    $scope.edgeCalc = function( tabId, parentTabId ){
+    $scope.edgeCalc = function( tabId, parentTabId, edgeIndex ){
 
       var tabPos = angular.element( '#'+tabId ).offset(),
           pTabPos = angular.element( '#'+parentTabId ).offset();
 
-      return { x1:tabPos.left, y1:tabPos.top, x2:pTabPos.left, y2:pTabPos.top };
+      if( tabPos.left && tabPos.top && pTabPos.left && pTabPos.top ){
+
+        //calculate the offsets of all the things
+
+        //try to make the ends point to different locations on the child
+        var side_offset = 0;
+        var offset = $scope.edgesList[edgeIndex][2];
+        offset = offset * 17 + 3;
+
+        //set the size of the circle depending on how many connections there are
+        var node_size = Math.abs( offset * .02 )
+
+        var child_side_offset = 0;
+        var parent_side_offset = 0;
+        var child_top_offset = 0;
+        var parent_top_offset = 0;
+
+        //determine the side offset:
+        //if a higher than b, a -> no offset, b offset to bottom
+        //if b higher than a, b -> no offset, a offset to bottom
+
+        var box_width = 165;
+        var box_height = 180;
+
+        if( pTabPos.top > tabPos.top ){ //parent is higher than child
+
+          child_top_offset = box_height;
+        }else if( pTabPos.top < tabPos.top ){ //child is higher than parent
+
+          parent_top_offset = box_height;
+        }
+
+        if( pTabPos.left > tabPos.left ){
+
+          child_side_offset = box_width;
+        }else if( pTabPos.left < tabPos.left ){
+
+          parent_side_offset = box_width;
+        }else if( pTabPos.left == tabPos.left ){
+
+          side_offset = offset;
+        }
+
+        return {
+          x1:tabPos.left + side_offset + child_side_offset,
+          y1:tabPos.top + offset + child_top_offset,
+          x2:pTabPos.left + parent_side_offset,
+          y2:pTabPos.top + parent_top_offset
+        };
+      }
     }
 }

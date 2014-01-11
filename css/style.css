@@ -54,7 +54,7 @@ body {
 
 .edge-cont {
   position: absolute;
-  top: 80px;
+  top: 10px;
   left: 8px;
   pointer-events: none; }
 
