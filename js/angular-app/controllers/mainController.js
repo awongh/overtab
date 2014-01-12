@@ -269,6 +269,9 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
             angular.element( elem ).attr( "y2", edges.y2 );
             angular.element( elem ).attr( "x2", edges.x2 );
 
+            //set the size of the circle depending on how many connections there are
+            var node_size = Math.abs( edges.offset * .02 )
+
             //set a circle at the parent
             //TODO: logic to not render if its already a parent
             var cir = angular.element( '#circle-'+tabId+'-'+parentId );
@@ -294,8 +297,6 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
         var offset = $scope.edgesList[edgeIndex][2];
         offset = offset * 17 + 3;
 
-        //set the size of the circle depending on how many connections there are
-        var node_size = Math.abs( offset * .02 )
 
         var child_side_offset = 0;
         var parent_side_offset = 0;
@@ -332,7 +333,8 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
           x1:tabPos.left + side_offset + child_side_offset,
           y1:tabPos.top + offset + child_top_offset,
           x2:pTabPos.left + parent_side_offset,
-          y2:pTabPos.top + parent_top_offset
+          y2:pTabPos.top + parent_top_offset,
+          offset:offset
         };
       }
     }
