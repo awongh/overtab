@@ -2,6 +2,9 @@ $green: #71b451;
 $torquoise: #296976;
 $background: #383738;
 $text: #bfbfbf;
+$edge-color: #8c8c8c;
+$edge-parent-color: #999999;
+
 
 .hidden {
     display: none;
@@ -87,12 +90,12 @@ body {
 }
 
 .edge-line {
-  stroke:#fff;
+  stroke:$edge-color;
   stroke-width:2;
 }
 
 .edge-circle {
-  fill:#fff;
+  fill:$edge-parent-color;
 }
 
 svg{

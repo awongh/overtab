@@ -59,11 +59,11 @@ body {
   pointer-events: none; }
 
 .edge-line {
-  stroke: #fff;
+  stroke: #8c8c8c;
   stroke-width: 2; }
 
 .edge-circle {
-  fill: #fff; }
+  fill: #999999; }
 
 svg {
   position: absolute; }
