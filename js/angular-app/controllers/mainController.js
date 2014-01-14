@@ -326,7 +326,7 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
           parent_side_offset = box_width;
         }else if( pTabPos.left == tabPos.left ){
 
-          side_offset = offset;
+          side_offset = box_width - offset;
         }
 
         return {
