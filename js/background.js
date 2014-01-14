@@ -251,20 +251,30 @@ function captureScreen(tab) {
     sanitizeTab(tab, function(tab) {
 
         chrome.tabs.captureVisibleTab(tab.windowId, {format: "png"}, function(imgBlob) {
+            var canvas = document.getElementById('canvas')
+                ,canvasContext = canvas.getContext('2d')
+                ,img = document.getElementById('img')
+                ,ratio = tab.height / tab.width
+                ,quarter
+            ;
 
-            tab["screencap"] = imgBlob;
-            tab["timestampSinceCapture"] = date.getTime();
-            if (tabExists(tab)) {
-                tabList[tabListIndex[tab.id]] = tab;
-                sendSingleTab(tabList[tabListIndex[tab.id]]);
+            img.onload = function() {
+                canvasContext.clearRect( 0, 0, canvas.width, canvas.height);
+                if (ratio > 1) { // Screenshot is taller than it is wide
+                    canvasContext.drawImage(this, 0, 0, canvas.width * window.devicePixelRatio, canvas.height * ratio * window.devicePixelRatio);
+                } else {
+                    canvasContext.drawImage(this, 0, 0, canvas.width * tab.width / tab.height * window.devicePixelRatio, canvas.height * window.devicePixelRatio);
+                }
+
+                tab["screencap"] = canvas.toDataURL();
+                tab["timestampSinceCapture"] = date.getTime();
+                if (tabExists(tab)) {
+                    tabList[tabListIndex[tab.id]] = tab;
+                    sendSingleTab(tabList[tabListIndex[tab.id]]);
+                }
             }
 
-            // Work in progress code for shrinking the image
-            //var ctx = null;
-
-            //ctx = canvas.getContext('2d');
-            // Img Blog is a Data URI that cannot be directly drawn into Canvas
-            //ctx.drawImage(imgBlob, 0, 0, document.body.offsetWidth, document.body.offsetHeight);
+            img.src = imgBlob; // Set the image to the dataUrl and invoke the onload function
         });
     });
 }
