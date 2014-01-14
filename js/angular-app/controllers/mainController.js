@@ -288,7 +288,7 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
       var tabPos = angular.element( '#'+tabId ).offset(),
           pTabPos = angular.element( '#'+parentTabId ).offset();
 
-      if( tabPos.left && tabPos.top && pTabPos.left && pTabPos.top ){
+      if( tabPos && pTabPos && tabPos.left && tabPos.top && pTabPos.left && pTabPos.top ){
 
         //calculate the offsets of all the things
 
