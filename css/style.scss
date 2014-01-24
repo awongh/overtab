@@ -51,6 +51,7 @@ body {
         background-color: darken($background, 4%);
         font-size: .8rem;
         width:150px;
+        position:relative;
 
         .thumbnail {
             overflow: hidden;
@@ -71,6 +72,13 @@ body {
             white-space: nowrap;
             text-overflow: ellipsis;
             width:150px;
+        }
+
+        .close-button{
+          position:absolute;
+          right:-17px;
+          top:-22px;
+          height:22px;
         }
     }
 }

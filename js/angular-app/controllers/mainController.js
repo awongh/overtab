@@ -151,46 +151,7 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
                     break;
 
                 case "sendRemoveTab":
-                    //console.log("BEFORE:");
-                    //console.log("ID: ", request.tabId, "Length: ", $scope.tabs.length);
-                    //console.log("Tab Index: ", $scope.tabIndex);
-                    //console.log("Index: ",$scope.tabIndex[request.tabId]);
-                    if (request.tabId) {
-                        var tabId = request.tabId,
-                            tabPosition = $scope.tabIndex[tabId];
-
-                        //remove edge
-                        if(typeof typeof $scope.edges[tabId] !== "undefined" ){
-
-                          delete $scope.edges[tabId];
-
-                        }
-
-                        //let's look through all the edges to make sure its not a parent
-
-                        //look in parent edges
-                        if(typeof $scope.edgesParentIndex[tabId] !== 'undefined' ){
-                          for( var i=0; i<$scope.edgesParentIndex[tabId].length; i++ ){
-                            var id = $scope.edgesParentIndex[tabId][i];
-                            delete $scope.edges[id];
-
-                            delete $scope.edgesParentIndex[tabId][i];
-                          }
-
-                          delete $scope.edges[tabId];
-                        }
-
-                        $scope.tabs.remove(tabPosition);
-                        delete $scope.tabIndex[tabId];
-                        $scope.reIndex(tabPosition);
-
-                        $scope.setWindowSize();
-
-                    }
-                    //console.log("AFTER:");
-                    //console.log("ID: ", request.tabId, "Length: ", $scope.tabs.length);
-                    //console.log("Tab Index: ", $scope.tabIndex);
-                    //console.log("Index: ",$scope.tabIndex[request.tabId]);
+                    $scope.removeTab( request.tabId );
                     break;
             }
 
@@ -201,6 +162,54 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
         });
 
         chrome.runtime.sendMessage(null, {message: "getList"}, function() {});
+    }
+
+    $scope.tabClose = function( e ){
+      chrome.tabs.remove(this.tab.id, function() { 
+        $scope.removeTab( this.id );
+      });
+    }
+
+    $scope.removeTab = function( tabId ) {
+        //console.log("BEFORE:");
+        //console.log("ID: ", tabId, "Length: ", $scope.tabs.length);
+        //console.log("Tab Index: ", $scope.tabIndex);
+        //console.log("Index: ",$scope.tabIndex[tabId]);
+        if (tabId) {
+            var tabPosition = $scope.tabIndex[tabId];
+
+            //remove edge
+            if(typeof typeof $scope.edges[tabId] !== "undefined" ){
+
+              delete $scope.edges[tabId];
+
+            }
+
+            //let's look through all the edges to make sure its not a parent
+
+            //look in parent edges
+            if(typeof $scope.edgesParentIndex[tabId] !== 'undefined' ){
+              for( var i=0; i<$scope.edgesParentIndex[tabId].length; i++ ){
+                var id = $scope.edgesParentIndex[tabId][i];
+                delete $scope.edges[id];
+
+                delete $scope.edgesParentIndex[tabId][i];
+              }
+
+              delete $scope.edges[tabId];
+            }
+
+            $scope.tabs.remove(tabPosition);
+            delete $scope.tabIndex[tabId];
+            $scope.reIndex(tabPosition);
+
+            $scope.setWindowSize();
+
+        }
+        //console.log("AFTER:");
+        //console.log("ID: ", tabId, "Length: ", $scope.tabs.length);
+        //console.log("Tab Index: ", $scope.tabIndex);
+        //console.log("Index: ",$scope.tabIndex[tabId]);
     }
 
     $scope.emptyDomain = function(domain) {

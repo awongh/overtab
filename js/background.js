@@ -295,6 +295,7 @@ chrome.browserAction.onClicked.addListener(function(tab) {
             // Tab opened.
             overTabId = tab.id;
             overTabWindowId = tab.windowId;
+
         });
     } else {
         // Focus on OverTab ID
