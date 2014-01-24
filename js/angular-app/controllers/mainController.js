@@ -53,6 +53,7 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
                         $scope.tabs = request.tabList;
                         $scope.tabIndex = request.tabListIndex;
 
+
                         angular.forEach($scope.tabs, function(tab, k){
                             var domain = $filter('domainExtraction')(tab.url);
                             tab["searchDomain"] = domain;
@@ -91,67 +92,15 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
                     break;
 
                 case "sendSingleTab":
-                    if (request.tab) {
-                        var tab = request.tab,
-                            domain = $filter('domainExtraction')(tab.url),
-                            oldDomain;
-
-                        if (typeof $scope.tabIndex[tab.id] === 'undefined') {
-                            tab["searchDomain"] = domain;
-                            tab["domainInt"] = $scope.getDomainInt( domain );
-                            //console.log( "send single tab", domain, $scope.getDomainInt( domain ) );
-
-                            //set the edge
-                            //openerTabId
-                            if(typeof tab.openerTabId !== 'undefined'){
-
-                              var sibling_count = 0;
-                              $scope.edges[tab.id] = tab.openerTabId;
-
-                              if (typeof $scope.edgesParentIndex[tab.openerTabId] === 'undefined') {
-
-                                $scope.edgesParentIndex[tab.openerTabId] = [tab.id];
-                              }else{
-
-                                sibling_count = $scope.edgesParentIndex[tab.openerTabId].length++;
-
-                                $scope.edgesParentIndex[tab.openerTabId].push( tab.id ); 
-                              }
-
-                              $scope.edgesList.push( [ tab.id, tab.openerTabId, sibling_count ] );
-
-                            }
-
-                            //render the edges
-                            $scope.edgesRender();
-
-                            $scope.tabIndex[tab.id] = $scope.tabs.length;
-                            $scope.tabs[$scope.tabIndex[tab.id]] = tab;
-
-                        } else {
-                            oldDomain = $filter('domainExtraction')($scope.tabs[$scope.tabIndex[tab.id]].url);
-
-                            if ( oldDomain !== domain ) {
-                                //console.log( "tab index IS defined ", domain, $scope.getDomainInt( domain ) );
-
-                                //get rid of edge if this is a parent edge
-                            }
-
-                            //we shouldn't have to do this??
-                            tab["searchDomain"] = domain;
-                            tab["domainInt"] = $scope.getDomainInt( domain );
-                            $scope.tabs[$scope.tabIndex[tab.id]] = tab;
-                            // Fetch the non-loaded version of the tab from the 'undefined' favIconUrl pile, and remove it
-                        }
-
-                        setTimeout(function() {
-                          window.scrollTo( $scope.windowWidth, 0);
-                        },1000)
-                    }
+                    $scope.addTab( request.tab );
                     break;
 
                 case "sendRemoveTab":
                     $scope.removeTab( request.tabId );
+                    break;
+
+                case "faviconTab":
+                    $scope.addTab( request.tab );
                     break;
             }
 
@@ -168,6 +117,67 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
       chrome.tabs.remove(this.tab.id, function() { 
         $scope.removeTab( this.id );
       });
+    }
+
+    $scope.addTab = function( tab ){
+
+      if (tab) {
+            var domain = $filter('domainExtraction')(tab.url),
+                oldDomain;
+
+            if (typeof $scope.tabIndex[tab.id] === 'undefined') {
+                tab["searchDomain"] = domain;
+                tab["domainInt"] = $scope.getDomainInt( domain );
+                //console.log( "send single tab", domain, $scope.getDomainInt( domain ) );
+
+                //set the edge
+                //openerTabId
+                if(typeof tab.openerTabId !== 'undefined'){
+
+                  var sibling_count = 0;
+                  $scope.edges[tab.id] = tab.openerTabId;
+
+                  if (typeof $scope.edgesParentIndex[tab.openerTabId] === 'undefined') {
+
+                    $scope.edgesParentIndex[tab.openerTabId] = [tab.id];
+                  }else{
+
+                    sibling_count = $scope.edgesParentIndex[tab.openerTabId].length++;
+
+                    $scope.edgesParentIndex[tab.openerTabId].push( tab.id ); 
+                  }
+
+                  $scope.edgesList.push( [ tab.id, tab.openerTabId, sibling_count ] );
+
+                }
+
+                //render the edges
+                $scope.edgesRender();
+
+                $scope.tabIndex[tab.id] = $scope.tabs.length;
+                $scope.tabs[$scope.tabIndex[tab.id]] = tab;
+
+            } else {
+                oldDomain = $filter('domainExtraction')($scope.tabs[$scope.tabIndex[tab.id]].url);
+
+                if ( oldDomain !== domain ) {
+                    //console.log( "tab index IS defined ", domain, $scope.getDomainInt( domain ) );
+
+                    //get rid of edge if this is a parent edge
+                }
+
+                //we shouldn't have to do this??
+                tab["searchDomain"] = domain;
+                tab["domainInt"] = $scope.getDomainInt( domain );
+                $scope.tabs[$scope.tabIndex[tab.id]] = tab;
+                // Fetch the non-loaded version of the tab from the 'undefined' favIconUrl pile, and remove it
+                console.log( tab )
+            }
+
+            setTimeout(function() {
+              window.scrollTo( $scope.windowWidth, 0);
+            },1000)
+        }
     }
 
     $scope.removeTab = function( tabId ) {

@@ -21,7 +21,8 @@
             </div>
 
             <div id="node-container" class="node-cont" style="height:{{windowHeight}}px; width:{{windowWidth}}px;">
-              <div ng-repeat="tab in tabs | filter:tabFilter" class="tab-node" ng-click="switchToTab(tab.id)" id="{{tab.id}}" node-color>
+              <div ng-repeat="tab in tabs | filter:tabFilter" class="tab-node" ng-click="switchToTab(tab.id)" id="{{tab.id}}" node-color="9">
+                  <img class="favicon" ng-src="{{tab.favIconUrl}}" node-color="4"/>
                   <a ng-click="tabClose()"><img class="close-button" ng-src="../images/close_button.svg"/></a>
                   <div class="thumbnail"><img width="150px" ng-src="{{tab.screencap}}"></div>
                   <div class="title">{{tab.title}}</div>

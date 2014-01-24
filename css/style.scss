@@ -49,7 +49,7 @@ body {
         padding: 5px; 
         border-radius: .3rem;
         background-color: darken($background, 4%);
-        font-size: .8rem;
+        font-size: .7rem;
         width:150px;
         position:relative;
 
@@ -65,12 +65,18 @@ body {
             }
         }
 
+        .favicon{
+          height:20px;
+          position:absolute;
+          top:-8px;
+          left:-8px;
+        }
+
         .title {
             margin-top: 0.5em;
             color: $text;
             overflow-x: hidden;
             white-space: nowrap;
-            text-overflow: ellipsis;
             width:150px;
         }
 

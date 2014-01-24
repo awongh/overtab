@@ -202,6 +202,7 @@ function sendTabLists() {
 
 function sendSingleTab( tab ) {
     sanitizeTab(tab, function(tab) {
+        console.log( tab );
         chrome.runtime.sendMessage(null, { message:"sendSingleTab", tab: tab });
     });
 }
@@ -271,6 +272,19 @@ function captureScreen(tab) {
                 if (tabExists(tab)) {
                     tabList[tabListIndex[tab.id]] = tab;
                     sendSingleTab(tabList[tabListIndex[tab.id]]);
+
+                    if (!tab.favIconUrl || tab.favIconUrl == ''){
+
+                        setTimeout(function() {
+                            /// set favicon wherever it needs to be set here
+                            console.log('delay tabId', tab.id);
+                            chrome.tabs.get(tab.id, function(tab){
+
+                              chrome.runtime.sendMessage(null, {message: "faviconTab", tab: tab}, function() {});
+                            });
+
+                        }, 4000);
+                    }
                 }
             }
 
