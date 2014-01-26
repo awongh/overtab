@@ -1,8 +1,8 @@
 {
   "manifest_version": 2,
-  "name"       : "tabs",
-  "description": "chrome tab manager",
-  "version"    : "0.6.9",
+  "name"       : "Overtab",
+  "description": "Visual chrome tab manager that respects your context.",
+  "version"    : "0.7.0",
   "icons": {
     "19" : "images/OverTab_19.png",
     "32" : "images/OverTab_32.png",
