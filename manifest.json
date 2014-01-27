@@ -39,7 +39,7 @@
       }
     }
   },
-  //"options_page": "options.html",
+  "options_page": "html/options.html",
   "permissions" : [
     "background",
     "tabs",
