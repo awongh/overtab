@@ -46,7 +46,7 @@ body {
         margin: 6px 4px 6px 4px;
         -webkit-flex: 0 0 auto;
 
-        padding: 5px; 
+        padding: 5px;
         border-radius: .3rem;
         background-color: darken($background, 4%);
         font-size: .7rem;
@@ -70,6 +70,7 @@ body {
           position:absolute;
           top:-8px;
           left:-8px;
+          background-color:#fff;
         }
 
         .title {

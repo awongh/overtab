@@ -74,7 +74,7 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
                                 //add an offset amount
                                 sibling_count = $scope.edgesParentIndex[tab.openerTabId].length++;
 
-                                $scope.edgesParentIndex[tab.openerTabId].push( tab.id ); 
+                                $scope.edgesParentIndex[tab.openerTabId].push( tab.id );
                               }
 
                               $scope.edgesList.push( [ tab.id, tab.openerTabId, sibling_count ] );
@@ -100,7 +100,7 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
                     break;
 
                 case "faviconTab":
-                    $scope.addTab( request.tab );
+                    $scope.setFavicon( request.tab );
                     break;
             }
 
@@ -114,9 +114,19 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
     }
 
     $scope.tabClose = function( e ){
-      chrome.tabs.remove(this.tab.id, function() { 
+      chrome.tabs.remove(this.tab.id, function() {
         $scope.removeTab( this.id );
       });
+    }
+
+    $scope.setFavicon = function( tab ){
+
+        if (tab
+            && typeof $scope.tabIndex[tab.id] != 'undefined'
+            && typeof tab.favIconUrl != 'undefined' )
+        {
+                $scope.tabs[$scope.tabIndex[tab.id]].favIconUrl = tab.favIconUrl;
+        }
     }
 
     $scope.addTab = function( tab ){
@@ -144,7 +154,7 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
 
                     sibling_count = $scope.edgesParentIndex[tab.openerTabId].length++;
 
-                    $scope.edgesParentIndex[tab.openerTabId].push( tab.id ); 
+                    $scope.edgesParentIndex[tab.openerTabId].push( tab.id );
                   }
 
                   $scope.edgesList.push( [ tab.id, tab.openerTabId, sibling_count ] );
@@ -214,6 +224,7 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
             $scope.reIndex(tabPosition);
 
             $scope.setWindowSize();
+            $scope.edgesRender();
 
         }
         //console.log("AFTER:");
@@ -257,7 +268,7 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
       var j = document.getElementById('node-container').scrollHeight;
       console.log( "width", i, "height", j );
 
-      $scope.windowWidth = i; 
+      $scope.windowWidth = i;
       $scope.windowHeight = j;
       //$scope.windowWidth = document.getElementById('node-container').scrollWidth;
       //$scope.windowHeight = document.getElementById('node-container').scrollHeight;
