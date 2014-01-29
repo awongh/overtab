@@ -1,9 +1,15 @@
 "use strict";
 
-Array.prototype.remove = function(from, to) {
-    var rest = this.slice((to || from) + 1 || this.length);
-    this.length = from < 0 ? this.length + from : from;
-    return this.push.apply(this, rest);
+Array.prototype.remove = function(from) {
+    return this.splice( (from - 1), 1);
+};
+
+Array.prototype.add = function(from, item) {
+    if( !item ){
+      throw "Trying to add a null variable to array. -oops";
+    }
+
+    return this.splice(from, 1, item);
 };
 
 /* Refactor in progress???
