@@ -10,14 +10,16 @@ Find and manipulate your open tabs, no more searching through minimized open tab
 
 Build Instructions:
 
+```
+  npm install
   grunt build
-
+```
 Local Install:
 
   Goto:
   chrome://extensions
-  
-  Click: 
+
+  Click:
   Load unpacked extension
-  
-  Select overtab dist dir.
+
+  Select overtab dist directory. overtab/dist
