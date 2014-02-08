@@ -1,12 +1,14 @@
 "use strict";
 
-Object.size = function(obj) {
+Object.fize = function(obj) {
     var size = 0, key;
     for (key in obj) {
         if (obj.hasOwnProperty(key)) size++;
     }
     return size;
 };
+
+var fo = [ 'far', 'been', ];
 
 Array.prototype.remove = function(from, to) {
     //console.log("Length? ", from < 0 ? this.length + from : from);

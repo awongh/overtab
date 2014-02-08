@@ -3,14 +3,16 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
         <title>OverTab | Be over your tabs.</title>
-        <link rel="stylesheet" type="text/css" href="/css/style.css" />
-        <script src="/js/jquery-2.0.3.js"></script>
-        <script src="/js/angular-app/angular.min.js"></script>
-        <script src="/js/d3.js"></script>
-        <script src="/js/angular-app/filters/domainExtractionFilter.js"></script>
-        <script src="/js/angular-app/controllers/mainController.js"></script>
-        <script src="/js/angular-app/directives/nodeColor.js"></script>
-        <script src="/js/angular-app/modules/app.js"></script>
+
+        <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+        <!-- build:css styles/vendor.css -->
+        <!-- bower:css -->
+        <link rel="stylesheet" href="bower_components/sass-bootstrap/dist/css/bootstrap.css" />
+        <!-- endbower -->
+        <!-- endbuild -->
+        <!-- build:css({.tmp,app}) styles/style.css -->
+        <link rel="stylesheet" href="styles/style.css">
+        <!-- endbuild -->
     </head>
 
     <body ng-app="overtab">
@@ -37,5 +39,22 @@
               </svg>
             </div>
         </div>
+        <!-- build:js scripts/vendor.js -->
+        <!-- bower:js -->
+        <script src="bower_components/jquery/jquery.js"></script>
+        <script src="bower_components/angular/angular.js"></script>
+        <script src="bower_components/json3/lib/json3.min.js"></script>
+        <script src="bower_components/sass-bootstrap/dist/js/bootstrap.js"></script>
+        <script src="bower_components/d3/d3.js"></script>
+        <!-- endbower -->
+        <!-- endbuild -->
+
+        <!-- build:js({.tmp,app}) scripts/scripts.js -->
+        <script src="js/angular-app/controllers/mainController.js"></script>
+        <script src="js/angular-app/directives/nodeColor.js"></script>
+        <script src="js/angular-app/filters/domainExtractionFilter.js"></script>
+        <script src="js/angular-app/modules/app.js"></script>
+        <!-- endbuild -->
+
     </body>
 </html>
