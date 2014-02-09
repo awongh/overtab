@@ -1,3 +1,5 @@
+"use strict";
+
 var domainExtractionFilter = function() {
     return function(uri) {
         var domainSplits = uri.split('//'),
@@ -10,10 +12,8 @@ var domainExtractionFilter = function() {
                 dir.shift();
                 dir.pop();
                 return dir.join('/');
-                break;
             default:
                 return domainSplits[1].split('/')[0];
-                break;
         }
-    }
+    };
 };

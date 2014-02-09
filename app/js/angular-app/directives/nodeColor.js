@@ -1,3 +1,5 @@
+"use strict";
+
 var nodeColor = function(){
 
   var fill = d3.scale.category20();
@@ -13,8 +15,8 @@ var nodeColor = function(){
     //console.log("here!", scope.tab, scope.tab.domain, scope.tab.domainInt, color);
   };
 
-  return {
-    restrict: 'A',
-    link: setColor 
-  };
+    return {
+        restrict: 'A',
+        link: setColor
+    };
 };

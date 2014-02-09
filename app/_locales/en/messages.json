@@ -1,0 +1,10 @@
+{
+    "appName": {
+        "message": "overtab",
+        "description": "The name of the application"
+    },
+    "appDescription": {
+        "message": "Manages your tabs.",
+        "description": "The description of the application"
+    }
+}

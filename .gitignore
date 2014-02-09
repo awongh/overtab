@@ -22,3 +22,10 @@ libpeerconnection.log
 npm-debug.log
 /tmp/
 /scripts/bower/bower-*
+
+temp
+.tmp
+dist
+app/bower_components
+
+/package/
