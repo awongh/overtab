@@ -41,6 +41,39 @@ document.addEventListener("DOMContentLoaded", function() {
     image = document.querySelector('canvas');
 });
 
+// This function will accept tab object, tab id, tab info, and a callback function.
+// It will always pass into the callback function a tab object
+function sanitizeTab(dirtyTab, callback) {
+    var dirtyTabId = null;
+
+    if (typeof dirtyTab === "undefined") {
+        return false;
+    } else {
+        if (typeof dirtyTab.tabId !== "undefined" || typeof dirtyTab === "number") {
+            dirtyTabId = dirtyTab.tabId || dirtyTab;
+        }
+    }
+
+    // The input was a tab ID, so fetch the actual tab object
+    if (typeof dirtyTabId !== "undefined" && dirtyTabId !== null) {
+        chrome.tabs.get(dirtyTabId, function(tabObject) {
+            if (typeof tabObject !== "undefined" && (tabObject.url.match(/^http.*:\/\//) || dirtyTab.title === "New Tab" )) {
+                callback(tabObject);
+            }
+        });
+    // The input was a tab object, run the callback directly on it :)
+    } else if (typeof dirtyTab.id !== "undefined" && (dirtyTab.url.match(/^http.*:\/\//) || dirtyTab.title === "New Tab" )) {
+        callback(dirtyTab);
+    }
+}
+
+function sendSingleTab( tab ) {
+    sanitizeTab(tab, function(tab) {
+        console.log( tab );
+        chrome.runtime.sendMessage(null, { message:"sendSingleTab", tab: tab });
+    });
+}
+
 function addTab(tab, callback) {
 
     if (typeof tab.tabId !== "undefined") { // The user passed in a tabInfo object, not a tab object
@@ -73,6 +106,22 @@ function addTab(tab, callback) {
             }
         }
     }
+}
+
+// This function re-indexes the tabListIndex after a tab is removed from the tabList array
+// so that the reverse index in tabListIndex is still pointing to the right Array element
+function reIndex(tabPosition) {
+    for (var tabIndex in tabListIndex) {
+        if (tabListIndex.hasOwnProperty(tabIndex)) {
+            if (tabListIndex[tabIndex] >= tabPosition) {
+                tabListIndex[tabIndex] -= 1;
+            }
+        }
+    }
+}
+
+function sendRemoveTab( tabId ) {
+    chrome.runtime.sendMessage(null, { message:"sendRemoveTab", tabId: tabId });
 }
 
 function removeTab(tab) {
@@ -110,32 +159,6 @@ function removeTab(tab) {
     sendRemoveTab(tabId);
 }
 
-// This function will accept tab object, tab id, tab info, and a callback function.
-// It will always pass into the callback function a tab object
-function sanitizeTab(dirtyTab, callback) {
-    var dirtyTabId = null;
-
-    if (typeof dirtyTab === "undefined") {
-        return false;
-    } else {
-        if (typeof dirtyTab.tabId !== "undefined" || typeof dirtyTab === "number") {
-            dirtyTabId = dirtyTab.tabId || dirtyTab;
-        }
-    }
-
-    // The input was a tab ID, so fetch the actual tab object
-    if (typeof dirtyTabId !== "undefined" && dirtyTabId !== null) {
-        chrome.tabs.get(dirtyTabId, function(tabObject) {
-            if (typeof tabObject !== "undefined" && (tabObject.url.match(/^http.*:\/\//) || dirtyTab.title === "New Tab" )) {
-                callback(tabObject);
-            }
-        });
-    // The input was a tab object, run the callback directly on it :)
-    } else if (typeof dirtyTab.id !== "undefined" && (dirtyTab.url.match(/^http.*:\/\//) || dirtyTab.title === "New Tab" )) {
-        callback(dirtyTab);
-    }
-}
-
 // Updates an existing tab entry, and calls the given callback afterwards (optional)
 // If the tab doesn't exist yet, invoke the addTab function instead
 function updateTab(tab, callback) {
@@ -146,8 +169,8 @@ function updateTab(tab, callback) {
         if (tabList[tabListIndex[tab.id]]) {
             if (tabList[tabListIndex[tab.id]].url !== tab.url) {
                 tabList[tabListIndex[tab.id]].url = tab.url;
-                delete tabList[tabListIndex[tab.id]]["screencap"];
-                delete tabList[tabListIndex[tab.id]]["timestamp"];
+                delete tabList[tabListIndex[tab.id]].screencap;
+                delete tabList[tabListIndex[tab.id]].timestamp;
                 updated = true;
             }
 
@@ -176,18 +199,6 @@ function updateTab(tab, callback) {
     });
 }
 
-// This function re-indexes the tabListIndex after a tab is removed from the tabList array
-// so that the reverse index in tabListIndex is still pointing to the right Array element
-function reIndex(tabPosition) {
-    for (var tabIndex in tabListIndex) {
-        if (tabListIndex.hasOwnProperty(tabIndex)) {
-            if (tabListIndex[tabIndex] >= tabPosition) {
-                tabListIndex[tabIndex] -= 1;
-            }
-        }
-    }
-}
-
 // Expect an actual tab object
 function tabExists(tab) {
     return typeof tabListIndex[tab.id] !== "undefined" ? true : false;
@@ -206,15 +217,49 @@ function sendTabLists() {
     chrome.runtime.sendMessage(null, {message: "sendTabLists", tabList: tabList, tabListIndex: tabListIndex}, function() {});
 }
 
-function sendSingleTab( tab ) {
-    sanitizeTab(tab, function(tab) {
-        console.log( tab );
-        chrome.runtime.sendMessage(null, { message:"sendSingleTab", tab: tab });
-    });
-}
+function captureScreen(tab) {
 
-function sendRemoveTab( tabId ) {
-    chrome.runtime.sendMessage(null, { message:"sendRemoveTab", tabId: tabId });
+    sanitizeTab(tab, function(tab) {
+
+        chrome.tabs.captureVisibleTab(tab.windowId, {format: "png"}, function(imgBlob) {
+            var canvas = document.getElementById('canvas'),
+                canvasContext = canvas.getContext('2d'),
+                img = document.getElementById('img'),
+                ratio = tab.height / tab.width,
+                quarter;
+
+            img.onload = function() {
+                canvasContext.clearRect( 0, 0, canvas.width, canvas.height);
+                if (ratio > 1) { // Screenshot is taller than it is wide
+                    canvasContext.drawImage(this, 0, 0, canvas.width * window.devicePixelRatio, canvas.height * ratio * window.devicePixelRatio);
+                } else {
+                    canvasContext.drawImage(this, 0, 0, canvas.width * tab.width / tab.height * window.devicePixelRatio, canvas.height * window.devicePixelRatio);
+                }
+
+                tab.screencap = canvas.toDataURL();
+                tab.timestampSinceCapture = date.getTime();
+                if (tabExists(tab)) {
+                    tabList[tabListIndex[tab.id]] = tab;
+                    sendSingleTab(tabList[tabListIndex[tab.id]]);
+
+                    if (!tab.favIconUrl || tab.favIconUrl === ''){
+
+                        setTimeout(function() {
+                            /// set favicon wherever it needs to be set here
+                            console.log('delay tabId', tab.id);
+                            chrome.tabs.get(tab.id, function(tab){
+
+                              chrome.runtime.sendMessage(null, {message: "faviconTab", tab: tab}, function() {});
+                            });
+
+                        }, 4000);
+                    }
+                }
+            };
+
+            img.src = imgBlob; // Set the image to the dataUrl and invoke the onload function
+        });
+    });
 }
 
 // This will execute whenever a tab has completed "loading"
@@ -252,52 +297,6 @@ chrome.tabs.onActivated.addListener(function(tabInfo) {
         }
     });
 });
-
-function captureScreen(tab) {
-
-    sanitizeTab(tab, function(tab) {
-
-        chrome.tabs.captureVisibleTab(tab.windowId, {format: "png"}, function(imgBlob) {
-            var canvas = document.getElementById('canvas')
-                ,canvasContext = canvas.getContext('2d')
-                ,img = document.getElementById('img')
-                ,ratio = tab.height / tab.width
-                ,quarter
-            ;
-
-            img.onload = function() {
-                canvasContext.clearRect( 0, 0, canvas.width, canvas.height);
-                if (ratio > 1) { // Screenshot is taller than it is wide
-                    canvasContext.drawImage(this, 0, 0, canvas.width * window.devicePixelRatio, canvas.height * ratio * window.devicePixelRatio);
-                } else {
-                    canvasContext.drawImage(this, 0, 0, canvas.width * tab.width / tab.height * window.devicePixelRatio, canvas.height * window.devicePixelRatio);
-                }
-
-                tab["screencap"] = canvas.toDataURL();
-                tab["timestampSinceCapture"] = date.getTime();
-                if (tabExists(tab)) {
-                    tabList[tabListIndex[tab.id]] = tab;
-                    sendSingleTab(tabList[tabListIndex[tab.id]]);
-
-                    if (!tab.favIconUrl || tab.favIconUrl == ''){
-
-                        setTimeout(function() {
-                            /// set favicon wherever it needs to be set here
-                            console.log('delay tabId', tab.id);
-                            chrome.tabs.get(tab.id, function(tab){
-
-                              chrome.runtime.sendMessage(null, {message: "faviconTab", tab: tab}, function() {});
-                            });
-
-                        }, 4000);
-                    }
-                }
-            }
-
-            img.src = imgBlob; // Set the image to the dataUrl and invoke the onload function
-        });
-    });
-}
 
 chrome.runtime.onMessage.addListener( function( request, sender, sendResponse) {
     if ( request.message === "getList" ) {

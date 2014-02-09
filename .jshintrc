@@ -16,6 +16,10 @@
   "smarttabs": true,
   "globals": {
     "angular": false,
-    "chrome": true
+    "chrome": true,
+    "mainController": true,
+    "setColor": true,
+    "nodeColor": true,
+    "domainExtractionFilter": true
   }
 }

@@ -1,3 +1,5 @@
+"use strict";
+
 // Saves options to localStorage.
 function save_options() {
   var select = document.getElementById("color");
@@ -7,7 +9,7 @@ function save_options() {
   //get it
   var windowOption = input.value;
 
-  localStorage["windowOption"] = windowOption;
+  localStorage.windowOption = windowOption;
 
   // Update status to let user know options were saved.
   var status = document.getElementById("status");
@@ -19,7 +21,7 @@ function save_options() {
 
 function restore_options() {
 
-  var windowOption = localStorage["windowOption"];
+  var windowOption = localStorage.windowOption;
 
   if (!windowOption) {
     return;
@@ -27,7 +29,7 @@ function restore_options() {
 
   var input = document.getElementById("window-as-option");
 
-  input.value = winodwOption;
+  input.value = windowOption;
 }
 
 document.addEventListener('DOMContentLoaded', restore_options);

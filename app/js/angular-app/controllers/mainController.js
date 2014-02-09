@@ -3,12 +3,10 @@
 Object.fize = function(obj) {
     var size = 0, key;
     for (key in obj) {
-        if (obj.hasOwnProperty(key)) size++;
+        if (obj.hasOwnProperty(key)){ size++; }
     }
     return size;
 };
-
-var fo = [ 'far', 'been', ];
 
 Array.prototype.remove = function(from, to) {
     //console.log("Length? ", from < 0 ? this.length + from : from);
@@ -58,8 +56,8 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
 
                         angular.forEach($scope.tabs, function(tab, k){
                             var domain = $filter('domainExtraction')(tab.url);
-                            tab["searchDomain"] = domain;
-                            tab["domainInt"] = $scope.getDomainInt( domain );
+                            tab.searchDomain = domain;
+                            tab.domainInt = $scope.getDomainInt( domain );
                             //console.log( "send tab lists", domain, $scope.getDomainInt( domain ) );
                             //console.log( "last tab list set" );
 
@@ -89,7 +87,7 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
                         //we have an existing set of tabs. is there a finished rendering function?
                         setTimeout(function() {
                           window.scrollTo( window.innerWidth, 0);
-                        },1000)
+                        },1000);
                     }
                     break;
 
@@ -113,23 +111,23 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
         });
 
         chrome.runtime.sendMessage(null, {message: "getList"}, function() {});
-    }
+    };
 
     $scope.tabClose = function( e ){
       chrome.tabs.remove(this.tab.id, function() {
         $scope.removeTab( this.id );
       });
-    }
+    };
 
     $scope.setFavicon = function( tab ){
 
-        if (tab
-            && typeof $scope.tabIndex[tab.id] != 'undefined'
-            && typeof tab.favIconUrl != 'undefined' )
+        if (tab &&
+            typeof $scope.tabIndex[tab.id] != 'undefined' &&
+            typeof tab.favIconUrl != 'undefined' )
         {
                 $scope.tabs[$scope.tabIndex[tab.id]].favIconUrl = tab.favIconUrl;
         }
-    }
+    };
 
     $scope.addTab = function( tab ){
 
@@ -138,8 +136,8 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
                 oldDomain;
 
             if (typeof $scope.tabIndex[tab.id] === 'undefined') {
-                tab["searchDomain"] = domain;
-                tab["domainInt"] = $scope.getDomainInt( domain );
+                tab.searchDomain = domain;
+                tab.domainInt = $scope.getDomainInt( domain );
                 //console.log( "send single tab", domain, $scope.getDomainInt( domain ) );
 
                 //set the edge
@@ -179,18 +177,18 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
                 }
 
                 //we shouldn't have to do this??
-                tab["searchDomain"] = domain;
-                tab["domainInt"] = $scope.getDomainInt( domain );
+                tab.searchDomain = domain;
+                tab.domainInt = $scope.getDomainInt( domain );
                 $scope.tabs[$scope.tabIndex[tab.id]] = tab;
                 // Fetch the non-loaded version of the tab from the 'undefined' favIconUrl pile, and remove it
-                console.log( tab )
+                console.log( tab );
             }
 
             setTimeout(function() {
               window.scrollTo( $scope.windowWidth, 0);
-            },1000)
+            },1000);
         }
-    }
+    };
 
     $scope.removeTab = function( tabId ) {
         //console.log("BEFORE:");
@@ -233,15 +231,15 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
         //console.log("ID: ", tabId, "Length: ", $scope.tabs.length);
         //console.log("Tab Index: ", $scope.tabIndex);
         //console.log("Index: ",$scope.tabIndex[tabId]);
-    }
+    };
 
     $scope.emptyDomain = function(domain) {
         return Object.size(domain) <= 1 ? 'hidden' : '';
-    }
+    };
 
     $scope.switchToTab = function(tabId) {
         chrome.tabs.update(tabId, {'active': true}, function() {} );
-    }
+    };
 
     $scope.reIndex = function(tabPosition) {
         for (var tabIndex in $scope.tabIndex) {
@@ -251,7 +249,7 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
                 }
             }
         }
-    }
+    };
 
     $scope.getDomainInt = function( domain ) {
       var domainInt = 0,
@@ -263,7 +261,7 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
       }
 
       return domainInt;
-    }
+    };
 
     $scope.setWindowSize = function(){
       var i = document.getElementById('node-container').scrollWidth;
@@ -275,11 +273,11 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
       //$scope.windowWidth = document.getElementById('node-container').scrollWidth;
       //$scope.windowHeight = document.getElementById('node-container').scrollHeight;
       //$scope.apply();
-    }
+    };
 
     $scope.edgesRender = function(){
 
-      requestAnimationFrame(function(){
+      window.requestAnimationFrame(function(){
         $scope.setWindowSize();
 
         for( var i =0; i< $scope.edgesList.length; i++ ){
@@ -302,7 +300,7 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
             angular.element( elem ).attr( "x2", edges.x2 );
 
             //set the size of the circle depending on how many connections there are
-            var node_size = Math.abs( edges.offset * .02 )
+            var node_size = Math.abs( edges.offset * 0.02 );
 
             //set a circle at the parent
             //TODO: logic to not render if its already a parent
@@ -313,7 +311,7 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
           }
         }
       });
-    }
+    };
 
     $scope.edgeCalc = function( tabId, parentTabId, edgeIndex ){
 
@@ -369,5 +367,5 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
           offset:offset
         };
       }
-    }
-}
+    };
+};
