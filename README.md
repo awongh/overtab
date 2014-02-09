@@ -8,6 +8,18 @@ Find and manipulate your open tabs, no more searching through minimized open tab
 
 =======
 
+Prequisites:
+  
+  yeoman:
+  ```
+    npm install -g yo
+  ```
+  
+  compass
+  ```
+    gem install compass
+  ```
+  
 Build Instructions:
 
 ```
