@@ -12,21 +12,6 @@ Array.prototype.add = function(from, item) {
     return this.splice(from, 1, item);
 };
 
-/* Refactor in progress???
-var overtab = {
-    // The list which we will use to hold all the tab objects
-    tabList: [],
-
-    // For checking to see if a tab already exists, and for reverse lookup of the tab in tabList array
-    tabListIndex: {},
-
-    tabOpened: false,
-    canvas: null,
-    image: null,
-    Date: new Date(),
-    overTab: null,
-}
-*/
 var tabList = [],
     tabListIndex = {}, // For checking to see if a tab already exists, and for reverse lookup of the tab in tabList array
     tabOpened = false,
@@ -40,6 +25,162 @@ document.addEventListener("DOMContentLoaded", function() {
     canvas = document.querySelector('canvas');
     image = document.querySelector('canvas');
 });
+
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+////////////////      START CHROME INTERACTION          ////////////////
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+
+//get the tab screenshot
+var screenCap = function( windowId, options, callback ){
+  return chrome.tabs.captureVisibleTab( windowId, options, callback );
+};
+
+//listen for tab states
+chrome.tabs.onCreated.addListener( tabCreated );
+chrome.tabs.onUpdated.addListener( tabUpdated );
+chrome.tabs.onActivated.addListener( tabActivated );
+chrome.tabs.onRemoved.addListener( tabRemoved );
+
+//listen for a message
+chrome.runtime.onMessage.addListener( onMessage );
+
+//send message
+var sendMessage = function( tabId, message, callback ){
+  return chrome.runtime.sendMessage( tabId, message, callback );
+};
+
+//query for a tab
+var tabQuery = function( queryInfo, callback ){
+  return chrome.tabs.query( queryInfo, callback );
+};
+
+//get a tab by id
+var getTab = function( tabId, callback ){
+  return chrome.tabs.get( tabId, callback );
+};
+
+//clicking on the browser menu item
+chrome.browserAction.onClicked.addListener( browserActionClick );
+
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+////////////////        END CHROME INTERACTION          ////////////////
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+////////////////     START CHROME CALLBACK FUNCTIONS    ////////////////
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+
+var tabCreated = function( tab ){
+
+  if (typeof tab.tabId !== "undefined") { // The user passed in a tabInfo object, not a tab object
+      // Is this tab already in our index?
+      if (typeof tabListIndex[tab.tabId] === "undefined") {
+          // We need to go and fetch the actual tab object now
+          chrome.tabs.get(tab.tabId, function(tabObject) {
+              if (tab.url.match(/^http.*:\/\//) || tab.title === "New Tab") {
+                  // Add the tab object and index lookup into their respective arrays
+                  tabList.push(tabObject);
+                  tabListIndex[tabObject.id] = tabList.length - 1;
+                  sendSingleTab(tabObject);
+
+                  if (typeof callback !== "undefined") {
+                      callback(tabObject);
+                  }
+              }
+          });
+      }
+  } else if (typeof tab.id !== "undefined" && (tab.url.match(/^http.*:\/\//) || tab.title === "New Tab")) { // The object is (probably) a tab object, yay!
+      // Is this tab already in our index?
+      if (typeof tabListIndex[tab.id] === "undefined") {
+          // Add the tab index and object into their respective arrays
+          tabList.push(tab);
+          tabListIndex[tab.id] = tabList.length - 1;
+          sendSingleTab(tab);
+
+          if (typeof callback !== "undefined") {
+              callback(tab);
+          }
+      }
+  }
+
+};
+
+var tabUpdated = function( tabId, changeInfo, tab ){
+
+    updateTab(tab, function() {
+        if (changeInfo.status === "complete") {
+            chrome.tabs.query({ currentWindow: true, windowId: tab.windowId, active: true, status: "complete" }, function(tabs) {
+                if (tabs.length > 0 && tabs[0].id == tab.id) {
+                    captureScreen(tab);
+                }
+            });
+        }
+    });
+};
+
+var tabActivated = function( tabInfo ){
+   var tabId = tabInfo.tabId;
+
+    sanitizeTab(tabId, function(tab) {
+
+        if (!screencapExists(tab)) {
+            updateTab(tab, function(tab) {
+
+                chrome.tabs.query({ currentWindow: true, windowId: tab.windowId, active: true, status: "complete" }, function(tabs) {
+                    if (tabs.length > 0 && tabs[0].id == tab.id) {
+                        captureScreen(tab);
+                    }
+                });
+            });
+        }
+    });
+};
+
+var tabRemoved = function(){
+  removeTab(tabId);
+  if (tabId === overTabId) {
+    console.log("Closed");
+    tabOpened = false;
+    overTabId = null;
+    overTabWindowId = null;
+  }
+};
+
+var onMessage = function( request, sender, sendResponse ){
+  if ( request.message === "getList" ) {
+    sendTabLists();
+  }
+};
+
+var browserActionClicked = function( tab ){
+  if ( !tabOpened ) {
+    // Prevents mashing the button and opening duplicate Overtab tabs
+    tabOpened = true;
+    chrome.tabs.create({'url': chrome.extension.getURL('html/index.html')}, function(tab) {
+
+      // Tab opened.
+      overTabId = tab.id;
+      overTabWindowId = tab.windowId;
+
+    });
+  } else {
+    // Focus on OverTab ID
+    chrome.tabs.update(overTabId, {'active': true}, function() {} );
+    chrome.windows.update(overTabWindowId, {'focused': true}, function() {} );
+  }
+};
+
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+////////////////       END CHROME CALLBACK FUNCTIONS    ////////////////
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
 
 // This function will accept tab object, tab id, tab info, and a callback function.
 // It will always pass into the callback function a tab object
@@ -194,7 +335,7 @@ function updateTab(tab, callback) {
                 callback(tab);
             }
         } else {
-            addTab(tab, callback(tab));
+            tabCreated(tab, callback(tab));
         }
     });
 }
@@ -261,74 +402,3 @@ function captureScreen(tab) {
         });
     });
 }
-
-// This will execute whenever a tab has completed "loading"
-chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
-
-    updateTab(tab, function() {
-        if (changeInfo.status === "complete") {
-            chrome.tabs.query({ currentWindow: true, windowId: tab.windowId, active: true, status: "complete" }, function(tabs) {
-                if (tabs.length > 0 && tabs[0].id == tab.id) {
-                    captureScreen(tab);
-                }
-            });
-        }
-    });
-});
-
-chrome.tabs.onCreated.addListener(function(tab) {
-    addTab(tab);
-});
-
-chrome.tabs.onActivated.addListener(function(tabInfo) {
-    var tabId = tabInfo.tabId;
-
-    sanitizeTab(tabId, function(tab) {
-
-        if (!screencapExists(tab)) {
-            updateTab(tab, function(tab) {
-
-                chrome.tabs.query({ currentWindow: true, windowId: tab.windowId, active: true, status: "complete" }, function(tabs) {
-                    if (tabs.length > 0 && tabs[0].id == tab.id) {
-                        captureScreen(tab);
-                    }
-                });
-            });
-        }
-    });
-});
-
-chrome.runtime.onMessage.addListener( function( request, sender, sendResponse) {
-    if ( request.message === "getList" ) {
-        sendTabLists();
-    }
-});
-
-chrome.browserAction.onClicked.addListener(function(tab) {
-
-    if ( !tabOpened ) {
-        // Prevents mashing the button and opening duplicate Overtab tabs
-        tabOpened = true;
-        chrome.tabs.create({'url': chrome.extension.getURL('html/index.html')}, function(tab) {
-
-            // Tab opened.
-            overTabId = tab.id;
-            overTabWindowId = tab.windowId;
-
-        });
-    } else {
-        // Focus on OverTab ID
-        chrome.tabs.update(overTabId, {'active': true}, function() {} );
-        chrome.windows.update(overTabWindowId, {'focused': true}, function() {} );
-    }
-});
-
-chrome.tabs.onRemoved.addListener(function( tabId, removeInfo ) {
-    removeTab(tabId);
-    if (tabId === overTabId) {
-        console.log("Closed");
-        tabOpened = false;
-        overTabId = null;
-        overTabWindowId = null;
-    }
-});
