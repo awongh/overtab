@@ -19,6 +19,7 @@ var tabList = [],
     image = null,
     date = new Date(),
     overTabId = null,
+
     overTabWindowId = null;
 
 document.addEventListener("DOMContentLoaded", function() {
@@ -31,6 +32,14 @@ document.addEventListener("DOMContentLoaded", function() {
 ////////////////      START CHROME INTERACTION          ////////////////
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
+
+//default overtab opener
+var defaultOpener = chrome.tabs.create;
+
+//get extension html url
+var getExtensionUrl = function(){
+  return chrome.extension.getURL('html/index.html');
+};
 
 //get the tab screenshot
 var screenCap = function( windowId, options, callback ){
@@ -64,6 +73,12 @@ var getTab = function( tabId, callback ){
 //clicking on the browser menu item
 chrome.browserAction.onClicked.addListener( browserActionClick );
 
+//bring a tab into focus
+var tabFocus = function( tabId, windowId ){
+    chrome.windows.update(windowId, {'focused': true}, function() {
+      chrome.tabs.update(tabId, {'active': true}, function() {} );
+    });
+};
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 ////////////////        END CHROME INTERACTION          ////////////////
@@ -82,7 +97,7 @@ var tabCreated = function( tab ){
       // Is this tab already in our index?
       if (typeof tabListIndex[tab.tabId] === "undefined") {
           // We need to go and fetch the actual tab object now
-          chrome.tabs.get(tab.tabId, function(tabObject) {
+          getTab( tab.tabId, function(tabObject) {
               if (tab.url.match(/^http.*:\/\//) || tab.title === "New Tab") {
                   // Add the tab object and index lookup into their respective arrays
                   tabList.push(tabObject);
@@ -115,7 +130,7 @@ var tabUpdated = function( tabId, changeInfo, tab ){
 
     updateTab(tab, function() {
         if (changeInfo.status === "complete") {
-            chrome.tabs.query({ currentWindow: true, windowId: tab.windowId, active: true, status: "complete" }, function(tabs) {
+            tabQuery({ currentWindow: true, windowId: tab.windowId, active: true, status: "complete" }, function(tabs) {
                 if (tabs.length > 0 && tabs[0].id == tab.id) {
                     captureScreen(tab);
                 }
@@ -132,7 +147,7 @@ var tabActivated = function( tabInfo ){
         if (!screencapExists(tab)) {
             updateTab(tab, function(tab) {
 
-                chrome.tabs.query({ currentWindow: true, windowId: tab.windowId, active: true, status: "complete" }, function(tabs) {
+                tabQuery({ currentWindow: true, windowId: tab.windowId, active: true, status: "complete" }, function(tabs) {
                     if (tabs.length > 0 && tabs[0].id == tab.id) {
                         captureScreen(tab);
                     }
@@ -158,21 +173,34 @@ var onMessage = function( request, sender, sendResponse ){
   }
 };
 
-var browserActionClicked = function( tab ){
+var browserActionClicked = function( ){
+
   if ( !tabOpened ) {
     // Prevents mashing the button and opening duplicate Overtab tabs
     tabOpened = true;
-    chrome.tabs.create({'url': chrome.extension.getURL('html/index.html')}, function(tab) {
+    var func = localStorage['overTabFunc'];
 
-      // Tab opened.
-      overTabId = tab.id;
-      overTabWindowId = tab.windowId;
+    if( !func ){
+      //default behavior
+      func = defaultOpener;
+    }
 
+    var options = {
+      'url' : getExtensionUrl()
+    };
+
+    //add more options here from local storage
+
+    func( options, function(tab) {
+
+        //do we want any checks here?
+
+        overTabId = tab.id;
+        overTabWindowId = tab.windowId;
     });
-  } else {
-    // Focus on OverTab ID
-    chrome.tabs.update(overTabId, {'active': true}, function() {} );
-    chrome.windows.update(overTabWindowId, {'focused': true}, function() {} );
+
+  }else {
+    tabFocus( overTabId, overTabWindowId );
   }
 };
 
@@ -197,7 +225,7 @@ function sanitizeTab(dirtyTab, callback) {
 
     // The input was a tab ID, so fetch the actual tab object
     if (typeof dirtyTabId !== "undefined" && dirtyTabId !== null) {
-        chrome.tabs.get(dirtyTabId, function(tabObject) {
+        getTab(dirtyTabId, function(tabObject) {
             if (typeof tabObject !== "undefined" && (tabObject.url.match(/^http.*:\/\//) || dirtyTab.title === "New Tab" )) {
                 callback(tabObject);
             }
@@ -211,7 +239,7 @@ function sanitizeTab(dirtyTab, callback) {
 function sendSingleTab( tab ) {
     sanitizeTab(tab, function(tab) {
         console.log( tab );
-        chrome.runtime.sendMessage(null, { message:"sendSingleTab", tab: tab });
+        sendMessage(null, { message:"sendSingleTab", tab: tab });
     });
 }
 
@@ -221,7 +249,7 @@ function addTab(tab, callback) {
         // Is this tab already in our index?
         if (typeof tabListIndex[tab.tabId] === "undefined") {
             // We need to go and fetch the actual tab object now
-            chrome.tabs.get(tab.tabId, function(tabObject) {
+            getTab(tab.tabId, function(tabObject) {
                 if (tab.url.match(/^http.*:\/\//) || tab.title === "New Tab") {
                     // Add the tab object and index lookup into their respective arrays
                     tabList.push(tabObject);
@@ -262,7 +290,7 @@ function reIndex(tabPosition) {
 }
 
 function sendRemoveTab( tabId ) {
-    chrome.runtime.sendMessage(null, { message:"sendRemoveTab", tabId: tabId });
+    sendMessage(null, { message:"sendRemoveTab", tabId: tabId });
 }
 
 function removeTab(tab) {
@@ -355,14 +383,14 @@ function screencapExists(tab) {
 }
 
 function sendTabLists() {
-    chrome.runtime.sendMessage(null, {message: "sendTabLists", tabList: tabList, tabListIndex: tabListIndex}, function() {});
+    sendMessage(null, {message: "sendTabLists", tabList: tabList, tabListIndex: tabListIndex}, function() {});
 }
 
 function captureScreen(tab) {
 
     sanitizeTab(tab, function(tab) {
 
-        chrome.tabs.captureVisibleTab(tab.windowId, {format: "png"}, function(imgBlob) {
+        screeenCap(tab.windowId, {format: "png"}, function(imgBlob) {
             var canvas = document.getElementById('canvas'),
                 canvasContext = canvas.getContext('2d'),
                 img = document.getElementById('img'),
@@ -388,9 +416,9 @@ function captureScreen(tab) {
                         setTimeout(function() {
                             /// set favicon wherever it needs to be set here
                             console.log('delay tabId', tab.id);
-                            chrome.tabs.get(tab.id, function(tab){
+                            getTab(tab.id, function(tab){
 
-                              chrome.runtime.sendMessage(null, {message: "faviconTab", tab: tab}, function() {});
+                              sendMessage(null, {message: "faviconTab", tab: tab}, function() {});
                             });
 
                         }, 4000);
