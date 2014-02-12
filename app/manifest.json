@@ -3,6 +3,7 @@
     "name": "Overtab",
     "description": "Visual chrome tab manager that respects your context.",
     "version": "0.7.11",
+    "default_locale":"en",
     "icons": {
         "19": "images/OverTab_19.png",
         "32": "images/OverTab_32.png",

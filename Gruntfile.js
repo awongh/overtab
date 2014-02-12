@@ -38,7 +38,7 @@ module.exports = function (grunt) {
         }
       },
       compass: {
-        files: ['<%= yeoman.app %>/css/{,*/}*.{scss,sass}'],
+        files: ['<%= yeoman.app %>/css/style.{scss,sass}'],
         tasks: ['compass:server', 'autoprefixer']
       },
       gruntfile: {
@@ -50,13 +50,12 @@ module.exports = function (grunt) {
         },
         files: [
             '<%= yeoman.app %>/js/**/*.js',
-            //'<%= yeoman.app %>/scripts/{,*/}*.js',
-            //'<%= yeoman.app %>/scripts/{**/}*.js',
             '<%= yeoman.app %>/images/{,*/}*.{png,jpg,jpeg,gif,webp,svg}',
             '<%= yeoman.app %>/manifest.json',
             '<%= yeoman.app %>/_locales/{,*/}*.json',
             '<%= yeoman.app %>/{,*/}*.html',
             '.tmp/styles/{,*/}*.css',
+            '<%= yeoman.app %>/css/{,*/}*.css'
         ]
       }
     },
@@ -165,7 +164,7 @@ module.exports = function (grunt) {
     compass: {
       options: {
         sassDir: '<%= yeoman.app %>/css',
-        cssDir: '.tmp/styles',
+        cssDir: 'app/css',
         generatedImagesDir: '.tmp/images/generated',
         imagesDir: '<%= yeoman.app %>/images',
         javascriptsDir: '<%= yeoman.app %>/js',

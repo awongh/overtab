@@ -10,8 +10,8 @@
         <link rel="stylesheet" href="bower_components/sass-bootstrap/dist/css/bootstrap.css" />
         <!-- endbower -->
         <!-- endbuild -->
-        <!-- build:css({.tmp,app}) styles/style.css -->
-        <link rel="stylesheet" href="styles/style.css">
+        <!-- build:css(app,.tmp) /css/main.css -->
+        <link rel="stylesheet" href="css/style.css">
         <!-- endbuild -->
     </head>
 
@@ -25,7 +25,7 @@
             <div id="node-container" class="node-cont" style="height:{{windowHeight}}px; width:{{windowWidth}}px;">
               <div ng-repeat="tab in tabs | filter:tabFilter" class="tab-node" ng-click="switchToTab(tab.id)" id="{{tab.id}}" node-color="9">
                   <img class="favicon" ng-src="{{tab.favIconUrl}}" node-color="4"/>
-                  <a ng-click="tabClose()"><img class="close-button" ng-src="../images/close_button.svg"/></a>
+                  <a ng-click="tabClose()"><img class="close-button" ng-src="/images/close_button.svg"/></a>
                   <div class="thumbnail"><img width="150px" ng-src="{{tab.screencap}}"></div>
                   <div class="title">{{tab.title}}</div>
               </div>
