@@ -179,7 +179,7 @@ function updateTab(tab, callback) {
                 callback(tab);
             }
         } else {
-            alert("wut");
+            //alert("wut");
             console.log( "other tabc" );
             itabCreated(tab, callback(tab));
         }
