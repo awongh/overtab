@@ -1,6 +1,7 @@
 "use strict";
 
 Array.prototype.remove = function(from) {
+    return this.splice(from, 1);
 };
 
 Array.prototype.add = function(from, item) {
@@ -8,7 +9,7 @@ Array.prototype.add = function(from, item) {
       throw "Trying to add a null variable to array. -oops";
     }
 
-    return this.splice(from, 1, item);
+    return this.splice(from, 0, item);
 };
 
 var tabList = [],

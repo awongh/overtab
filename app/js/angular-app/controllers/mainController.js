@@ -114,8 +114,10 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
     };
 
     $scope.tabClose = function( e ){
+
       chrome.tabs.remove(this.tab.id, function() {
-        $scope.removeTab( this.id );
+        //$scope.removeTab( this.id );
+        console.log("remove tab callback");
       });
     };
 
@@ -195,7 +197,8 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
         //console.log("ID: ", tabId, "Length: ", $scope.tabs.length);
         //console.log("Tab Index: ", $scope.tabIndex);
         //console.log("Index: ",$scope.tabIndex[tabId]);
-        if (tabId) {
+        //if (tabId && $scope.tabIndex[tabId] ) {
+        if (tabId){
             var tabPosition = $scope.tabIndex[tabId];
 
             //remove edge
