@@ -1,6 +1,6 @@
 /log/*.log
 .sass-cache/
-/css/style.css
+style.css
 
 /build/
 .DS_Store
