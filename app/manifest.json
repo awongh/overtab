@@ -14,23 +14,13 @@
         "default_title": "tabs",
         "default_icon": "images/OverTab_32.png"
     },
+
     "background": {
-        "page": "html/background.html",
-        "persistent": true
+      "persistent": false,
+      "scripts": ["js/background.js"]
     },
     "homepage_url": "http://overtab.co",
     "minimum_chrome_version": "25.0",
-    "content_scripts": [
-        {
-            "matches": [
-                "<all_urls>"
-            ],
-            "js": [
-                "js/background.js"
-            ],
-            "all_frames": true
-        }
-    ],
     "commands": {
         "_execute_browser_action": {
             "suggested_key": {
@@ -43,6 +33,7 @@
         "background",
         "tabs",
         "storage",
+        "unlimitedStorage",
         "history",
         "<all_urls>"
     ],
