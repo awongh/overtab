@@ -115,7 +115,7 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
 
     $scope.tabClose = function( e ){
       chrome.tabs.remove(this.tab.id, function() {
-        $scope.removeTab( this.id );
+        //$scope.removeTab( this.id );
       });
     };
 
