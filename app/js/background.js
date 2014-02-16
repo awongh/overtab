@@ -3,7 +3,9 @@
 //VARIABLES
 
   var OVERTAB_TAB_ID = null,
-      OVERTAB_WINDOW_ID = null;
+      OVERTAB_WINDOW_ID = null,
+      OVERTAB_DEFAULT_OPEN_FUNC = chrome.tabs.create,
+      OVERTAB_ARRAY;
 
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
@@ -23,8 +25,26 @@ Array.prototype.add = function(from, item) {
     return this.splice(from, 0, item);
 };
 
-var Parser = function( href ){
-  this.constructor;
+Array.prototype.hasValue = function( val ){
+
+  if( this.indexOf( val ) ){
+    return true;
+  }
+
+  return false;
+};
+
+Array.prototype.removeValue = function( val ){
+
+  var i = this.indexOf( val );
+  if( i ){
+    return this.remove( i );
+  }
+
+  return false;
+};
+
+var Parser = function(){
   this.parser = document.createElement('a');
 }
 
@@ -62,6 +82,36 @@ Parser.prototype = {
     return this.parser.host;
   }
 }
+
+var lsArrayGet = function(){
+  if( typeof OVERTAB_ARRAY === "undefined"){
+    var array_string = localStorage.getItem( "OVERTAB_ARRAY" );
+    OVERTAB_ARRAY = array_string.split(",");
+  }
+
+  return OVERTAB_ARRAY;
+}
+
+var lsArraySet = function( val ){
+
+  OVERTAB_ARRAY = lsArrayGet();
+
+  OVERTAB_ARRAY.push( val );
+
+  return localStorage.setItem( "OVERTAB_ARRAY", OVERTAB_ARRAY )
+}
+
+var lsArrayRemove = function( val ){
+  OVERTAB_ARRAY = lsArrayGet();
+
+  OVERTAB_ARRAY.push( val );
+
+  //remove it
+  OVERTAB_ARRAY.removeValue( val );
+
+  return localStorage.setItem( "OVERTAB_ARRAY", OVERTAB_ARRAY )
+}
+
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 ////////////////      END CONVINIENCE CLASSES           ////////////////
@@ -99,8 +149,15 @@ var tabCreated = function( tab ){
           //ya, we are storing nothing in here
           localStorage.setItem( id, "no-screencap");
 
+          //set it in the array of things
+          if( !lsArrayGet().hasValue( id ) ){
+            lsArraySet( id );
+          }
+
           //send it off to the angular app
           tabEvent( id, "created" );
+      }else{
+        console.log( "ERROR: ls, tab already in there on create!" );
       }
   }else{
     //this might be the overtab tab, or options tab or soemthing
@@ -175,6 +232,8 @@ var tabRemoved = function( tabId, removeInfo ){
 
   localStorage.removeItem(tabId);
 
+  lsArrayRemove( tabId );
+
   if (tabId === OVERTAB_TAB_ID) {
     //console.log("Closed");
     OVERTAB_TAB_ID = null;
@@ -192,11 +251,11 @@ var browserActionClick = function( ){
 
   if ( OVERTAB_TAB_ID === null ) {
     // Prevents mashing the button and opening duplicate Overtab tabs
-    var func = localStorage.getItem( overTabFunc );
+    var func = localStorage.getItem( "OVERTAB_OPEN_FUNC" );
 
     if( !func ){
       //default behavior
-      func = defaultOpener;
+      func = OVERTAB_DEFAULT_OPEN_FUNC;
     }
 
     var options = {
