@@ -5,7 +5,13 @@
   var OVERTAB_TAB_ID = null,
       OVERTAB_WINDOW_ID = null,
       OVERTAB_DEFAULT_OPEN_FUNC = chrome.tabs.create,
-      OVERTAB_ARRAY;
+      OVERTAB_ARRAY = [],
+      LOG_LEVEL = "vvv",
+      ALLOWED_PROTOCOLS = [
+        "http:",
+        "https:",
+        "chrome:"
+      ];
 
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
@@ -13,104 +19,62 @@
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 
-Array.prototype.remove = function(from) {
-    return this.splice(from, 1);
+var lsGet = function( id, callback ){
+  var id = String( id );
+  console.log( "notify", "local storage  get: ", id );
+  chrome.storage.local.get( id, callback );
 };
 
-Array.prototype.add = function(from, item) {
-    if( !item ){
-      throw "Trying to add a null variable to array. -oops";
+var lsSet = function( thing, callback ){
+  console.log( "notify", "local storage  set: ", thing );
+  chrome.storage.local.set( thing, callback );
+};
+
+var lsRemove = function( id, callback ){
+  if( typeof callback === "function" ){
+    var id = String( id );
+    chrome.storage.local.remove( [ id, "screencap-"+id, "screencap-url-"+id ], callback );
+  }else{
+    console.log( "warn", "lsremove callback not defined", callback );
+  }
+};
+
+var logger = console.log;
+
+console.log = function(){
+  //argument types:
+  //  vvv:
+  //    notify, warn, errors
+  //  vv:
+  //    warn, errors
+  //  v:
+  //    errors
+  //  production:
+  //    log errors to google analytics
+
+  if( arguments.length >= 2 ){
+    var type = arguments[0];
+
+    switch( LOG_LEVEL ){
+      case "production":
+        //do some google analytics error reporting
+        break;
+      case "v":
+        if( type == "errors" ){
+          logger.apply( this, arguments );
+        }
+        break;
+      case "vv":
+        if( type == "errors" || type == "warn" ){
+          logger.apply( this, arguments );
+        }
+        break;
+      case "vvv":
+        logger.apply( this, arguments );
+        break;
     }
-
-    return this.splice(from, 0, item);
+  }
 };
-
-Array.prototype.hasValue = function( val ){
-
-  if( this.indexOf( val ) ){
-    return true;
-  }
-
-  return false;
-};
-
-Array.prototype.removeValue = function( val ){
-
-  var i = this.indexOf( val );
-  if( i ){
-    return this.remove( i );
-  }
-
-  return false;
-};
-
-var Parser = function(){
-  this.parser = document.createElement('a');
-}
-
-Parser.prototype = {
-  href : function( href ){
-    this.parser.href = href;
-    return this;
-  },
-
-  protocol : function(){
-    return this.parser.protocol;
-  },
-
-  hostname : function(){
-    return this.parser.hostname;
-  },
-
-  port : function(){
-    return this.parser.port;
-  },
-
-  pathname : function(){
-    return this.parser.pathname;
-  },
-
-  search : function(){
-    return this.parser.search;
-  },
-
-  hash : function(){
-    return this.parser.hash;
-  },
-
-  host : function(){
-    return this.parser.host;
-  }
-}
-
-var lsArrayGet = function(){
-  if( typeof OVERTAB_ARRAY === "undefined"){
-    var array_string = localStorage.getItem( "OVERTAB_ARRAY" );
-    OVERTAB_ARRAY = array_string.split(",");
-  }
-
-  return OVERTAB_ARRAY;
-}
-
-var lsArraySet = function( val ){
-
-  OVERTAB_ARRAY = lsArrayGet();
-
-  OVERTAB_ARRAY.push( val );
-
-  return localStorage.setItem( "OVERTAB_ARRAY", OVERTAB_ARRAY )
-}
-
-var lsArrayRemove = function( val ){
-  OVERTAB_ARRAY = lsArrayGet();
-
-  OVERTAB_ARRAY.push( val );
-
-  //remove it
-  OVERTAB_ARRAY.removeValue( val );
-
-  return localStorage.setItem( "OVERTAB_ARRAY", OVERTAB_ARRAY )
-}
 
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
@@ -130,9 +94,9 @@ function tabEvent( id, message ){
 
 var tabCreated = function( tab ){
 
-  console.log( "tabcreated - undefined", tab.id );
-  console.log( "tabcreated - url", tab.url );
-  console.log( "tabcreated - title", tab.title );
+  console.log( "notify", "tabcreated - undefined", tab.id );
+  console.log( "notify", "tabcreated - url", tab.url );
+  console.log( "notify", "tabcreated - title", tab.title );
 
   var parser = new Parser();
 
@@ -140,141 +104,187 @@ var tabCreated = function( tab ){
   var hostName = parser.href(tab.url).hostname();
 
   //what conditions do we want to accept add adding a tab?
-  if (typeof tab.id !== "undefined"
-    && ( (tabProtocol === "http:" || tabProtocol === "https:" || hostName === "newtab" ) ) ) {
+  if (typeof tab.id !== "undefined" && ALLOWED_PROTOCOLS.indexOf( tabProtocol ) !== -1 && tab.id != OVERTAB_TAB_ID ){
 
-      var id = tab.id;
-      if ( !localStorage.getItem( id ) ) {
+    var setObj = {};
+    setObj[tab.id] = tab.url;
+    setObj["screencap-"+tab.id] = "";
+    setObj["screencap-url-"+tab.id] = "";
 
-          //ya, we are storing nothing in here
-          localStorage.setItem( id, "no-screencap");
+    console.log( "notify", "created about to set:", tab.id, tab.url, "======");
 
-          //set it in the array of things
-          if( !lsArrayGet().hasValue( id ) ){
-            lsArraySet( id );
-          }
-
-          //send it off to the angular app
-          tabEvent( id, "created" );
-      }else{
-        console.log( "ERROR: ls, tab already in there on create!" );
-      }
+    lsSet( setObj, function(){
+      //ok we set it, send an event
+      tabEvent( tab.id, "created" );
+    });
   }else{
     //this might be the overtab tab, or options tab or soemthing
-    console.log( "ERROR: something happened on create:", tab );
-    console.log( "http:",tabProtocol === "http:");
-    console.log( "https:",tabProtocol === "https:");
-    console.log( "hostname", hostName, hostName === "newtab" );
+    console.log( "error", "ERROR: something happened on create:", tab );
+    console.log( "error", "protocol:",tabProtocol, "hostname", hostName);
   }
 };
 
 var tabUpdated = function( tabId, changeInfo, tab ){
-    console.log( "tabupdated", changeInfo.status );
 
-    if( !localStorage.getItem( tabId ) ){
-      console.log( "ERROR: updated but not in lc:", tabId, changeInfo, tab );
-      return;
-    }
+  var parser = new Parser();
 
-    tabEvent( tabId, "updated" );
-};
+  var tabProtocol = parser.href(tab.url).protocol();
+  var hostName = parser.href(tab.url).hostname();
 
-function getFavicon(id){
-  setTimeout(function() {
-    /// set favicon wherever it needs to be set here
-    getTab(id, function(tab){
-      if( tab.favIconUrl ){
-        tabEvent( id, "favicon" );
+  if ( typeof tab.id !== "undefined" && ALLOWED_PROTOCOLS.indexOf( tabProtocol ) !== -1 && tabId != OVERTAB_TAB_ID ){
+
+    var id = tab.id;
+    lsGet( id, function( result ){
+      console.log( "notify", "lsget: result:", result, chrome.runtime.lastError );
+      if( !result || !result.hasOwnProperty( id ) ){
+        //its not inside the thing
+        console.log("warn", "WARNING: update, couldnt find thing" );
+        //maybe the create failed b/c it wasnt a thing yet. put it in ls
+        console.log( "notify", "updated about to set:", id, result.url, "======");
+
+        var setObj = {};
+        setObj[id] = tab.url;
+        lsSet( setObj, function(){
+
+          console.log("notify", "ls is set, let's do the screencap", result );
+          //ok we set it, send an event
+          tabEvent( id, "pre-update" );
+
+          screenCap( tab );
+        });
+      }else{
+        //don't make it too noisy with messages
+        console.log("notify", "we know its a thing, update complete", changeInfo, result, tab);
+        console.log("notify", !result, !result.hasOwnProperty( id ));
+
+        console.log( "warn", "about to DO scap", result );
+        if( changeInfo.status == "complete" ){
+          tabEvent( id, "updated" );
+          screenCap( tab );
+        }
       }
     });
 
-  }, 4000);
-}
+  }else{
+    //this might be the overtab tab, or options tab or soemthing
+    console.log( "warn", "WARNING: update: not correct protocol", tab );
+    console.log( "warn", "protocol:",tabProtocol, "hostname", hostName);
+  }
+};
+
+var screenCap = function( tab ){
+
+  //get the current screencap url
+  var screenCapUrlId = "screencap-url-"+tab.id;
+  lsGet( screenCapUrlId, function( screenCapUrl ){
+
+    console.log( "warn", "OUR RESULT", screenCapUrl );
+    if( !screenCapUrl || !screenCapUrl.hasOwnProperty( screenCapUrlId ) ){
+      //didnt find!!
+      console.log("warn", "we couldnt find this record:", screenCapUrlId, tab, tab);
+      return false;
+    }
+
+    //extract the value;
+    var oldUrl = screenCapUrl[screenCapUrlId];
+
+    if( tab.url == oldUrl ){
+      //we already took this screencap
+      console.log("notify", "we already took this cap:", screenCapUrl);
+      return false;
+    }
+
+    //needs to be "active" and "complete" to screenshot
+    var activeCompleteQuery = {
+      currentWindow: true,
+      windowId: tab.windowId,
+      active: true,
+      status: "complete"
+    };
+
+    tabQuery(activeCompleteQuery, function(result) {
+      console.log( "notify", "screencap: ", screenCapUrl, result, tab, "----------");
+      if ( result.id == tab.id && result.windowId == tab.windowId && oldUrl != result.url ) {
+        generateScreenCap(result.windowId, {format: "png"}, function( blob ){
+          console.log( "notify", "screencap about to set:", capId, result.url, "======");
+
+          var capId = "screencap-"+tab.id;
+          var setObj = {};
+
+          setObj[capId] = blob;
+          setObj["screncap-url-"+tab.id] = result.url;
+
+          lsSet( setObj, function(){
+            //storage is set, ready for ng app to get it
+            tabEvent( tab.id, "screencap" );
+            console.log("notify", "screenshot done");
+          });
+        });
+      }else{
+        console.log( "notify", "NOTIFY: no active window found for this event" );
+      }
+    });
+  });
+};
 
 var tabActivated = function( tabInfo ){
-  console.log( "tabactiviated", tabInfo );
-  var tabId = tabInfo.tabId;
 
-  if( !localStorage.getItem( tabId ) ){
-    console.log( "ERROR: activated but not in lc:", tabInfo);
-    return;
-  }
+  var id = tabInfo.tabId;
 
-  tabEvent( tabId, "activated" );
-
-  if( localStorage.getItem( tabId ) !== "no-screencap" ){
-    //we already have a screencap for this
-    console.log( "already has a screenshot" );
-  }
-
-  //needs to be "active" and "complete" to screenshot
-  var activeCompleteQuery = {
-    currentWindow: true,
-    windowId: tabInfo.windowId,
-    active: true,
-    status: "complete"
-  };
-
-  tabQuery(activeCompleteQuery, function(result) {
-    if (result.id == tabId) {
-      screenCap(tabInfo.windowId, {format: "png"}, function( blob ){
-        localStorage.setItem( tabId, blob );
-        tabEvent( tabId, "screencap" );
-      });
-
-      //go off to get a favicon
-      getFavicon(tabId);
+  lsGet( id, function( result ){
+    if( result && result != null && result.hasOwnProperty( id ) ){
+        tabEvent( id, "activated" );
+    }else{
+      console.log( "warn", "tab activated but not found in ls", result );
     }
+
   });
 };
 
 var tabRemoved = function( tabId, removeInfo ){
 
-  localStorage.removeItem(tabId);
-
-  lsArrayRemove( tabId );
-
   if (tabId === OVERTAB_TAB_ID) {
     //console.log("Closed");
     OVERTAB_TAB_ID = null;
     OVERTAB_WINDOW_ID = null;
+  }else{
+    lsRemove(tabId, function(){
+      tabEvent( tabId, "removed" );
+    });
   }
 };
 
 var onMessage = function( request, sender, sendResponse ){
-  if ( request.message === "getList" ) {
-    sendTabLists();
-  }
+  console.log("notify", "message request:", request);
 };
 
 var browserActionClick = function( ){
 
   if ( OVERTAB_TAB_ID === null ) {
     // Prevents mashing the button and opening duplicate Overtab tabs
-    var func = localStorage.getItem( "OVERTAB_OPEN_FUNC" );
+    var func = lsGet( "OVERTAB_OPEN_FUNC", function( func ){
 
-    if( !func ){
-      //default behavior
-      func = OVERTAB_DEFAULT_OPEN_FUNC;
-    }
+      if( !func || typeof func["OVERTAB_OPEN_FUNC"] == "undefined" ){
+        //default behavior
+        func = OVERTAB_DEFAULT_OPEN_FUNC;
+      }
 
-    var options = {
-      'url' : getExtensionUrl()
-    };
+      var options = {
+        'url' : getExtensionUrl()
+      };
 
-    //add more options here from local storage
+      //add more options here from local storage
 
-    func( options, function(tab) {
+      func( options, function(tab) {
 
-        //do we want any checks here?
+          //do we want any checks here?
 
-        OVERTAB_TAB_ID = tab.id;
-        OVERTAB_WINDOW_ID = tab.windowId;
+          OVERTAB_TAB_ID = tab.id;
+          OVERTAB_WINDOW_ID = tab.windowId;
 
-        localStorage.setItem( "OVERTAB_TAB_ID", OVERTAB_TAB_ID );
-        localStorage.setItem( "OVERTAB_WINDOW_ID", OVERTAB_WINDOW_ID );
+          lsSet( { "OVERTAB_TAB_ID" : OVERTAB_TAB_ID, "OVERTAB_WINDOW_ID" : OVERTAB_WINDOW_ID } );
+      });
     });
-
   }else {
     tabFocus( OVERTAB_TAB_ID, OVERTAB_WINDOW_ID );
   }
@@ -283,7 +293,24 @@ var browserActionClick = function( ){
 var tabReplaced = function( newTabId, oldTabId ){
 
   //replace the old tab with the new one
-  console.log( "ERROR: a tab was replaced" );
+  console.log("warn", "ERROR: a tab was replaced" );
+};
+
+var startup = function(){
+  //chrome.storage.local.clear();
+  //set some local storage stuff???
+  console.log("notify", "startup" );
+};
+
+var shutdown = function(){
+  //delete local storage stuff????
+  console.log("notify", "shutdown" );
+};
+
+var install = function( details ){
+  chrome.storage.local.clear();
+  //set some options????
+  console.log("notify", "installed", details.reason, details.previousVersion );
 };
 
 ////////////////////////////////////////////////////////////////////////
@@ -298,6 +325,10 @@ var tabReplaced = function( newTabId, oldTabId ){
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 
+chrome.runtime.onStartup.addListener( startup );
+chrome.runtime.onSuspend.addListener( shutdown );
+chrome.runtime.onInstalled.addListener( install );
+
 //default overtab opener
 var defaultOpener = chrome.tabs.create;
 
@@ -306,53 +337,28 @@ var getExtensionUrl = function(){
   return chrome.extension.getURL('index.html');
 };
 
+//listen for a message
+chrome.runtime.onMessage.addListener( onMessage );
+
 //get the tab screenshot
-var screenCap = function( windowId, options, callback ){
+//this needs to run the web worker
+var generateScreenCap = function( windowId, options, callback ){
+  console.log( "notify", "gen screen cap" );
   return chrome.tabs.captureVisibleTab( windowId, options, callback );
 };
 
 //listen for tab states
 chrome.tabs.onCreated.addListener( tabCreated );
 chrome.tabs.onUpdated.addListener( tabUpdated );
+
 chrome.tabs.onActivated.addListener( tabActivated );
 chrome.tabs.onRemoved.addListener( tabRemoved );
-
-//listen for a message
-chrome.runtime.onMessage.addListener( onMessage );
-
-//send message
-var sendMessage = function( tabId, message, callback ){
-  return chrome.runtime.sendMessage( tabId, message, callback );
-};
-
-//query for a single tab
-var tabQuery = function( queryInfo, callback ){
-  return chrome.tabs.query( queryInfo, function( tabs ){
-    if (tabs.length > 0 && tabs[0].id) {
-        callback(tabs[0]);
-    }else{
-      console.log( "WARNING: your tab query failed", queryInfo, tabs );
-    }
-  });
-};
-
-//get a tab by id
-var getTab = function( tabId, callback ){
-  return chrome.tabs.get( tabId, callback );
-};
 
 //clicking on the browser menu item
 chrome.browserAction.onClicked.addListener( browserActionClick );
 
-//bring a tab into focus
-var tabFocus = function( tabId, windowId ){
-    chrome.windows.update(windowId, {'focused': true}, function() {
-      chrome.tabs.update(tabId, {'active': true}, function() {} );
-    });
-};
-
 //if a tab is replaced (only for prerender)
-chrome.tabs.onReplaced.addListener( tabReplaced )
+chrome.tabs.onReplaced.addListener( tabReplaced );
 
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
