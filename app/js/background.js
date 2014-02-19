@@ -5,81 +5,7 @@
   var OVERTAB_TAB_ID = null,
       OVERTAB_WINDOW_ID = null,
       OVERTAB_DEFAULT_OPEN_FUNC = chrome.tabs.create,
-      OVERTAB_ARRAY = [],
-      LOG_LEVEL = "vvv",
-      ALLOWED_PROTOCOLS = [
-        "http:",
-        "https:",
-        "chrome:"
-      ];
-
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////
-////////////////        CONVINIENCE CLASSES             ////////////////
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////
-
-var lsGet = function( id, callback ){
-  console.log( "notify", "local storage  get: ", id );
-  chrome.storage.local.get( String( id) , callback );
-};
-
-var lsSet = function( thing, callback ){
-  console.log( "notify", "local storage  set: ", thing );
-  chrome.storage.local.set( thing, callback );
-};
-
-var lsRemove = function( tabId, callback ){
-  if( typeof callback === "function" ){
-    var id = String( tabId );
-    chrome.storage.local.remove( [ id, "screencap-"+id, "screencap-url-"+id ], callback );
-  }else{
-    console.log( "warn", "lsremove callback not defined", callback );
-  }
-};
-
-var logger = console.log;
-
-console.log = function(){
-  //argument types:
-  //  vvv:
-  //    notify, warn, errors
-  //  vv:
-  //    warn, errors
-  //  v:
-  //    errors
-  //  production:
-  //    log errors to google analytics
-
-  if( arguments.length >= 2 ){
-    var type = arguments[0];
-
-    switch( LOG_LEVEL ){
-      case "production":
-        //do some google analytics error reporting
-        break;
-      case "v":
-        if( type == "errors" ){
-          logger.apply( this, arguments );
-        }
-        break;
-      case "vv":
-        if( type == "errors" || type == "warn" ){
-          logger.apply( this, arguments );
-        }
-        break;
-      case "vvv":
-        logger.apply( this, arguments );
-        break;
-    }
-  }
-};
-
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////
-////////////////      END CONVINIENCE CLASSES           ////////////////
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////
+      OVERTAB_ARRAY = [];
 
 function tabEvent( id, message ){
   sendMessage(null, {message: message, id: id});
@@ -135,6 +61,8 @@ var tabUpdated = function( tabId, changeInfo, tab ){
     var id = tab.id;
     lsGet( id, function( result ){
       console.log( "notify", "lsget: result:", result, chrome.runtime.lastError );
+      //commenting this out, incase we dont need it.
+      //it was here in case tabcreated failed in some way. we shall see
       if( !result || !result.hasOwnProperty( id ) ){
         //its not inside the thing
         console.log("warn", "WARNING: update, couldnt find thing" );
@@ -142,7 +70,10 @@ var tabUpdated = function( tabId, changeInfo, tab ){
         console.log( "notify", "updated about to set:", id, result.url, "======");
 
         var setObj = {};
-        setObj[id] = tab.url;
+        setObj[tab.id] = tab.url;
+        setObj["screencap-"+tab.id] = "";
+        setObj["screencap-url-"+tab.id] = "";
+
         lsSet( setObj, function(){
 
           console.log("notify", "ls is set, let's do the screencap", result );
@@ -227,6 +158,8 @@ var screenCap = function( tab ){
   });
 };
 
+//do we need this???
+//when do we take a screen shot and its not updated??
 var tabActivated = function( tabInfo ){
 
   var id = tabInfo.tabId;

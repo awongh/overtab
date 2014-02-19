@@ -39,6 +39,25 @@ var sendMessage = function( tabId, message, callback ){
   return chrome.runtime.sendMessage( tabId, message, callback );
 };
 
+var lsGet = function( id, callback ){
+  console.log( "notify", "local storage  get: ", id );
+  chrome.storage.local.get( String( id) , callback );
+};
+
+var lsSet = function( thing, callback ){
+  console.log( "notify", "local storage  set: ", thing );
+  chrome.storage.local.set( thing, callback );
+};
+
+var lsRemove = function( tabId, callback ){
+  if( typeof callback === "function" ){
+    var id = String( tabId );
+    chrome.storage.local.remove( [ id, "screencap-"+id, "screencap-url-"+id ], callback );
+  }else{
+    console.log( "warn", "lsremove callback not defined", callback );
+  }
+};
+
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 ////////////////     END SHARED CHROME INTERACTION      ////////////////

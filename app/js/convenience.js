@@ -5,6 +5,46 @@
 ////////////////        CONVINIENCE CLASSES             ////////////////
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
+
+var LOG_LEVEL = "vvv";
+
+var logger = console.log;
+
+console.log = function(){
+  //argument types:
+  //  vvv:
+  //    notify, warn, errors
+  //  vv:
+  //    warn, errors
+  //  v:
+  //    errors
+  //  production:
+  //    log errors to google analytics
+
+  if( arguments.length >= 2 ){
+    var type = arguments[0];
+
+    switch( LOG_LEVEL ){
+      case "production":
+        //do some google analytics error reporting
+        break;
+      case "v":
+        if( type == "errors" ){
+          logger.apply( this, arguments );
+        }
+        break;
+      case "vv":
+        if( type == "errors" || type == "warn" ){
+          logger.apply( this, arguments );
+        }
+        break;
+      case "vvv":
+        logger.apply( this, arguments );
+        break;
+    }
+  }
+};
+
 Object.size = function(obj) {
   var size = 0, key;
   for (key in obj) {
@@ -84,6 +124,12 @@ Array.prototype.valuePropertyIndex = function( key, val ){
 
   return false;
 };
+
+var ALLOWED_PROTOCOLS = [
+  "http:",
+  "https:",
+  "chrome:"
+];
 
 var Parser = function(){
   this.parser = document.createElement('a');
