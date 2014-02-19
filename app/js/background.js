@@ -20,9 +20,8 @@
 ////////////////////////////////////////////////////////////////////////
 
 var lsGet = function( id, callback ){
-  var id = String( id );
   console.log( "notify", "local storage  get: ", id );
-  chrome.storage.local.get( id, callback );
+  chrome.storage.local.get( String( id) , callback );
 };
 
 var lsSet = function( thing, callback ){
@@ -30,9 +29,9 @@ var lsSet = function( thing, callback ){
   chrome.storage.local.set( thing, callback );
 };
 
-var lsRemove = function( id, callback ){
+var lsRemove = function( tabId, callback ){
   if( typeof callback === "function" ){
-    var id = String( id );
+    var id = String( tabId );
     chrome.storage.local.remove( [ id, "screencap-"+id, "screencap-url-"+id ], callback );
   }else{
     console.log( "warn", "lsremove callback not defined", callback );
@@ -206,10 +205,11 @@ var screenCap = function( tab ){
       console.log( "notify", "screencap: ", screenCapUrl, result, tab, "----------");
       if ( result.id == tab.id && result.windowId == tab.windowId && oldUrl != result.url ) {
         generateScreenCap(result.windowId, {format: "png"}, function( blob ){
-          console.log( "notify", "screencap about to set:", capId, result.url, "======");
 
           var capId = "screencap-"+tab.id;
           var setObj = {};
+
+          console.log( "notify", "screencap about to set:", capId, result.url, "======");
 
           setObj[capId] = blob;
           setObj["screncap-url-"+tab.id] = result.url;
@@ -232,7 +232,7 @@ var tabActivated = function( tabInfo ){
   var id = tabInfo.tabId;
 
   lsGet( id, function( result ){
-    if( result && result != null && result.hasOwnProperty( id ) ){
+    if( result && result !== null && result.hasOwnProperty( id ) ){
         tabEvent( id, "activated" );
     }else{
       console.log( "warn", "tab activated but not found in ls", result );
@@ -264,6 +264,7 @@ var browserActionClick = function( ){
     // Prevents mashing the button and opening duplicate Overtab tabs
     var func = lsGet( "OVERTAB_OPEN_FUNC", function( func ){
 
+      //this is a hack, needs to be fixed with switch statement
       if( !func || typeof func["OVERTAB_OPEN_FUNC"] == "undefined" ){
         //default behavior
         func = OVERTAB_DEFAULT_OPEN_FUNC;
