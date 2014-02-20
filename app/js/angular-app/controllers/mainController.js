@@ -48,13 +48,20 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
         $scope.createTab( request.id );
         break;
 
+      case "pre-update":
+      case "pre-update":
       case "updated":
-      case "loaded":
       case "favicon":
-      case "ativated":
+      case "activated":
 
         console.log("notify", "updating the tab", request );
         $scope.updateTab( request.id );
+        break;
+
+      case "screencap":
+        console.log("notify", "we have a screencap, virginia", request );
+        $scope.updateScreenCap( request.id );
+
         break;
 
       case "removed":
@@ -181,7 +188,7 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
       return false;
     }
 
-    var parser = new Parser;
+    var parser = new Parser();
 
     var domain = parser.href( tab.url ).hostname();
 
@@ -207,23 +214,20 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
   };
 
   $scope.removeTab = function( tabId ) {
-      //console.log("BEFORE:");
-      //console.log("ID: ", tabId, "Length: ", $scope.tabs.length);
+    if (tabId) {
+      var tabPosition = $scope.tabs.valuePropertyIndex("id", tabId);
+      if( tabPosition !== false ){
+        console.log( "warn", "about to remove tabs:", tabId, tabPosition, $scope.tabs );
 
-      //make some checks here!!!
-      if (tabId) {
-          var tabPosition = $scope.tabs.valuePropertyIndex("id", tabId);
+        $scope.tabEdgeRemove( tabId, $scope.edgesRender );
 
-          $scope.tabEdgeRemove( tabId, $scope.edgesRender );
+        $scope.tabs.remove(tabPosition);
 
-          $scope.tabs.remove(tabPosition);
+        $scope.setWindowSize();
 
-          $scope.setWindowSize();
-
-          $scope.edgesRender();
+        $scope.edgesRender();
       }
-      //console.log("AFTER:");
-      //console.log("ID: ", tabId, "Length: ", $scope.tabs.length);
+    }
   };
 
   $scope.updateLocalTab = function( newTab, oldTab ){
@@ -258,6 +262,27 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
     $scope.edgesRender();
 
     $scope.$apply();
+  };
+
+  $scope.updateScreenCap = function( tabId ){
+    lsGet("screencap-"+tabId, function( result ){
+      if( result.hasOwnProperty( "screencap-"+tabId ) ){
+        var screencap = result["screencap-"+tabId];
+        var tab = $scope.tabs.getByValueProperty( "id", tabId );
+
+        if( ( typeof tab.screencap !== "undefined" && tab.screencap != screencap ) || typeof tab.screencap == "undefined" || !tab.screencap ){
+          var tabIndex = $scope.tabs.valuePropertyIndex( "id", tabId );
+
+          $scope.tabs[tabIndex].screencap = screencap;
+
+          $scope.$apply();
+        }else{
+          console.log( "warn", "couldnt set this records screencap: "+tabId );
+        }
+      }else{
+        console.log( "warn", "we dont have this screen cap record: "+tabId );
+      }
+    });
   };
 
   $scope.updateTab = function( tabId ){

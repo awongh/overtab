@@ -111,7 +111,7 @@ var screenCap = function( tab ){
     console.log( "warn", "OUR RESULT", screenCapUrl );
     if( !screenCapUrl || !screenCapUrl.hasOwnProperty( screenCapUrlId ) ){
       //didnt find!!
-      console.log("warn", "we couldnt find this record:", screenCapUrlId, tab, tab);
+      console.log("warn", "we couldnt find this screencap record:", screenCapUrlId, tabId, tab);
       return false;
     }
 
@@ -124,7 +124,7 @@ var screenCap = function( tab ){
       return false;
     }
 
-    //needs to be "active" and "complete" to screenshot
+    //needs to be "active" and "complete" to screencap
     var activeCompleteQuery = {
       currentWindow: true,
       windowId: tab.windowId,
@@ -134,7 +134,7 @@ var screenCap = function( tab ){
 
     tabQuery(activeCompleteQuery, function(result) {
       console.log( "notify", "screencap: ", screenCapUrl, result, tab, "----------");
-      if ( result.id == tab.id && result.windowId == tab.windowId && oldUrl != result.url ) {
+      if ( result.id == tab.id && result.windowId == tab.windowId && oldUrl != result.url && DISALLOWED_SCREENCAP_URLS.indexOf(result.url) === -1 ) {
         generateScreenCap(result.windowId, {format: "png"}, function( blob ){
 
           var capId = "screencap-"+tab.id;
@@ -148,7 +148,7 @@ var screenCap = function( tab ){
           lsSet( setObj, function(){
             //storage is set, ready for ng app to get it
             tabEvent( tab.id, "screencap" );
-            console.log("notify", "screenshot done");
+            console.log("notify", "screencap done");
           });
         });
       }else{
@@ -166,7 +166,17 @@ var tabActivated = function( tabInfo ){
 
   lsGet( id, function( result ){
     if( result && result !== null && result.hasOwnProperty( id ) ){
+        console.log( "warn", "about to try screencap in activated", result );
         tabEvent( id, "activated" );
+
+        getTab( id, function( tab ){
+          console.log( "error", "WUUUTT, result", tab );
+
+          //what kind of check do we need here??
+          if( tab && typeof tab.id !== "undefined" ){
+            screenCap( tab );
+          }
+        });
     }else{
       console.log( "warn", "tab activated but not found in ls", result );
     }
@@ -274,7 +284,7 @@ var getExtensionUrl = function(){
 //listen for a message
 chrome.runtime.onMessage.addListener( onMessage );
 
-//get the tab screenshot
+//get the tab screencap
 //this needs to run the web worker
 var generateScreenCap = function( windowId, options, callback ){
   console.log( "notify", "gen screen cap" );

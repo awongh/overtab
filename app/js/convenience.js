@@ -125,6 +125,10 @@ Array.prototype.valuePropertyIndex = function( key, val ){
   return false;
 };
 
+var DISALLOWED_SCREENCAP_URLS = [
+  "chrome://newtab/"
+];
+
 var ALLOWED_PROTOCOLS = [
   "http:",
   "https:",
