@@ -13,6 +13,7 @@ var tabQuery = function( queryInfo, callback ){
         callback(tabs[0]);
     }else{
       console.log( "WARNING: your tab query failed", queryInfo, tabs );
+      callback(false);
     }
   });
 };

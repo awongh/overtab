@@ -190,6 +190,7 @@ var tabRemoved = function( tabId, removeInfo ){
     //console.log("Closed");
     OVERTAB_TAB_ID = null;
     OVERTAB_WINDOW_ID = null;
+    lsSet( { "OVERTAB_TAB_ID" : null, "OVERTAB_WINDOW_ID" : null } );
   }else{
     lsRemove(tabId, function(){
       tabEvent( tabId, "removed" );
@@ -201,34 +202,59 @@ var onMessage = function( request, sender, sendResponse ){
   console.log("notify", "message request:", request);
 };
 
+var openOverTab = function( ){
+
+  lsGet( "OVERTAB_OPEN_FUNC", function( func ){
+
+    //this is a hack, needs to be fixed with switch statement
+    if( !func || typeof func["OVERTAB_OPEN_FUNC"] == "undefined" ){
+      //default behavior
+      func = OVERTAB_DEFAULT_OPEN_FUNC;
+    }
+
+    var options = {
+      'url' : getExtensionUrl()
+    };
+
+    //add more options here from local storage
+    func( options, function(tab) {
+
+      //do we want any checks here?
+
+      OVERTAB_TAB_ID = tab.id;
+      OVERTAB_WINDOW_ID = tab.windowId;
+
+      lsSet( { "OVERTAB_TAB_ID" : OVERTAB_TAB_ID, "OVERTAB_WINDOW_ID" : OVERTAB_WINDOW_ID } );
+    });
+
+  });
+};
+
 var browserActionClick = function( ){
 
-  if ( OVERTAB_TAB_ID === null ) {
-    // Prevents mashing the button and opening duplicate Overtab tabs
-    var func = lsGet( "OVERTAB_OPEN_FUNC", function( func ){
+  if ( OVERTAB_TAB_ID === null || OVERTAB_WINDOW_ID === null ) {
 
-      //this is a hack, needs to be fixed with switch statement
-      if( !func || typeof func["OVERTAB_OPEN_FUNC"] == "undefined" ){
-        //default behavior
-        func = OVERTAB_DEFAULT_OPEN_FUNC;
-      }
+      lsGet( "OVERTAB_TAB_ID", function( tabIdResult ){
 
-      var options = {
-        'url' : getExtensionUrl()
-      };
+        if( tabIdResult && tabIdResult !== null && tabIdResult.hasOwnProperty( "OVERTAB_TAB_ID" ) && tabIdResult["OVERTAB_TAB_ID"] !== null ){
+          OVERTAB_TAB_ID = tabIdResult;
+        }else{
+          openOverTab();
+          return;
+        }
 
-      //add more options here from local storage
+        lsGet( "OVERTAB_WINDOW_ID", function( windowIdResult ){
 
-      func( options, function(tab) {
+          if( windowIdResult && windowIdResult !== null && windowIdResult.hasOwnProperty( "OVERTAB_WINDOW_ID" ) && windowIdResult["OVERTAB_WINDOW_ID"] !== null ){
 
-          //do we want any checks here?
+            OVERTAB_WINDOW_ID = windowIdResult;
+            tabFocus( OVERTAB_TAB_ID, OVERTAB_WINDOW_ID );
 
-          OVERTAB_TAB_ID = tab.id;
-          OVERTAB_WINDOW_ID = tab.windowId;
-
-          lsSet( { "OVERTAB_TAB_ID" : OVERTAB_TAB_ID, "OVERTAB_WINDOW_ID" : OVERTAB_WINDOW_ID } );
+          }else{
+            openOverTab();
+          }
+        });
       });
-    });
   }else {
     tabFocus( OVERTAB_TAB_ID, OVERTAB_WINDOW_ID );
   }
@@ -303,6 +329,9 @@ chrome.browserAction.onClicked.addListener( browserActionClick );
 
 //if a tab is replaced (only for prerender)
 chrome.tabs.onReplaced.addListener( tabReplaced );
+
+chrome.runtime.onSuspend.addListener( function(){ copnsole.log("notify", "suspended"); });
+chrome.runtime.onSuspendCanceled.addListener( function(){ copnsole.log("notify", "suspend cancelled"); });
 
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
