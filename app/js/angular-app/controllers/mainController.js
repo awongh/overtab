@@ -205,10 +205,10 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
 
     $scope.tabs.push(tab);
 
-    //scroll to this tab
-    //setTimeout(function() {
-    //  window.scrollTo( $scope.windowWidth, 0);
-    //},1000);
+    //scroll to the newest tab
+    setTimeout(function() {
+      window.scrollTo( $scope.windowWidth, 0);
+    },1000);
 
     $scope.$apply();
   };
@@ -425,6 +425,7 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
       };
     }
   };
+
 
   $scope.init = function() {
     console.log("notify", "init" );

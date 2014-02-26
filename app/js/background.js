@@ -137,19 +137,46 @@ var screenCap = function( tab ){
       if ( result.id == tab.id && result.windowId == tab.windowId && oldUrl != result.url && DISALLOWED_SCREENCAP_URLS.indexOf(result.url) === -1 ) {
         generateScreenCap(result.windowId, {format: "png"}, function( blob ){
 
-          var capId = "screencap-"+tab.id;
-          var setObj = {};
+          //get the canvas
+          //and stuff
+          var canvas = document.createElement('canvas');
 
-          console.log( "notify", "screencap about to set:", capId, result.url, "======");
+          //start the proc w/ canvas
 
-          setObj[capId] = blob;
-          setObj["screncap-url-"+tab.id] = result.url;
+          var img = document.createElement('img'),
+            ratio = tab.height / tab.width,
+            canvasContext = canvas.getContext('2d'),
+            width = canvas.width * tab.width / tab.height * window.devicePixelRatio,
+            height = canvas.height * window.devicePixelRatio;
 
-          lsSet( setObj, function(){
-            //storage is set, ready for ng app to get it
-            tabEvent( tab.id, "screencap" );
-            console.log("notify", "screencap done");
-          });
+          if (ratio > 1) { // Screenshot is taller than it is wide
+            width = canvas.width * window.devicePixelRatio;
+            height = canvas.height * ratio * window.devicePixelRatio;
+          }
+
+          img.onload = function() {
+            //ok we need to get the result out from here somehow
+
+            var capId = "screencap-"+tab.id;
+            var setObj = {};
+
+            console.log( "notify", "screencap about to set:", capId, "======");
+
+            canvasContext.clearRect( 0, 0, canvas.width, canvas.height);
+            canvasContext.drawImage(this, 0, 0, width, height);
+
+            setObj[capId] = canvas.toDataURL();
+            setObj["screncap-url-"+tab.id] = result.url;
+
+            lsSet( setObj, function(){
+              //storage is set, ready for ng app to get it
+              tabEvent( tab.id, "screencap" );
+              console.log("notify", "screencap done");
+            });
+          };
+
+          img.src = blob; // Set the image to the dataUrl and invoke the onload function
+
         });
       }else{
         console.log( "notify", "NOTIFY: no active window found for this event" );
