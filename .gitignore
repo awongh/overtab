@@ -25,7 +25,4 @@ npm-debug.log
 
 temp
 .tmp
-dist
 app/bower_components
-
-/package/

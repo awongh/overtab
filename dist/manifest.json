@@ -17,9 +17,7 @@
     "background": {
         "persistent": false,
         "scripts": [
-            "js/convenience.js",
-            "js/background.js",
-            "js/chrome.js"
+            "js/background.js"
         ]
     },
     "homepage_url": "http://overtab.co",
