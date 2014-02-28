@@ -1,253 +1,17 @@
 "use strict";
 
-Array.prototype.remove = function(from) {
-    return this.splice(from, 1);
-};
+//VARIABLES
 
-Array.prototype.add = function(from, item) {
-    if( !item ){
-      throw "Trying to add a null variable to array. -oops";
-    }
+  var THUMBSIZE = 150,
+      SCREEN_CROP_RATIO = 1;
 
-    return this.splice(from, 0, item);
-};
+  var OVERTAB_TAB_ID = null,
+      OVERTAB_WINDOW_ID = null,
+      OVERTAB_DEFAULT_OPEN_FUNC = chrome.tabs.create,
+      OVERTAB_ARRAY = [];
 
-var tabList = [],
-    tabListIndex = {}, // For checking to see if a tab already exists, and for reverse lookup of the tab in tabList array
-    tabOpened = false,
-    canvas = null,
-    image = null,
-    date = new Date(),
-    overTabId = null,
-
-    overTabWindowId = null;
-
-document.addEventListener("DOMContentLoaded", function() {
-    canvas = document.querySelector('canvas');
-    image = document.querySelector('canvas');
-});
-
-// This function will accept tab object, tab id, tab info, and a callback function.
-// It will always pass into the callback function a tab object
-function sanitizeTab(dirtyTab, callback) {
-    var dirtyTabId = null;
-
-    if (typeof dirtyTab === "undefined") {
-        return false;
-    } else {
-        if (typeof dirtyTab.tabId !== "undefined" || typeof dirtyTab === "number") {
-            dirtyTabId = dirtyTab.tabId || dirtyTab;
-        }
-    }
-
-    // The input was a tab ID, so fetch the actual tab object
-    if (typeof dirtyTabId !== "undefined" && dirtyTabId !== null) {
-        getTab(dirtyTabId, function(tabObject) {
-            if (typeof tabObject !== "undefined" && (tabObject.url.match(/^http.*:\/\//) || dirtyTab.title === "New Tab" )) {
-                callback(tabObject);
-            }
-        });
-    // The input was a tab object, run the callback directly on it :)
-    } else if (typeof dirtyTab.id !== "undefined" && (dirtyTab.url.match(/^http.*:\/\//) || dirtyTab.title === "New Tab" )) {
-        callback(dirtyTab);
-    }
-}
-
-function sendSingleTab( tab ) {
-    sanitizeTab(tab, function(tab) {
-        console.log( tab );
-        sendMessage(null, { message:"sendSingleTab", tab: tab });
-    });
-}
-
-function addTab(tab, callback) {
-
-    if (typeof tab.tabId !== "undefined") { // The user passed in a tabInfo object, not a tab object
-        // Is this tab already in our index?
-        if (typeof tabListIndex[tab.tabId] === "undefined") {
-            // We need to go and fetch the actual tab object now
-            getTab(tab.tabId, function(tabObject) {
-                if (tab.url.match(/^http.*:\/\//) || tab.title === "New Tab") {
-                    // Add the tab object and index lookup into their respective arrays
-                    tabList.push(tabObject);
-                    tabListIndex[tabObject.id] = tabList.length - 1;
-                    sendSingleTab(tabObject);
-
-                    if (typeof callback !== "undefined") {
-                        callback(tabObject);
-                    }
-                }
-            });
-        }
-    } else if (typeof tab.id !== "undefined" && (tab.url.match(/^http.*:\/\//) || tab.title === "New Tab")) { // The object is (probably) a tab object, yay!
-        // Is this tab already in our index?
-        if (typeof tabListIndex[tab.id] === "undefined") {
-            // Add the tab index and object into their respective arrays
-            tabList.push(tab);
-            tabListIndex[tab.id] = tabList.length - 1;
-            sendSingleTab(tab);
-
-            if (typeof callback !== "undefined") {
-                callback(tab);
-            }
-        }
-    }
-}
-
-// This function re-indexes the tabListIndex after a tab is removed from the tabList array
-// so that the reverse index in tabListIndex is still pointing to the right Array element
-function reIndex(tabPosition) {
-    for (var tabIndex in tabListIndex) {
-        if (tabListIndex.hasOwnProperty(tabIndex)) {
-            if (tabListIndex[tabIndex] >= tabPosition) {
-                tabListIndex[tabIndex] -= 1;
-            }
-        }
-    }
-}
-
-function sendRemoveTab( tabId ) {
-    sendMessage(null, { message:"sendRemoveTab", tabId: tabId });
-}
-
-function removeTab(tab) {
-    var tabId = null,
-        tabPosition = null;
-
-    if (typeof tab.tabId !== "undefined") { // The user passed in a tabInfo object, not a tab object
-        // Is this tab still in our index?
-        if (typeof tabListIndex[tab.tabId] !== "undefined") {
-            tabId = tab.tabId;
-        } else {
-            return false;
-        }
-    } else if (typeof tab.id !== "undefined") { // The object is (probably) a tab object, yay!
-        // Is this tab still in our index?
-        if (typeof tabListIndex[tab.id] !== "undefined") {
-            tabId = tab.id;
-        } else {
-            return false;
-        }
-    } else if (typeof tab === "number") { // The variable is the tab ID as an integer
-        // Is this tab still in our index?
-        if (typeof tabListIndex[tab] !== "undefined") {
-            tabId = tab;
-        } else {
-            return false;
-        }
-    }
-
-    tabPosition = tabListIndex[tabId];
-    tabList.remove(tabPosition);
-    delete tabListIndex[tabId];
-
-    reIndex(tabPosition);
-    sendRemoveTab(tabId);
-}
-
-// Updates an existing tab entry, and calls the given callback afterwards (optional)
-// If the tab doesn't exist yet, invoke the addTab function instead
-function updateTab(tab, callback) {
-
-    sanitizeTab(tab, function(tab) {
-        var updated = false;
-
-        if (tabList[tabListIndex[tab.id]]) {
-            if (tabList[tabListIndex[tab.id]].url !== tab.url) {
-                tabList[tabListIndex[tab.id]].url = tab.url;
-                delete tabList[tabListIndex[tab.id]].screencap;
-                delete tabList[tabListIndex[tab.id]].timestamp;
-                updated = true;
-            }
-
-            if (tabList[tabListIndex[tab.id]].status !== tab.status) {
-                tabList[tabListIndex[tab.id]].status = tab.status;
-                updated = true;
-            }
-
-            if (tabList[tabListIndex[tab.id]].title !== tab.title) {
-                tabList[tabListIndex[tab.id]].title = tab.title;
-                updated = true;
-            }
-
-            //**Add new properties to track for updating here**//
-
-            if (updated) {
-                sendSingleTab(tab);
-            }
-
-            if (typeof callback !== "undefined") {
-                callback(tab);
-            }
-        } else {
-            //alert("wut");
-            console.log( "other tabc" );
-            itabCreated(tab, callback(tab));
-        }
-    });
-}
-
-// Expect an actual tab object
-function tabExists(tab) {
-    return typeof tabListIndex[tab.id] !== "undefined" ? true : false;
-}
-
-// Expect an actual tab object
-function screencapExists(tab) {
-    if (tabExists(tab)) {
-        return typeof tabList[tabListIndex[tab.id]].screencap !== "undefined" ? true : false;
-    } else {
-        return false;
-    }
-}
-
-function sendTabLists() {
-    sendMessage(null, {message: "sendTabLists", tabList: tabList, tabListIndex: tabListIndex}, function() {});
-}
-
-function captureScreen(tab) {
-
-    sanitizeTab(tab, function(tab) {
-
-        screenCap(tab.windowId, {format: "png"}, function(imgBlob) {
-            var canvas = document.getElementById('canvas'),
-                canvasContext = canvas.getContext('2d'),
-                img = document.getElementById('img'),
-                ratio = tab.height / tab.width,
-                quarter;
-
-            img.onload = function() {
-                canvasContext.clearRect( 0, 0, canvas.width, canvas.height);
-                if (ratio > 1) { // Screenshot is taller than it is wide
-                    canvasContext.drawImage(this, 0, 0, canvas.width * window.devicePixelRatio, canvas.height * ratio * window.devicePixelRatio);
-                } else {
-                    canvasContext.drawImage(this, 0, 0, canvas.width * tab.width / tab.height * window.devicePixelRatio, canvas.height * window.devicePixelRatio);
-                }
-
-                tab.screencap = canvas.toDataURL();
-                tab.timestampSinceCapture = date.getTime();
-                if (tabExists(tab)) {
-                    tabList[tabListIndex[tab.id]] = tab;
-                    sendSingleTab(tabList[tabListIndex[tab.id]]);
-
-                    if (!tab.favIconUrl || tab.favIconUrl === ''){
-
-                        setTimeout(function() {
-                            /// set favicon wherever it needs to be set here
-                            console.log('delay tabId', tab.id);
-                            getTab(tab.id, function(tab){
-
-                              sendMessage(null, {message: "faviconTab", tab: tab}, function() {});
-                            });
-
-                        }, 4000);
-                    }
-                }
-            };
-
-            img.src = imgBlob; // Set the image to the dataUrl and invoke the onload function
-        });
-    });
+function tabEvent( id, message ){
+  sendMessage(null, {message: message, id: id});
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -256,139 +20,245 @@ function captureScreen(tab) {
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 
-
-var itabCreated = function( tab ){
-
-  console.log( "itabcreated", tab );
-
-  if (typeof tab.tabId !== "undefined") { // The user passed in a tabInfo object, not a tab object
-      // Is this tab already in our index?
-      if (typeof tabListIndex[tab.tabId] === "undefined") {
-          // We need to go and fetch the actual tab object now
-          getTab( tab.tabId, function(tabObject) {
-              if (tab.url.match(/^http.*:\/\//) || tab.title === "New Tab") {
-                  // Add the tab object and index lookup into their respective arrays
-                  tabList.push(tabObject);
-                  tabListIndex[tabObject.id] = tabList.length - 1;
-                  sendSingleTab(tabObject);
-
-                  if (typeof callback !== "undefined") {
-                      callback(tabObject);
-                  }
-              }
-          });
-      }
-  } else if (typeof tab.id !== "undefined" && (tab.url.match(/^http.*:\/\//) || tab.title === "New Tab")) { // The object is (probably) a tab object, yay!
-      // Is this tab already in our index?
-      if (typeof tabListIndex[tab.id] === "undefined") {
-          // Add the tab index and object into their respective arrays
-          tabList.push(tab);
-          tabListIndex[tab.id] = tabList.length - 1;
-          sendSingleTab(tab);
-
-          if (typeof callback !== "undefined") {
-              callback(tab);
-          }
-      }
-  }
-
-};
-
 var tabCreated = function( tab ){
 
-  console.log( "tabcreated", tab );
-  if (typeof tab.tabId !== "undefined") { // The user passed in a tabInfo object, not a tab object
-      // Is this tab already in our index?
-      if (typeof tabListIndex[tab.tabId] === "undefined") {
-          // We need to go and fetch the actual tab object now
-          getTab( tab.tabId, function(tabObject) {
-              if (tab.url.match(/^http.*:\/\//) || tab.title === "New Tab") {
-                  // Add the tab object and index lookup into their respective arrays
-                  tabList.push(tabObject);
-                  tabListIndex[tabObject.id] = tabList.length - 1;
-                  sendSingleTab(tabObject);
+  console.log( "notify", "tabcreated - undefined", tab.id );
+  console.log( "notify", "tabcreated - url", tab.url );
+  console.log( "notify", "tabcreated - title", tab.title );
 
-                  if (typeof callback !== "undefined") {
-                      callback(tabObject);
-                  }
-              }
-          });
-      }
-  } else if (typeof tab.id !== "undefined" && (tab.url.match(/^http.*:\/\//) || tab.title === "New Tab")) { // The object is (probably) a tab object, yay!
-      // Is this tab already in our index?
-      if (typeof tabListIndex[tab.id] === "undefined") {
-          // Add the tab index and object into their respective arrays
-          tabList.push(tab);
-          tabListIndex[tab.id] = tabList.length - 1;
-          sendSingleTab(tab);
+  var parser = new Parser();
 
-          if (typeof callback !== "undefined") {
-              callback(tab);
-          }
-      }
+  var tabProtocol = parser.href(tab.url).protocol();
+  var hostName = parser.href(tab.url).hostname();
+
+  //what conditions do we want to accept add adding a tab?
+  if (typeof tab.id !== "undefined" && ALLOWED_PROTOCOLS.indexOf( tabProtocol ) !== -1 && tab.id != OVERTAB_TAB_ID ){
+
+    var setObj = {};
+    setObj[tab.id] = tab.url;
+    setObj["screencap-"+tab.id] = "";
+    setObj["screencap-url-"+tab.id] = "";
+
+    console.log( "notify", "created about to set:", tab.id, tab.url, "======");
+
+    lsSet( setObj, function(){
+      //ok we set it, send an event
+      tabEvent( tab.id, "created" );
+    });
+  }else{
+    //this might be the overtab tab, or options tab or soemthing
+    console.log( "error", "ERROR: something happened on create:", tab );
+    console.log( "error", "protocol:",tabProtocol, "hostname", hostName);
   }
-
 };
 
 var tabUpdated = function( tabId, changeInfo, tab ){
-    console.log( "tabupdated", tabId, changeInfo, tab );
 
-    updateTab(tab, function() {
-        if (changeInfo.status === "complete") {
-            tabQuery({ currentWindow: true, windowId: tab.windowId, active: true, status: "complete" }, function(tabs) {
-                if (tabs.length > 0 && tabs[0].id == tab.id) {
-                    captureScreen(tab);
-                }
-            });
+  var parser = new Parser();
+
+  var tabProtocol = parser.href(tab.url).protocol();
+  var hostName = parser.href(tab.url).hostname();
+
+  if ( typeof tab.id !== "undefined" && ALLOWED_PROTOCOLS.indexOf( tabProtocol ) !== -1 && tabId != OVERTAB_TAB_ID ){
+
+    var id = tab.id;
+    lsGet( id, function( result ){
+      console.log( "notify", "lsget: result:", result, chrome.runtime.lastError );
+      //commenting this out, incase we dont need it.
+      //it was here in case tabcreated failed in some way. we shall see
+      if( !result || !result.hasOwnProperty( id ) ){
+        //its not inside the thing
+        console.log("warn", "WARNING: update, couldnt find thing" );
+        //maybe the create failed b/c it wasnt a thing yet. put it in ls
+        console.log( "notify", "updated about to set:", id, result.url, "======");
+
+        var setObj = {};
+        setObj[tab.id] = tab.url;
+        setObj["screencap-"+tab.id] = "";
+        setObj["screencap-url-"+tab.id] = "";
+
+        lsSet( setObj, function(){
+
+          console.log("notify", "ls is set, let's do the screencap", result );
+          //ok we set it, send an event
+          tabEvent( id, "pre-update" );
+
+          screenCap( tab );
+        });
+      }else{
+        //don't make it too noisy with messages
+        console.log("notify", "we know its a thing, update complete", changeInfo, result, tab);
+        console.log("notify", !result, !result.hasOwnProperty( id ));
+
+        console.log( "warn", "about to DO scap", result );
+        if( changeInfo.status == "complete" ){
+          tabEvent( id, "updated" );
+          screenCap( tab );
         }
+      }
     });
+
+  }else{
+    //this might be the overtab tab, or options tab or soemthing
+    console.log( "warn", "WARNING: update: not correct protocol", tab );
+    console.log( "warn", "protocol:",tabProtocol, "hostname", hostName);
+  }
 };
 
-var tabActivated = function( tabInfo ){
-   console.log( "tabactiviated", tabInfo );
-   var tabId = tabInfo.tabId;
+var screenCap = function( tab ){
 
-    sanitizeTab(tabId, function(tab) {
+  //get the current screencap url
+  var screenCapUrlId = "screencap-url-"+tab.id;
+  lsGet( screenCapUrlId, function( screenCapUrl ){
 
-        if (!screencapExists(tab)) {
-            updateTab(tab, function(tab) {
+    console.log( "warn", "OUR RESULT", screenCapUrl );
+    if( !screenCapUrl || !screenCapUrl.hasOwnProperty( screenCapUrlId ) ){
+      //didnt find!!
+      console.log("warn", "we couldnt find this screencap record:", screenCapUrlId, tabId, tab);
+      return false;
+    }
 
-                tabQuery({ currentWindow: true, windowId: tab.windowId, active: true, status: "complete" }, function(tabs) {
-                    if (tabs.length > 0 && tabs[0].id == tab.id) {
-                        captureScreen(tab);
-                    }
-                });
+    //extract the value;
+    var oldUrl = screenCapUrl[screenCapUrlId];
+
+    if( tab.url == oldUrl ){
+      //we already took this screencap
+      console.log("notify", "we already took this cap:", screenCapUrl);
+      return false;
+    }
+
+    //needs to be "active" and "complete" to screencap
+    var activeCompleteQuery = {
+      currentWindow: true,
+      windowId: tab.windowId,
+      active: true,
+      status: "complete"
+    };
+
+    tabQuery(activeCompleteQuery, function(result) {
+      console.log( "notify", "screencap: ", screenCapUrl, result, tab, "----------");
+      if ( result.id == tab.id && result.windowId == tab.windowId && oldUrl != result.url && DISALLOWED_SCREENCAP_URLS.indexOf(result.url) === -1 ) {
+        generateScreenCap(result.windowId, {format: "png"}, function( blob ){
+
+          var canvas = document.createElement('canvas'),
+            canvasContext = canvas.getContext('2d');
+
+          canvas.width = THUMBSIZE;
+          canvas.height = THUMBSIZE;
+
+          var img = document.createElement('img');
+
+          img.onload = function() {
+
+            var cropLength = THUMBSIZE / SCREEN_CROP_RATIO,
+              height, width;
+
+            //figure out the size to draw the image.
+
+            //height is ratio corrected, so that we are fitting the
+            //screencrop's amount into the thumb height.
+            //the viewport of thumbsize is the visible portion of the screen_crop ratio's
+
+            if( this.height < this.width ){ //landscape
+
+              height = cropLength;
+
+              //figure out the ratio-calculated length of the adjacent side
+              //increase the longer side:
+              //computed length * local ratio <-- always > 1
+              width = cropLength * ( this.width / this.height );
+            }else{
+              width = cropLength;
+
+              height = cropLength * ( this.height / this.width );
+            }
+
+            var capId = "screencap-"+tab.id;
+            var setObj = {};
+
+            console.log( "notify", "screencap about to set:", capId, height, width, "======");
+
+            canvasContext.clearRect( 0, 0, canvas.width, canvas.height);
+            canvasContext.drawImage(this, 0, 0, width, height);
+
+            setObj[capId] = canvas.toDataURL();
+            setObj["screncap-url-"+tab.id] = result.url;
+
+            lsSet( setObj, function(){
+              //storage is set, ready for ng app to get it
+              tabEvent( tab.id, "screencap" );
+              console.log("notify", "screencap done");
+
+              canvas = undefined;
+              canvasContext = undefined;
             });
-        }
+
+            img = undefined;
+            blob = undefined;
+          };
+
+          img.src = blob; // Set the image to the dataUrl and invoke the onload function
+
+        });
+      }else{
+        console.log( "notify", "NOTIFY: no active window found for this event" );
+      }
     });
+  });
+};
+
+//do we need this???
+//when do we take a screen shot and its not updated??
+var tabActivated = function( tabInfo ){
+
+  var id = tabInfo.tabId;
+
+  lsGet( id, function( result ){
+    if( result && result !== null && result.hasOwnProperty( id ) ){
+        console.log( "warn", "about to try screencap in activated", result );
+        tabEvent( id, "activated" );
+
+        getTab( id, function( tab ){
+          console.log( "error", "WUUUTT, result", tab );
+
+          //what kind of check do we need here??
+          if( tab && typeof tab.id !== "undefined" ){
+            screenCap( tab );
+          }
+        });
+    }else{
+      console.log( "warn", "tab activated but not found in ls", result );
+    }
+
+  });
 };
 
 var tabRemoved = function( tabId, removeInfo ){
-  removeTab(tabId);
-  if (tabId === overTabId) {
-    console.log("Closed");
-    tabOpened = false;
-    overTabId = null;
-    overTabWindowId = null;
+
+  if (tabId === OVERTAB_TAB_ID) {
+    //console.log("Closed");
+    OVERTAB_TAB_ID = null;
+    OVERTAB_WINDOW_ID = null;
+    lsSet( { "OVERTAB_TAB_ID" : null, "OVERTAB_WINDOW_ID" : null } );
+  }else{
+    lsRemove(tabId, function(){
+      tabEvent( tabId, "removed" );
+    });
   }
 };
 
 var onMessage = function( request, sender, sendResponse ){
-  if ( request.message === "getList" ) {
-    sendTabLists();
-  }
+  console.log("notify", "message request:", request);
 };
 
-var browserActionClick = function( ){
+var openOverTab = function( ){
 
-  if ( !tabOpened ) {
-    // Prevents mashing the button and opening duplicate Overtab tabs
-    tabOpened = true;
-    var func = localStorage['overTabFunc'];
+  lsGet( "OVERTAB_OPEN_FUNC", function( func ){
 
-    if( !func ){
+    //this is a hack, needs to be fixed with switch statement
+    if( !func || typeof func["OVERTAB_OPEN_FUNC"] == "undefined" ){
       //default behavior
-      func = defaultOpener;
+      func = OVERTAB_DEFAULT_OPEN_FUNC;
     }
 
     var options = {
@@ -396,23 +266,80 @@ var browserActionClick = function( ){
     };
 
     //add more options here from local storage
-
     func( options, function(tab) {
 
-        //do we want any checks here?
+      //do we want any checks here?
 
-        overTabId = tab.id;
-        overTabWindowId = tab.windowId;
+      OVERTAB_TAB_ID = tab.id;
+      OVERTAB_WINDOW_ID = tab.windowId;
+
+      lsSet( { "OVERTAB_TAB_ID" : OVERTAB_TAB_ID, "OVERTAB_WINDOW_ID" : OVERTAB_WINDOW_ID } );
     });
 
+  });
+};
+
+var browserActionClick = function( ){
+
+  if ( OVERTAB_TAB_ID === null || OVERTAB_WINDOW_ID === null ) {
+
+      lsGet( "OVERTAB_TAB_ID", function( tabIdResult ){
+
+        if( tabIdResult && tabIdResult !== null && tabIdResult.hasOwnProperty( "OVERTAB_TAB_ID" ) && tabIdResult["OVERTAB_TAB_ID"] !== null ){
+          OVERTAB_TAB_ID = tabIdResult;
+
+          getTab( tabIdResult, function( tab ){
+            console.log( "error", "browsertabaction tab get", tab );
+
+            //what kind of check do we need here??
+            if( tab && typeof tab.id !== "undefined" ){
+
+              lsGet( "OVERTAB_WINDOW_ID", function( windowIdResult ){
+
+                if( windowIdResult && windowIdResult !== null && windowIdResult.hasOwnProperty( "OVERTAB_WINDOW_ID" ) && windowIdResult["OVERTAB_WINDOW_ID"] !== null ){
+
+                  OVERTAB_WINDOW_ID = windowIdResult;
+                  tabFocus( OVERTAB_TAB_ID, OVERTAB_WINDOW_ID );
+
+                }else{
+                  openOverTab();
+                }
+              });
+            }else{
+              openOverTab();
+            }
+          });
+        }else{
+          openOverTab();
+        }
+
+      });
   }else {
-    tabFocus( overTabId, overTabWindowId );
+    tabFocus( OVERTAB_TAB_ID, OVERTAB_WINDOW_ID );
   }
 };
 
 var tabReplaced = function( newTabId, oldTabId ){
 
   //replace the old tab with the new one
+  console.log("warn", "ERROR: a tab was replaced" );
+};
+
+var startup = function(){
+  //chrome.storage.local.clear();
+  //set some local storage stuff???
+  console.log("notify", "startup" );
+};
+
+var shutdown = function(){
+  //delete local storage stuff????
+  console.log("notify", "shutdown" );
+};
+
+var install = function( details ){
+  chrome.storage.local.clear();
+  //set some options????
+  console.log("notify", "installed", details.reason, details.previousVersion );
 };
 
 ////////////////////////////////////////////////////////////////////////
@@ -427,6 +354,10 @@ var tabReplaced = function( newTabId, oldTabId ){
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 
+chrome.runtime.onStartup.addListener( startup );
+chrome.runtime.onSuspend.addListener( shutdown );
+chrome.runtime.onInstalled.addListener( install );
+
 //default overtab opener
 var defaultOpener = chrome.tabs.create;
 
@@ -435,47 +366,31 @@ var getExtensionUrl = function(){
   return chrome.extension.getURL('index.html');
 };
 
-//get the tab screenshot
-var screenCap = function( windowId, options, callback ){
+//listen for a message
+chrome.runtime.onMessage.addListener( onMessage );
+
+//get the tab screencap
+//this needs to run the web worker
+var generateScreenCap = function( windowId, options, callback ){
+  console.log( "notify", "gen screen cap" );
   return chrome.tabs.captureVisibleTab( windowId, options, callback );
 };
 
 //listen for tab states
 chrome.tabs.onCreated.addListener( tabCreated );
 chrome.tabs.onUpdated.addListener( tabUpdated );
+
 chrome.tabs.onActivated.addListener( tabActivated );
 chrome.tabs.onRemoved.addListener( tabRemoved );
-
-//listen for a message
-chrome.runtime.onMessage.addListener( onMessage );
-
-//send message
-var sendMessage = function( tabId, message, callback ){
-  return chrome.runtime.sendMessage( tabId, message, callback );
-};
-
-//query for a tab
-var tabQuery = function( queryInfo, callback ){
-  return chrome.tabs.query( queryInfo, callback );
-};
-
-//get a tab by id
-var getTab = function( tabId, callback ){
-  return chrome.tabs.get( tabId, callback );
-};
 
 //clicking on the browser menu item
 chrome.browserAction.onClicked.addListener( browserActionClick );
 
-//bring a tab into focus
-var tabFocus = function( tabId, windowId ){
-    chrome.windows.update(windowId, {'focused': true}, function() {
-      chrome.tabs.update(tabId, {'active': true}, function() {} );
-    });
-};
-
 //if a tab is replaced (only for prerender)
-chrome.tabs.onReplaced.addListener( tabReplaced )
+chrome.tabs.onReplaced.addListener( tabReplaced );
+
+chrome.runtime.onSuspend.addListener( function(){ copnsole.log("notify", "suspended"); });
+chrome.runtime.onSuspendCanceled.addListener( function(){ copnsole.log("notify", "suspend cancelled"); });
 
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////

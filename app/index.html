@@ -7,7 +7,6 @@
         <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
         <!-- build:css styles/vendor.css -->
         <!-- bower:css -->
-        <link rel="stylesheet" href="bower_components/sass-bootstrap/dist/css/bootstrap.css" />
         <!-- endbower -->
         <!-- endbuild -->
         <!-- build:css(app,.tmp) /css/main.css -->
@@ -19,14 +18,14 @@
 
       <div ng-controller="mainController" ng-init="init()" id="tab-graph">
             <div class="tab-filter">
-                <p><input ng-model="tabFilter" type="text" placeholder="filter"></p>
+                <input ng-model="tabFilter" type="text" placeholder="filter">
             </div>
 
             <div id="node-container" class="node-cont" style="height:{{windowHeight}}px; width:{{windowWidth}}px;">
-              <div ng-repeat="tab in tabs | filter:tabFilter" class="tab-node" ng-click="switchToTab(tab.id)" id="{{tab.id}}" node-color="9">
-                  <img class="favicon" ng-src="{{tab.favIconUrl}}" node-color="4"/>
-                  <a ng-click="tabClose()"><img class="close-button" ng-src="/images/close_button.svg"/></a>
-                  <div class="thumbnail"><img width="150px" ng-src="{{tab.screencap}}"></div>
+              <div ng-repeat="tab in tabs | filter:tabFilter" class="tab-node" ng-click="switchToTab(tab)" id="{{tab.id}}" node-color="9">
+                  <img class="favicon" ng-src="{{tab.favIconUrl || '/images/20x20.gif'}}" node-color="4"/>
+                  <a class="close-button" ng-click="tabClose()"><img ng-src="/images/close_button.svg"/></a>
+                  <div class="thumbnail"><img class="tab-close-img" width="150px" ng-src="{{tab.screencap || '/images/112x140.gif'}}"></div>
                   <div class="title">{{tab.title}}</div>
               </div>
             </div>
@@ -44,12 +43,14 @@
         <script src="bower_components/jquery/jquery.js"></script>
         <script src="bower_components/angular/angular.js"></script>
         <script src="bower_components/json3/lib/json3.min.js"></script>
-        <script src="bower_components/sass-bootstrap/dist/js/bootstrap.js"></script>
         <script src="bower_components/d3/d3.js"></script>
         <!-- endbower -->
         <!-- endbuild -->
 
         <!-- build:js({.tmp,app}) scripts/scripts.js -->
+        <script src="js/convenience.js"></script>
+        <script src="js/chrome.js"></script>
+        <script src="js/angular-chrome.js"></script>
         <script src="js/angular-app/controllers/mainController.js"></script>
         <script src="js/angular-app/directives/nodeColor.js"></script>
         <script src="js/angular-app/filters/domainExtractionFilter.js"></script>

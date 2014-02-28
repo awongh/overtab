@@ -11,10 +11,11 @@ var nodeColor = function(){
         var borderWidth = attrs.nodeColor;
 
         if(typeof scope.tab.domainInt !== 'undefined'){
+          //call the thing
           var color = fill( scope.tab.domainInt );
+
           elem.css( 'border', borderWidth+'px solid '+color);
         }
-        //console.log("here!", scope.tab, scope.tab.domain, scope.tab.domainInt, color);
       }
   };
 };

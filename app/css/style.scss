@@ -1,3 +1,5 @@
+@import "compass/css3";
+
 $green: #71b451;
 $torquoise: #296976;
 $background: #383738;
@@ -29,14 +31,27 @@ body {
 #tab-graph {
 }
 
-.tab-filter input{
-  border:none;
-  font-size:32px;
-  padding:3px 3px 3px 9px;
-  border-radius: .5rem;
-  background-color: lighten($background, 3%);
-  -webkit-box-shadow:inset 0 0 3px darken( $background, 20% );
-  color: $text;
+.tab-filter{
+  position:fixed;
+  top:0;
+
+  .scroll-back-button{
+    display:inline;
+  }
+
+  .multi-select-button{
+    display:inline;
+  }
+
+  input{
+    border:none;
+    font-size:32px;
+    padding:3px 3px 3px 9px;
+    border-radius: .5rem;
+    background-color: lighten($background, 3%);
+    -webkit-box-shadow:inset 0 0 3px darken( $background, 20% );
+    color: $text;
+  }
 }
 
 #tab-graph {
@@ -45,7 +60,7 @@ body {
 
     .tab-node {
         cursor: pointer;
-        margin: 6px 4px 6px 4px;
+        margin: 8px 6px 8px 6px;
         -webkit-flex: 0 0 auto;
 
         padding: 5px;
@@ -85,9 +100,12 @@ body {
 
         .close-button{
           position:absolute;
-          right:-17px;
-          top:-22px;
-          height:22px;
+          right:-14px;
+          top:-19px;
+
+          img {
+            height:22px;
+          }
         }
     }
 }
@@ -97,6 +115,7 @@ body {
   -webkit-flex-direction: column;
   -webkit-flex-wrap: wrap;
   position:relative;
+  margin-top:100px;
 }
 
 .edge-cont {
