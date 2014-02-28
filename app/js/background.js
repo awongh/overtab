@@ -155,7 +155,7 @@ var screenCap = function( tab ){
 
             //figure out the size to draw the image.
 
-            //height is ratio corrected, so that we are fitting the 
+            //height is ratio corrected, so that we are fitting the
             //screencrop's amount into the thumb height.
             //the viewport of thumbsize is the visible portion of the screen_crop ratio's
 
@@ -188,8 +188,13 @@ var screenCap = function( tab ){
               //storage is set, ready for ng app to get it
               tabEvent( tab.id, "screencap" );
               console.log("notify", "screencap done");
+
+              canvas = undefined;
+              canvasContext = undefined;
             });
 
+            img = undefined;
+            blob = undefined;
           };
 
           img.src = blob; // Set the image to the dataUrl and invoke the onload function
