@@ -287,22 +287,32 @@ var browserActionClick = function( ){
 
         if( tabIdResult && tabIdResult !== null && tabIdResult.hasOwnProperty( "OVERTAB_TAB_ID" ) && tabIdResult["OVERTAB_TAB_ID"] !== null ){
           OVERTAB_TAB_ID = tabIdResult;
+
+          getTab( tabIdResult, function( tab ){
+            console.log( "error", "browsertabaction tab get", tab );
+
+            //what kind of check do we need here??
+            if( tab && typeof tab.id !== "undefined" ){
+
+              lsGet( "OVERTAB_WINDOW_ID", function( windowIdResult ){
+
+                if( windowIdResult && windowIdResult !== null && windowIdResult.hasOwnProperty( "OVERTAB_WINDOW_ID" ) && windowIdResult["OVERTAB_WINDOW_ID"] !== null ){
+
+                  OVERTAB_WINDOW_ID = windowIdResult;
+                  tabFocus( OVERTAB_TAB_ID, OVERTAB_WINDOW_ID );
+
+                }else{
+                  openOverTab();
+                }
+              });
+            }else{
+              openOverTab();
+            }
+          });
         }else{
           openOverTab();
-          return;
         }
 
-        lsGet( "OVERTAB_WINDOW_ID", function( windowIdResult ){
-
-          if( windowIdResult && windowIdResult !== null && windowIdResult.hasOwnProperty( "OVERTAB_WINDOW_ID" ) && windowIdResult["OVERTAB_WINDOW_ID"] !== null ){
-
-            OVERTAB_WINDOW_ID = windowIdResult;
-            tabFocus( OVERTAB_TAB_ID, OVERTAB_WINDOW_ID );
-
-          }else{
-            openOverTab();
-          }
-        });
       });
   }else {
     tabFocus( OVERTAB_TAB_ID, OVERTAB_WINDOW_ID );
