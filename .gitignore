@@ -26,3 +26,4 @@ npm-debug.log
 temp
 .tmp
 app/bower_components
+test/bower_components

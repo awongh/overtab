@@ -78,9 +78,7 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
   };
 
   $scope.tabClose = function( e ){
-    chrome.tabs.remove(this.tab.id, function() {
-      //what should we do here
-    });
+    closeTab( this.tab.id );
   };
 
   //get the local storage array of tabs
@@ -439,7 +437,8 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
     $scope.getAllTabs();
 
     //listen for a message
-    chrome.runtime.onMessage.addListener( $scope.onMessage );
+    //chrome.runtime.onMessage.addListener( $scope.onMessage );
+    setMessageListener( $scope.onMessage );
 
   };
 };

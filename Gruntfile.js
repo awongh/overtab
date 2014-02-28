@@ -132,7 +132,9 @@ module.exports = function (grunt) {
         all: {
             options: {
                 run: true,
-                src: ['http://localhost:<%= connect.options.port %>/index.html']
+                timeout: 6000,
+                src: ['testrunner.html'],
+                urls: ['http://localhost:<%= connect.options.port %>/index.html']
             }
         }
     },
@@ -401,7 +403,6 @@ module.exports = function (grunt) {
     'connect:test',
     'mocha'
   ]);
-
 
   grunt.registerTask('build', [
     'clean:dist',
