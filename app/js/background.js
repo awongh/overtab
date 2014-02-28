@@ -2,6 +2,9 @@
 
 //VARIABLES
 
+  var THUMBSIZE = 150,
+      SCREEN_CROP_RATIO = 1;
+
   var OVERTAB_TAB_ID = null,
       OVERTAB_WINDOW_ID = null,
       OVERTAB_DEFAULT_OPEN_FUNC = chrome.tabs.create,
@@ -137,30 +140,43 @@ var screenCap = function( tab ){
       if ( result.id == tab.id && result.windowId == tab.windowId && oldUrl != result.url && DISALLOWED_SCREENCAP_URLS.indexOf(result.url) === -1 ) {
         generateScreenCap(result.windowId, {format: "png"}, function( blob ){
 
-          //get the canvas
-          //and stuff
-          var canvas = document.createElement('canvas');
+          var canvas = document.createElement('canvas'),
+            canvasContext = canvas.getContext('2d');
 
-          //start the proc w/ canvas
+          canvas.width = THUMBSIZE;
+          canvas.height = THUMBSIZE;
 
-          var img = document.createElement('img'),
-            ratio = tab.height / tab.width,
-            canvasContext = canvas.getContext('2d'),
-            width = canvas.width * tab.width / tab.height * window.devicePixelRatio,
-            height = canvas.height * window.devicePixelRatio;
-
-          if (ratio > 1) { // Screenshot is taller than it is wide
-            width = canvas.width * window.devicePixelRatio;
-            height = canvas.height * ratio * window.devicePixelRatio;
-          }
+          var img = document.createElement('img');
 
           img.onload = function() {
-            //ok we need to get the result out from here somehow
+
+            var cropLength = THUMBSIZE / SCREEN_CROP_RATIO,
+              height, width;
+
+            //figure out the size to draw the image.
+
+            //height is ratio corrected, so that we are fitting the 
+            //screencrop's amount into the thumb height.
+            //the viewport of thumbsize is the visible portion of the screen_crop ratio's
+
+            if( this.height < this.width ){ //landscape
+
+              height = cropLength;
+
+              //figure out the ratio-calculated length of the adjacent side
+              //increase the longer side:
+              //computed length * local ratio <-- always > 1
+              width = cropLength * ( this.width / this.height );
+            }else{
+              width = cropLength;
+
+              height = cropLength * ( this.height / this.width );
+            }
 
             var capId = "screencap-"+tab.id;
             var setObj = {};
 
-            console.log( "notify", "screencap about to set:", capId, "======");
+            console.log( "notify", "screencap about to set:", capId, height, width, "======");
 
             canvasContext.clearRect( 0, 0, canvas.width, canvas.height);
             canvasContext.drawImage(this, 0, 0, width, height);
@@ -173,6 +189,7 @@ var screenCap = function( tab ){
               tabEvent( tab.id, "screencap" );
               console.log("notify", "screencap done");
             });
+
           };
 
           img.src = blob; // Set the image to the dataUrl and invoke the onload function
