@@ -92,27 +92,29 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
       //query for all the tabs
 
       tabsQuery( {}, function( chromeTabs ){
-        console.log("notify", "query all tabs", chromeTabs );
         for( var i=0; i< chromeTabs.length; i++ ){
           //see if we are gonna allow it
-          var tab = chromeTabs[i];
+          var chromeTab = chromeTabs[i];
 
-          /* do an lsget */
-          lsGet( tab.id, function( result ){
-            if( result && result.hasOwnProperty( "id") && result.id == tab.id ){
+          /* do an lsget  == make a closure cause we're in a for loop*/
+          lsGet( chromeTab.id, (function(){
 
-              var tabProtocol = parser.href(tab.url).protocol();
-              var hostName = parser.href(tab.url).hostname();
+            var tab = chromeTab;
 
-              if ( typeof tab.id !== "undefined" && ALLOWED_PROTOCOLS.indexOf( tabProtocol ) !== -1 && tab.id != $scope.overtabId && tab.status === "complete" ){
+            return function( result ){
+              if( result && result.hasOwnProperty( tab.id ) ){
 
-                $scope.addTab( tab );
+                var tabProtocol = parser.href(tab.url).protocol();
+                var hostName = parser.href(tab.url).hostname();
 
+                if ( typeof tab.id !== "undefined" && ALLOWED_PROTOCOLS.indexOf( tabProtocol ) !== -1 && tab.id != $scope.overtabId && tab.status === "complete" ){
+
+                  $scope.addTab( tab );
+                }
               }
+            };
 
-            }
-
-          });
+          })(chromeTab));
           /* end do an lsget */
         }
       });
@@ -181,9 +183,7 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
     $scope.getChromeTab( tabId, $scope.addTab );
   };
 
-  $scope.addTab = function( tab ){
-
-    console.log("notify", "getcrhometab: add tab", tab);
+  $scope.addTab = function( tab, doUpdate ){
 
     if (!tab) {
       return false;
@@ -206,18 +206,25 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
       delete tab.favIconUrl;
     }
 
-    //set the edge
-    //openerTabId
-    $scope.tabEdgeSet( tab, $scope.edgesRender );
-
     $scope.tabs.push(tab);
 
-    //scroll to the newest tab
-    setTimeout(function() {
-      window.scrollTo( $scope.windowWidth, 0);
-    },1000);
+    //if we are calling this from add all tabs.....
+    if( doUpdate === true ){
+      $scope.updateTab( tab.id );
+    }else{
 
-    $scope.$apply();
+      //set the edge
+      //openerTabId
+      $scope.tabEdgeSet( tab, $scope.edgesRender );
+
+      //scroll to the newest tab
+      setTimeout(function() {
+        window.scrollTo( $scope.windowWidth, 0);
+      },1000);
+
+
+      $scope.$apply();
+    }
   };
 
   $scope.removeTab = function( tabId ) {
@@ -297,6 +304,7 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
 
   $scope.updateTab = function( tabId ){
 
+    console.log("notify","about to get "+tabId);
     //get the tab from chrome
     $scope.getChromeTab( tabId, function( chromeTab ){
 
