@@ -97,14 +97,23 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
           //see if we are gonna allow it
           var tab = chromeTabs[i];
 
-          var tabProtocol = parser.href(tab.url).protocol();
-          var hostName = parser.href(tab.url).hostname();
+          /* do an lsget */
+          lsGet( tab.id, function( result ){
+            if( result && result.hasOwnProperty( "id") && result.id == tab.id ){
 
-          if ( typeof tab.id !== "undefined" && ALLOWED_PROTOCOLS.indexOf( tabProtocol ) !== -1 && tab.id != $scope.overtabId && tab.status === "complete" ){
+              var tabProtocol = parser.href(tab.url).protocol();
+              var hostName = parser.href(tab.url).hostname();
 
-            $scope.addTab( tab );
+              if ( typeof tab.id !== "undefined" && ALLOWED_PROTOCOLS.indexOf( tabProtocol ) !== -1 && tab.id != $scope.overtabId && tab.status === "complete" ){
 
-          }
+                $scope.addTab( tab );
+
+              }
+
+            }
+
+          });
+          /* end do an lsget */
         }
       });
     });
@@ -280,6 +289,9 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
       }else{
         console.log( "warn", "we dont have this screen cap record: "+tabId );
       }
+
+      //unset it
+      result = undefined;
     });
   };
 

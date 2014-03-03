@@ -7,8 +7,7 @@
 
   var OVERTAB_TAB_ID = null,
       OVERTAB_WINDOW_ID = null,
-      OVERTAB_DEFAULT_OPEN_FUNC = chrome.tabs.create,
-      OVERTAB_ARRAY = [];
+      OVERTAB_DEFAULT_OPEN_FUNC = chrome.tabs.create;
 
 function tabEvent( id, message ){
   sendMessage(null, {message: message, id: id});
@@ -21,10 +20,6 @@ function tabEvent( id, message ){
 ////////////////////////////////////////////////////////////////////////
 
 var tabCreated = function( tab ){
-
-  console.log( "notify", "tabcreated - undefined", tab.id );
-  console.log( "notify", "tabcreated - url", tab.url );
-  console.log( "notify", "tabcreated - title", tab.title );
 
   var parser = new Parser();
 
@@ -39,8 +34,6 @@ var tabCreated = function( tab ){
     setObj["screencap-"+tab.id] = "";
     setObj["screencap-url-"+tab.id] = "";
 
-    console.log( "notify", "created about to set:", tab.id, tab.url, "======");
-
     lsSet( setObj, function(){
       //ok we set it, send an event
       tabEvent( tab.id, "created" );
@@ -48,7 +41,6 @@ var tabCreated = function( tab ){
   }else{
     //this might be the overtab tab, or options tab or soemthing
     console.log( "error", "ERROR: something happened on create:", tab );
-    console.log( "error", "protocol:",tabProtocol, "hostname", hostName);
   }
 };
 
@@ -63,14 +55,10 @@ var tabUpdated = function( tabId, changeInfo, tab ){
 
     var id = tab.id;
     lsGet( id, function( result ){
-      console.log( "notify", "lsget: result:", result, chrome.runtime.lastError );
       //commenting this out, incase we dont need it.
       //it was here in case tabcreated failed in some way. we shall see
       if( !result || !result.hasOwnProperty( id ) ){
         //its not inside the thing
-        console.log("warn", "WARNING: update, couldnt find thing" );
-        //maybe the create failed b/c it wasnt a thing yet. put it in ls
-        console.log( "notify", "updated about to set:", id, result.url, "======");
 
         var setObj = {};
         setObj[tab.id] = tab.url;
@@ -79,7 +67,6 @@ var tabUpdated = function( tabId, changeInfo, tab ){
 
         lsSet( setObj, function(){
 
-          console.log("notify", "ls is set, let's do the screencap", result );
           //ok we set it, send an event
           tabEvent( id, "pre-update" );
 
@@ -87,10 +74,6 @@ var tabUpdated = function( tabId, changeInfo, tab ){
         });
       }else{
         //don't make it too noisy with messages
-        console.log("notify", "we know its a thing, update complete", changeInfo, result, tab);
-        console.log("notify", !result, !result.hasOwnProperty( id ));
-
-        console.log( "warn", "about to DO scap", result );
         if( changeInfo.status == "complete" ){
           tabEvent( id, "updated" );
           screenCap( tab );
@@ -101,7 +84,6 @@ var tabUpdated = function( tabId, changeInfo, tab ){
   }else{
     //this might be the overtab tab, or options tab or soemthing
     console.log( "warn", "WARNING: update: not correct protocol", tab );
-    console.log( "warn", "protocol:",tabProtocol, "hostname", hostName);
   }
 };
 
@@ -111,7 +93,6 @@ var screenCap = function( tab ){
   var screenCapUrlId = "screencap-url-"+tab.id;
   lsGet( screenCapUrlId, function( screenCapUrl ){
 
-    console.log( "warn", "OUR RESULT", screenCapUrl );
     if( !screenCapUrl || !screenCapUrl.hasOwnProperty( screenCapUrlId ) ){
       //didnt find!!
       console.log("warn", "we couldnt find this screencap record:", screenCapUrlId, tabId, tab);
@@ -136,7 +117,6 @@ var screenCap = function( tab ){
     };
 
     tabQuery(activeCompleteQuery, function(result) {
-      console.log( "notify", "screencap: ", screenCapUrl, result, tab, "----------");
       if ( result.id == tab.id && result.windowId == tab.windowId && oldUrl != result.url && DISALLOWED_SCREENCAP_URLS.indexOf(result.url) === -1 ) {
         generateScreenCap(result.windowId, {format: "png"}, function( blob ){
 
@@ -176,8 +156,6 @@ var screenCap = function( tab ){
             var capId = "screencap-"+tab.id;
             var setObj = {};
 
-            console.log( "notify", "screencap about to set:", capId, height, width, "======");
-
             canvasContext.clearRect( 0, 0, canvas.width, canvas.height);
             canvasContext.drawImage(this, 0, 0, width, height);
 
@@ -187,21 +165,19 @@ var screenCap = function( tab ){
             lsSet( setObj, function(){
               //storage is set, ready for ng app to get it
               tabEvent( tab.id, "screencap" );
-              console.log("notify", "screencap done");
-
-              canvas = undefined;
-              canvasContext = undefined;
             });
 
-            img = undefined;
-            blob = undefined;
+            canvas = undefined;
+            canvasContext = undefined;
           };
 
           img.src = blob; // Set the image to the dataUrl and invoke the onload function
+          blob = undefined;
+          img = undefined;
 
         });
       }else{
-        console.log( "notify", "NOTIFY: no active window found for this event" );
+        console.log( "warn", "no active window found for this event" );
       }
     });
   });
@@ -215,11 +191,9 @@ var tabActivated = function( tabInfo ){
 
   lsGet( id, function( result ){
     if( result && result !== null && result.hasOwnProperty( id ) ){
-        console.log( "warn", "about to try screencap in activated", result );
         tabEvent( id, "activated" );
 
         getTab( id, function( tab ){
-          console.log( "error", "WUUUTT, result", tab );
 
           //what kind of check do we need here??
           if( tab && typeof tab.id !== "undefined" ){
@@ -236,7 +210,6 @@ var tabActivated = function( tabInfo ){
 var tabRemoved = function( tabId, removeInfo ){
 
   if (tabId === OVERTAB_TAB_ID) {
-    //console.log("Closed");
     OVERTAB_TAB_ID = null;
     OVERTAB_WINDOW_ID = null;
     lsSet( { "OVERTAB_TAB_ID" : null, "OVERTAB_WINDOW_ID" : null } );
@@ -248,7 +221,7 @@ var tabRemoved = function( tabId, removeInfo ){
 };
 
 var onMessage = function( request, sender, sendResponse ){
-  console.log("notify", "message request:", request);
+  //console.log("notify", "message request:", request);
 };
 
 var openOverTab = function( ){
@@ -288,8 +261,7 @@ var browserActionClick = function( ){
         if( tabIdResult && tabIdResult !== null && tabIdResult.hasOwnProperty( "OVERTAB_TAB_ID" ) && tabIdResult["OVERTAB_TAB_ID"] !== null ){
           OVERTAB_TAB_ID = tabIdResult;
 
-          getTab( tabIdResult, function( tab ){
-            console.log( "error", "browsertabaction tab get", tab );
+          getTab( tabIdResult.OVERTAB_TAB_ID, function( tab ){
 
             //what kind of check do we need here??
             if( tab && typeof tab.id !== "undefined" ){
@@ -298,7 +270,7 @@ var browserActionClick = function( ){
 
                 if( windowIdResult && windowIdResult !== null && windowIdResult.hasOwnProperty( "OVERTAB_WINDOW_ID" ) && windowIdResult["OVERTAB_WINDOW_ID"] !== null ){
 
-                  OVERTAB_WINDOW_ID = windowIdResult;
+                  OVERTAB_WINDOW_ID = windowIdResult.OVERTAB_WINDOW_ID;
                   tabFocus( OVERTAB_TAB_ID, OVERTAB_WINDOW_ID );
 
                 }else{
@@ -319,26 +291,61 @@ var browserActionClick = function( ){
   }
 };
 
+var getAllTabs = function(){
+  lsGet( "OVERTAB_TAB_ID", function( result ){
+
+    var overtabId = null;
+
+    if( result.hasOwnProperty( "OVERTAB_TAB_ID" ) ){
+      overtabId = result["OVERTAB_TAB_ID"];
+    }
+
+    var parser = new Parser();
+
+    //query for all the tabs
+
+    tabsQuery( {}, function( chromeTabs ){
+      console.log("notify", "query all tabs", chromeTabs );
+      for( var i=0; i< chromeTabs.length; i++ ){
+        //see if we are gonna allow it
+        var tab = chromeTabs[i];
+
+        var tabProtocol = parser.href(tab.url).protocol();
+        var hostName = parser.href(tab.url).hostname();
+
+        if ( typeof tab.id !== "undefined" && ALLOWED_PROTOCOLS.indexOf( tabProtocol ) !== -1 && tab.id != overtabId && tab.status === "complete" ){
+
+          tabCreated( tab );
+        }
+      }
+    });
+  });
+};
+
 var tabReplaced = function( newTabId, oldTabId ){
 
   //replace the old tab with the new one
-  console.log("warn", "ERROR: a tab was replaced" );
+  console.log("warn", "WARN: a tab was replaced" );
 };
 
 var startup = function(){
-  //chrome.storage.local.clear();
+  chrome.storage.local.clear();
   //set some local storage stuff???
   console.log("notify", "startup" );
+
+  getAllTabs();
 };
 
 var shutdown = function(){
-  //delete local storage stuff????
-  console.log("notify", "shutdown" );
+  chrome.storage.local.clear();
+  //console.log("notify", "shutdown" );
 };
 
 var install = function( details ){
   chrome.storage.local.clear();
   //set some options????
+  getAllTabs();
+
   console.log("notify", "installed", details.reason, details.previousVersion );
 };
 
@@ -372,7 +379,6 @@ chrome.runtime.onMessage.addListener( onMessage );
 //get the tab screencap
 //this needs to run the web worker
 var generateScreenCap = function( windowId, options, callback ){
-  console.log( "notify", "gen screen cap" );
   return chrome.tabs.captureVisibleTab( windowId, options, callback );
 };
 
@@ -389,8 +395,8 @@ chrome.browserAction.onClicked.addListener( browserActionClick );
 //if a tab is replaced (only for prerender)
 chrome.tabs.onReplaced.addListener( tabReplaced );
 
-chrome.runtime.onSuspend.addListener( function(){ copnsole.log("notify", "suspended"); });
-chrome.runtime.onSuspendCanceled.addListener( function(){ copnsole.log("notify", "suspend cancelled"); });
+chrome.runtime.onSuspend.addListener( function(){ console.log("notify", "suspended"); });
+chrome.runtime.onSuspendCanceled.addListener( function(){ console.log("notify", "suspend cancelled"); });
 
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
