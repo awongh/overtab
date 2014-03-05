@@ -206,7 +206,21 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
       delete tab.favIconUrl;
     }
 
-    $scope.tabs.push(tab);
+    //try to add it in depending on parent
+    if( tab.hasOwnProperty( "openerTabId" ) && tab.openerTabId ){
+      var index = $scope.tabs.valuePropertyIndex( "id", tab.openerTabId );
+
+      //no index, just add to end
+      if( index === false ){
+        index = -1;
+      }else{
+        index++;
+      }
+
+      $scope.tabs.add( index, tab );
+    }else{
+      $scope.tabs.push(tab);
+    }
 
     //if we are calling this from add all tabs.....
     if( doUpdate === true ){
@@ -214,7 +228,6 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
     }else{
 
       //set the edge
-      //openerTabId
       $scope.tabEdgeSet( tab, $scope.edgesRender );
 
       //scroll to the newest tab
