@@ -6,6 +6,7 @@ $background: #383738;
 $text: #bfbfbf;
 $edge-color: #8c8c8c;
 $edge-parent-color: #999999;
+$close-box-shadow: #000;
 
 /* new comment */
 
@@ -104,6 +105,8 @@ body {
           top:-19px;
 
           img {
+            box-shadow:rgba(0, 0, 0, 0.85) -2px 3px 28px;
+            border-radius:12px;
             height:22px;
           }
         }
