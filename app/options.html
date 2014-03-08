@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <title>OverTab Options | Be over your tabs.</title>
+
+        <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+        <!-- build:css styles/vendor.css -->
+        <!-- bower:css -->
+        <!-- endbower -->
+        <!-- endbuild -->
+        <!-- build:css(app,.tmp) /css/main.css -->
+        <link rel="stylesheet" href="css/style.css">
+        <!-- endbuild -->
+    </head>
+    <body>
+      <div>
+        <h3>this doesnt do anything! just a place holder!</h3>
+        <label>open as window</label>
+        <input id="open-as-window" type="checkbox"/>
+      </div>
+      <div id="status"></div>
+      <button id="save">Save</button>
+
+      <!-- build:js scripts/vendor.js -->
+      <!-- bower:js -->
+      <script src="bower_components/jquery/jquery.js"></script>
+      <script src="bower_components/angular/angular.js"></script>
+      <script src="bower_components/json3/lib/json3.min.js"></script>
+      <script src="bower_components/d3/d3.js"></script>
+      <!-- endbower -->
+      <!-- endbuild -->
+
+      <!-- build:js({.tmp,app}) scripts/options-scripts.js -->
+      <script src="scripts/convenience.js"></script>
+      <script src="scripts/chrome.js"></script>
+      <script src="scripts/angular-chrome.js"></script>
+      <script src="js/options.js"></script>
+      <!-- endbuild -->
+    </body>
+</html>

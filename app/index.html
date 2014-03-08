@@ -5,12 +5,8 @@
         <title>OverTab | Be over your tabs.</title>
 
         <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
-        <!-- build:css styles/vendor.css -->
-        <!-- bower:css -->
-        <!-- endbower -->
-        <!-- endbuild -->
-        <!-- build:css(app,.tmp) /css/main.css -->
-        <link rel="stylesheet" href="css/style.css">
+        <!-- build:css(app,.tmp) styles/style.css -->
+        <link rel="stylesheet" href="styles/style.css">
         <!-- endbuild -->
     </head>
 
@@ -38,7 +34,7 @@
               </svg>
             </div>
         </div>
-        <!-- build:js scripts/vendor.js -->
+        <!-- build:js({.tmp,app}) scripts/vendor.js -->
         <!-- bower:js -->
         <script src="bower_components/jquery/jquery.js"></script>
         <script src="bower_components/angular/angular.js"></script>
@@ -48,13 +44,13 @@
         <!-- endbuild -->
 
         <!-- build:js({.tmp,app}) scripts/scripts.js -->
-        <script src="js/convenience.js"></script>
-        <script src="js/chrome.js"></script>
-        <script src="js/angular-chrome.js"></script>
-        <script src="js/angular-app/controllers/mainController.js"></script>
-        <script src="js/angular-app/directives/nodeColor.js"></script>
-        <script src="js/angular-app/filters/domainExtractionFilter.js"></script>
-        <script src="js/angular-app/modules/app.js"></script>
+        <script src="scripts/convenience.js"></script>
+        <script src="scripts/chrome.js"></script>
+        <script src="scripts/angular-chrome.js"></script>
+        <script src="scripts/angular-app/controllers/mainController.js"></script>
+        <script src="scripts/angular-app/directives/nodeColor.js"></script>
+        <script src="scripts/angular-app/filters/domainExtractionFilter.js"></script>
+        <script src="scripts/angular-app/modules/app.js"></script>
         <!-- endbuild -->
 
     </body>
