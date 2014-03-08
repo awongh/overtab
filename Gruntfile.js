@@ -368,7 +368,7 @@ module.exports = function (grunt) {
     compress: {
         dist: {
             options: {
-                archive: 'package/overtab<%= manifest.version %>.zip'
+                archive: 'package/overtab.zip'
             },
             files: [{
                 expand: true,
