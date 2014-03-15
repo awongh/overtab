@@ -1,0 +1,69 @@
+$background: #383738;
+$text: #bfbfbf;
+
+body{
+  margin-left:20%;
+  margin-right:20%;
+}
+
+button{
+  background-color: $text;
+  color: $background;
+  border:none;
+  border-radius:5px;
+}
+
+button:hover{
+  background-color: lighten( $text, 10% );
+  color: darken( $background, 5% );
+
+}
+
+.option-group{
+  background-color: $background;
+  border: 5px solid lighten( $background, 10% );
+  border-radius: 14px;
+  margin:10px;
+  padding:10px;
+}
+
+#save{
+  height:30px;
+  font-size:18px;
+}
+
+label {
+    display: block;
+    cursor: pointer;
+    position: relative;
+    padding-left: 25px;
+    margin: 10px;
+    font-size: 13px;
+}
+
+
+label:before {
+    content: "";
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    margin-right: 10px;
+    position: absolute;
+    left: 0;
+    bottombottom: 1px;
+    background-color: #8f8f8f;
+    box-shadow: inset 0px 2px 3px 0px rgba(0, 0, 0, .3), 0px 1px 0px 0px rgba(255, 255, 255, .8);
+    border-radius: 8px;
+}
+
+input[type=radio]:checked + label:before {
+    content: "\2022";
+    color: darken( $background, 2% );
+    font-size: 30px;
+    text-align: center;
+    line-height: 19px;
+}
+
+input[type=radio] {
+    display: none;
+}

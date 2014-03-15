@@ -5,24 +5,26 @@
         <title>OverTab Options | Be over your tabs.</title>
 
         <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
-        <!-- build:css styles/vendor.css -->
-        <!-- bower:css -->
-        <!-- endbower -->
-        <!-- endbuild -->
-        <!-- build:css(app,.tmp) /css/main.css -->
-        <link rel="stylesheet" href="css/style.css">
+        <link rel="stylesheet" href="styles/style.css">
+        <!-- build:css(app,.tmp) styles/options.css -->
+        <link rel="stylesheet" href="styles/options.css">
         <!-- endbuild -->
     </head>
     <body>
-      <div>
-        <h3>this doesnt do anything! just a place holder!</h3>
-        <label>open as window</label>
-        <input id="open-as-window" type="checkbox"/>
-      </div>
+      <h1>OverTab Options</h1>
       <div id="status"></div>
-      <button id="save">Save</button>
+      <div class="radio option-group">
+        <h3>How do you want to open overtab?</h3>
+        <input id="tabOpener" class="opener" type="radio" name="opener" value="tab" checked>
+        <label for="tabOpener">Open in a new tab.</label>
+        <input id="windowOpener" class="opener" type="radio" name="opener" value="window">
+        <label for="windowOpener">Open in a new window.</label>
+      </div>
+      <div class="option-group">
+        <button id="save">Save</button>
+      </div>
 
-      <!-- build:js scripts/vendor.js -->
+      <!-- build:js scripts/options-vendor.js -->
       <!-- bower:js -->
       <script src="bower_components/jquery/jquery.js"></script>
       <script src="bower_components/angular/angular.js"></script>
@@ -35,7 +37,7 @@
       <script src="scripts/convenience.js"></script>
       <script src="scripts/chrome.js"></script>
       <script src="scripts/angular-chrome.js"></script>
-      <script src="js/options.js"></script>
+      <script src="scripts/options.js"></script>
       <!-- endbuild -->
     </body>
 </html>
