@@ -226,12 +226,17 @@ var onMessage = function( request, sender, sendResponse ){
 
 var openOverTab = function( ){
 
-  lsGet( "OVERTAB_OPEN_FUNC", function( func ){
+  lsGet( "opener", function( result ){
 
-    //this is a hack, needs to be fixed with switch statement
-    if( !func || typeof func["OVERTAB_OPEN_FUNC"] == "undefined" ){
-      //default behavior
-      func = OVERTAB_DEFAULT_OPEN_FUNC;
+    var openerMethod,
+      method = result["opener"];
+
+    switch( method ){
+      case "window":
+        openerMethod = chrome.windows.create;
+        break;
+      default:
+        openerMethod = chrome.tabs.create;
     }
 
     var options = {
@@ -239,7 +244,7 @@ var openOverTab = function( ){
     };
 
     //add more options here from local storage
-    func( options, function(tab) {
+    openerMethod( options, function(tab) {
 
       //do we want any checks here?
 

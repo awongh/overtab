@@ -16,55 +16,50 @@ function setAllOptions(){
 
   for( var index in options ){
 
-    if( options.hasOwnProperty( index ) ){
-
-      //store it under name
-      var name = options[index].name;
-
-      var c = $("."+name);
-
-      var elem;
-
-      //in case we have an element that has multiple inputs per value
-      if( c.length > 1 ){
-        //some kind of thing
-        var type = $( c[0] ).attr( "type" );
-
-        if( type === "radio" || type === "checked" ){
-          //get the checked one
-          elem = $(c).closest( "input:checked" );
-          //make sure we have a real result
-        }
-
-      }else{
-        var elem = c[0];
-      }
-
-      //set the elem to the name
-      if( elem ){
-
-        var value = $(elem).val();
-
-        //console.log( "warn", "SETTING: "+value);
-
-        lsSet( { name : elem }, function(){
-          //something???
-          //do the next thing i guess
-        });
-
-      }
+    if( !options.hasOwnProperty( index ) ){
+      continue;
     }
-  }
-}
+    //store it under name
+    var name = options[index].name;
+    var type = options[index].type;
 
-function setOpener( val ){
-  var opener = $( "input:checked" ).val();
+    var c = $("."+name);
 
-  if( options.opener.indexOf( opener ) !== -1 ){
-    lsSet( { "opener" : opener }, function(){
-      //
-      //
-    });
+    var elem;
+
+    //in case we have an element that has multiple inputs per value
+
+    if( type === "radio" || type === "checked" ){
+      //get the checked one
+      elem = $(c).closest( "input:checked" );
+      //make sure we have a real result
+    }else if( type === "select" ){
+      elem = $(c).closest( ":selected" );
+    }else{
+      elem = c[0];
+    }
+
+    //set the elem to the name
+    if( elem ){
+
+      var value = $(elem).val();
+
+      var setObj = {};
+
+      setObj[name] = value;
+
+      lsSet( setObj, function(){
+        var i = index;
+        return function(){
+          //this would work better in a promise and not a closure!!!
+          if( ++i == options.length ){
+            saveNotification();
+          }
+        };
+      }());
+    }else{
+      //we couldn't find the html element for this option
+    }
   }
 }
 
@@ -76,6 +71,52 @@ function save_options() {
 }
 
 function restore_options() {
+
+  for( var index in options ){
+
+    if( !options.hasOwnProperty( index ) ){
+      continue;
+    }
+
+    var option = options[index];
+
+    lsGet( option.name, function(){
+      var opt = option;
+
+      return function( result ){
+
+        if( !result || !result.hasOwnProperty( opt.name ) ) { return; }
+
+        var value = result[opt.name];
+
+        //try to set the thing
+        switch( opt.type ){
+          //get the thing with the value we set
+          case "checkbox":
+          case "radio":
+            var selector = "."+opt.name+"[value='"+value+"']";
+            $(selector).prop( "checked", true );
+
+            break;
+
+
+          case "select":
+            var selector = "."+opt.name+"[value='"+value+"']";
+            $(selector).prop( "selected", true );
+
+            break;
+
+          case "text":
+
+            var selector = "."+opt.name;
+            $(selector).val( value );
+
+            break;
+        }
+      };
+    }());
+  }
+
 }
 
 document.addEventListener('DOMContentLoaded', restore_options);

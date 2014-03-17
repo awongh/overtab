@@ -1,15 +1,26 @@
 "use strict";
 
 //options array
-
+//define the possible values in the options checker, inside of background
 var options = [
+  //values: tab, window
   {
     name : "opener",
-    options: [
-      "tab",
-      "window"
-    ]
+    type : "radio"
   }
+
+  //example other kinds of inputs for options
+  //name == class on individual
+  /*
+
+  {
+    name : "test4",
+    type : "select"
+  },
+  { name: "test3", type:"text" }
+
+  */
+
 ];
 
 ////////////////////////////////////////////////////////////////////////
