@@ -200,7 +200,12 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
     var domain = parser.href( tab.url ).hostname();
 
     tab.searchDomain = domain;
-    tab.domainInt = stringToInt( domain );
+
+    tab.domainInt = 0;
+
+    if( typeof tab.url !== "undefined" && parser.href(tab.url).protocol() !== "chrome:" ){
+      tab.domainInt = stringToInt( domain );
+    }
 
     if( typeof tab.favIconUrl !== "undefined" && parser.href(tab.favIconUrl).protocol() === "chrome:" ){
       delete tab.favIconUrl;
@@ -457,6 +462,9 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
     }
   };
 
+  $scope.borderColor = function(){
+    return rangeConstrict( this.tab.domainInt );
+  };
 
   $scope.init = function() {
     console.log("notify", "init" );

@@ -6,8 +6,7 @@
       SCREEN_CROP_RATIO = 1;
 
   var OVERTAB_TAB_ID = null,
-      OVERTAB_WINDOW_ID = null,
-      OVERTAB_DEFAULT_OPEN_FUNC = chrome.tabs.create;
+      OVERTAB_WINDOW_ID = null;
 
 function tabEvent( id, message ){
   sendMessage(null, {message: message, id: id});
@@ -224,6 +223,8 @@ var onMessage = function( request, sender, sendResponse ){
   //console.log("notify", "message request:", request);
 };
 
+//we are hard coding without static globals the default overtab behavior!!!!
+//it opens in a new tab
 var openOverTab = function( ){
 
   lsGet( "opener", function( result ){
@@ -369,9 +370,6 @@ var install = function( details ){
 chrome.runtime.onStartup.addListener( startup );
 chrome.runtime.onSuspend.addListener( shutdown );
 chrome.runtime.onInstalled.addListener( install );
-
-//default overtab opener
-var defaultOpener = chrome.tabs.create;
 
 //get extension html url
 var getExtensionUrl = function(){

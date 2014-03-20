@@ -70,6 +70,8 @@ body {
         font-size: .7rem;
         width:150px;
         position:relative;
+        border-width:9px;
+        border-style:solid;
 
         .thumbnail {
             overflow: hidden;
@@ -89,6 +91,8 @@ body {
           top:-8px;
           left:-8px;
           background-color:#fff;
+          border-width:4px;
+          border-style:solid;
         }
 
         .title {
