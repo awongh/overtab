@@ -186,6 +186,25 @@ var stringToInt = function( str ){
   return retInt;
 };
 
+//make the domainInt a number in the range
+//of colors we've specified
+function rangeConstrict(num ){
+
+  var min1 = 1,
+    max1 = 42,
+    min2 = 1,
+    max2 = 1638;
+
+  var num1 = (num - min1) / (max1 - min1);
+  var num2 = (num1 * (max2 - min2)) + min2;
+
+  //golden ratio is .6...
+  //this evenly distributes the numbers b/c most will not
+  //be anywhere near 1638
+  num2 += 0.618033988749895;
+  return Math.round( num2 %= max1 );
+}
+
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 ////////////////      END CONVINIENCE CLASSES           ////////////////
@@ -193,6 +212,29 @@ var stringToInt = function( str ){
 ////////////////////////////////////////////////////////////////////////
 
 "use strict";
+
+//options array
+//define the possible values in the options checker, inside of background
+var options = [
+  //values: tab, window
+  {
+    name : "opener",
+    type : "radio"
+  }
+
+  //example other kinds of inputs for options
+  //name == class on individual
+  /*
+
+  {
+    name : "test4",
+    type : "select"
+  },
+  { name: "test3", type:"text" }
+
+  */
+
+];
 
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
@@ -472,7 +514,12 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
     var domain = parser.href( tab.url ).hostname();
 
     tab.searchDomain = domain;
-    tab.domainInt = stringToInt( domain );
+
+    tab.domainInt = 0;
+
+    if( typeof tab.url !== "undefined" && parser.href(tab.url).protocol() !== "chrome:" ){
+      tab.domainInt = stringToInt( domain );
+    }
 
     if( typeof tab.favIconUrl !== "undefined" && parser.href(tab.favIconUrl).protocol() === "chrome:" ){
       delete tab.favIconUrl;
@@ -729,6 +776,9 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
     }
   };
 
+  $scope.borderColor = function(){
+    return rangeConstrict( this.tab.domainInt );
+  };
 
   $scope.init = function() {
     console.log("notify", "init" );
@@ -745,28 +795,6 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
     //chrome.runtime.onMessage.addListener( $scope.onMessage );
     setMessageListener( $scope.onMessage );
 
-  };
-};
-
-"use strict";
-
-var nodeColor = function(){
-
-  var fill = d3.scale.category20();
-
-  return {
-      restrict: 'A',
-      link: function( scope, elem, attrs ){
-
-        var borderWidth = attrs.nodeColor;
-
-        if(typeof scope.tab.domainInt !== 'undefined'){
-          //call the thing
-          var color = fill( scope.tab.domainInt );
-
-          elem.css( 'border', borderWidth+'px solid '+color);
-        }
-      }
   };
 };
 
