@@ -14,5 +14,4 @@ overtabApp.config(function($filterProvider, $compileProvider){
     // Angular before v1.2 uses $compileProvider.urlSanitizationWhitelist(...)
 })
 .filter('domainExtraction', domainExtractionFilter)
-.controller('mainController', ['$scope', '$rootScope', '$timeout', '$filter', mainController])
-.directive('nodeColor', nodeColor);
+.controller('mainController', ['$scope', '$rootScope', '$timeout', '$filter', mainController]);
