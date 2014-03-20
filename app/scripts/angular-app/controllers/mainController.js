@@ -48,7 +48,11 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
         $scope.createTab( request.id );
         break;
 
-      case "pre-update":
+      case "replaced":
+        //replace a tab
+        $scope.tabReplaced( request.id, request.oldId );
+        break;
+
       case "pre-update":
       case "updated":
       case "favicon":
@@ -176,6 +180,12 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
     callback();
   };
 
+  //this may create some race conditions..... not sure what to do about this
+  $scope.tabReplaced = function( tabId, oldTabId ){
+    var index = $scope.tabs.valuePropertyIndex( "id", oldTabId );
+    $scope.tabs[index].id = tabId;
+  };
+
   $scope.createTab = function( tabId ){
     console.log("notify", "add tba");
 
@@ -240,7 +250,6 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
         window.scrollTo( $scope.windowWidth, 0);
       },1000);
 
-
       $scope.$apply();
     }
   };
@@ -269,7 +278,6 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
     //run through each property of the tab and update it in the list of objects
     for( var i=0; i<$scope.tabUpdateProperties.length; i++ ){
       var property = $scope.tabUpdateProperties[i];
-
 
       if( property == "favIconUrl"
         && typeof newTab.favIconUrl

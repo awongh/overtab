@@ -331,7 +331,26 @@ var getAllTabs = function(){
 var tabReplaced = function( newTabId, oldTabId ){
 
   //replace the old tab with the new one
-  console.log("warn", "WARN: a tab was replaced" );
+  console.log("warn", "WARN: XXXXXXX a tab was replaced" );
+
+  lsGet( oldTabId, function( result ){
+    if( result && !result.hasOwnProperty( id ) ){
+
+      //reset the thing
+      var setObj = {};
+      setObj[newTabId] = result.url;
+      setObj["screencap-"+newTabId] = "";
+      setObj["screencap-url-"+newTabId] = "";
+
+      lsSet( setObj, function(){
+
+        //ok we set it, send an event
+        sendMessage(null, {message: "replaced", id: newTabId, oldId: oldTabId});
+      });
+    }else{
+      console.log("warn", "couldnt find tab on replace");
+    }
+  });
 };
 
 var startup = function(){
