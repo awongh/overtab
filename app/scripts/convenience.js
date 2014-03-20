@@ -202,7 +202,7 @@ function rangeConstrict(num ){
   //this evenly distributes the numbers b/c most will not
   //be anywhere near 1638
   num2 += 0.618033988749895;
-  return Math.round( num2 %= max1 );
+  return Math.abs( Math.round( num2 %= max1 ) );
 }
 
 ////////////////////////////////////////////////////////////////////////

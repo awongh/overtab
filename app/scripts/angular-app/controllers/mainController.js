@@ -280,11 +280,28 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
       var property = $scope.tabUpdateProperties[i];
 
       if( property == "favIconUrl"
-        && typeof newTab.favIconUrl
-        !== "undefined"
+        && typeof newTab.favIconUrl !== "undefined"
         && parser.href(newTab.favIconUrl).protocol() === "chrome:"
       ){
         continue;
+      }
+
+      //update the domain int
+      if( property == "url" ){
+
+        var parser = new Parser();
+
+        if( newTab.hasOwnProperty( "url" )
+          && oldTab.url !== newTab.url
+          && parser.href(newTab.url).protocol() !== "chrome:" )
+        {
+
+          var domain = parser.href( newTab.url ).hostname();
+          oldTab.searchDomain = domain;
+
+          //recalculate the domain int if its different
+          oldTab.domainInt = stringToInt( domain );
+        }
       }
 
       if( typeof newTab[property] !== "undefined"
@@ -294,6 +311,7 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
         console.log("notify", "updating "+property+" from "+ oldTab[property] +" to "+ newTab[property] );
         oldTab[property] = newTab[property];
       }
+
     }
 
     //we can see if we need to update the edges here.
