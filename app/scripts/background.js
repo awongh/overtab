@@ -8,10 +8,6 @@
   var OVERTAB_TAB_ID = null,
       OVERTAB_WINDOW_ID = null;
 
-function tabEvent( id, message ){
-  sendMessage(null, {message: message, id: id});
-}
-
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 ////////////////     START CHROME CALLBACK FUNCTIONS    ////////////////
@@ -224,35 +220,54 @@ var onMessage = function( request, sender, sendResponse ){
 };
 
 //we are hard coding without static globals the default overtab behavior!!!!
+//( the default switch )
 //it opens in a new tab
-var openOverTab = function( ){
+var openOverTab = function( oldTabId ){
 
   lsGet( "opener", function( result ){
 
     var openerMethod,
       method = result["opener"];
 
-    switch( method ){
-      case "window":
-        openerMethod = chrome.windows.create;
-        break;
-      default:
-        openerMethod = chrome.tabs.create;
-    }
 
     var options = {
       'url' : getExtensionUrl()
     };
 
+    switch( method ){
+      case "window":
+        options["focused"] = true;
+        openerMethod = chrome.windows.create;
+        break;
+      default:
+        options["active"] = true;
+        openerMethod = chrome.tabs.create;
+    }
+
     //add more options here from local storage
-    openerMethod( options, function(tab) {
+    openerMethod( options, function(chromeObj) {
 
       //do we want any checks here?
+      //if the opener method is window, do we still get all these params???
+      if( chromeObj.hasOwnProperty("tabs") && chromeObj.tabs.length > 0 ){
+        //get the tab index of the thing thats active
+        var result = chromeObj.tabs.getByValueProperty( "active", true );
 
-      OVERTAB_TAB_ID = tab.id;
-      OVERTAB_WINDOW_ID = tab.windowId;
+        if( result ){
+          chromeObj = result;
+        }else{
+          console.log( "error", "we couldnt find an active tab in the return value");
+          return;
+        }
+      }
+
+      OVERTAB_TAB_ID = chromeObj.id;
+      OVERTAB_WINDOW_ID = chromeObj.windowId;
 
       lsSet( { "OVERTAB_TAB_ID" : OVERTAB_TAB_ID, "OVERTAB_WINDOW_ID" : OVERTAB_WINDOW_ID } );
+
+      //send a message that says the old tab
+      tabEvent( oldTabId, "overtab" );
     });
 
   });
@@ -260,10 +275,26 @@ var openOverTab = function( ){
 
 var browserActionClick = function( ){
 
-  if ( OVERTAB_TAB_ID === null || OVERTAB_WINDOW_ID === null ) {
+  //before we change the tab, get the current active tab
+  var query = {
+      active: true
+    };
 
+  tabQuery(query, function(tab) {
+
+    var oldTabId = 0;
+
+    if( tab ){
+      var oldTabId = tab.id;
+    }
+
+    //are we in a state where we've set these constants?
+    if ( OVERTAB_TAB_ID === null || OVERTAB_WINDOW_ID === null || OVERTAB_TAB_ID === "undefined" || OVERTAB_WINDOW_ID === "undefined" ) {
+
+      //try to get these constants
       lsGet( "OVERTAB_TAB_ID", function( tabIdResult ){
 
+        //yep, they're set
         if( tabIdResult && tabIdResult !== null && tabIdResult.hasOwnProperty( "OVERTAB_TAB_ID" ) && tabIdResult["OVERTAB_TAB_ID"] !== null ){
           OVERTAB_TAB_ID = tabIdResult;
 
@@ -277,24 +308,28 @@ var browserActionClick = function( ){
                 if( windowIdResult && windowIdResult !== null && windowIdResult.hasOwnProperty( "OVERTAB_WINDOW_ID" ) && windowIdResult["OVERTAB_WINDOW_ID"] !== null ){
 
                   OVERTAB_WINDOW_ID = windowIdResult.OVERTAB_WINDOW_ID;
-                  tabFocus( OVERTAB_TAB_ID, OVERTAB_WINDOW_ID );
+                  tabFocus( OVERTAB_TAB_ID, OVERTAB_WINDOW_ID, oldTabId );
 
                 }else{
-                  openOverTab();
+                  //the overtab window id as set doesnt exist
+                  openOverTab( oldTabId );
                 }
               });
             }else{
-              openOverTab();
+              //the overtab tab id as set doesn't exist
+              openOverTab( oldTabId );
             }
           });
         }else{
-          openOverTab();
+          //the overtab constants aren't in local storage
+          openOverTab( oldTabId );
         }
 
       });
-  }else {
-    tabFocus( OVERTAB_TAB_ID, OVERTAB_WINDOW_ID );
-  }
+    }else {
+      tabFocus( OVERTAB_TAB_ID, OVERTAB_WINDOW_ID, oldTabId );
+    }
+  });
 };
 
 var getAllTabs = function(){
@@ -421,6 +456,9 @@ chrome.tabs.onReplaced.addListener( tabReplaced );
 chrome.runtime.onSuspend.addListener( function(){ console.log("notify", "suspended"); });
 chrome.runtime.onSuspendCanceled.addListener( function(){ console.log("notify", "suspend cancelled"); });
 
+var getCurrentTab = function( callback ){
+  chrome.tabs.getCurrent( callback );
+};
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 ////////////////        END CHROME INTERACTION          ////////////////

@@ -25,10 +25,11 @@
     "homepage_url": "http://overtab.co",
     "minimum_chrome_version": "25.0",
     "commands": {
-        "_execute_browser_action": {
+        "browserActionClick": {
             "suggested_key": {
                 "default": "Ctrl+Shift+A"
-            }
+            },
+            "description" : "open overTab"
         }
     },
     "options_page": "options.html",

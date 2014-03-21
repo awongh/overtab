@@ -42,6 +42,13 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
     }
 
     switch ( request.message ) {
+      case "overtab":
+        //we just focused on this thingy
+        if( request.id ){
+          $scope.overtabFocus( request.id );
+        }
+        break;
+
       case "created":
 
         console.log("notify", "createed", request );
@@ -79,6 +86,11 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
     }
 
     $scope.$apply();
+  };
+
+  $scope.overtabFocus = function( id ){
+    //we know the id of where we just came from, do some stuff
+    angular.element('#filter-input').focus();
   };
 
   $scope.tabClose = function( e ){

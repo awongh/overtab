@@ -15,7 +15,7 @@
 
       <div ng-controller="mainController" ng-init="init()" id="tab-graph">
             <div class="tab-filter">
-                <input ng-model="tabFilter" type="text" placeholder="filter">
+                <input id="filter-input" ng-model="tabFilter" type="text" placeholder="filter">
             </div>
 
             <div id="node-container" class="node-cont" style="height:{{windowHeight}}px; width:{{windowWidth}}px;">
