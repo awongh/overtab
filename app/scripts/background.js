@@ -99,7 +99,6 @@ var screenCap = function( tab ){
 
     if( tab.url == oldUrl ){
       //we already took this screencap
-      console.log("notify", "we already took this cap:", screenCapUrl);
       return false;
     }
 
@@ -155,7 +154,7 @@ var screenCap = function( tab ){
             canvasContext.drawImage(this, 0, 0, width, height);
 
             setObj[capId] = canvas.toDataURL();
-            setObj["screncap-url-"+tab.id] = result.url;
+            setObj["screencap-url-"+tab.id] = result.url;
 
             lsSet( setObj, function(){
               //storage is set, ready for ng app to get it
