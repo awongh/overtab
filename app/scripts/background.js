@@ -65,7 +65,7 @@ var tabUpdated = function( tabId, changeInfo, tab ){
           //ok we set it, send an event
           tabEvent( id, "pre-update" );
 
-          screenCap( tab );
+          //screenCap( tab );
         });
       }else{
         //don't make it too noisy with messages
@@ -78,7 +78,7 @@ var tabUpdated = function( tabId, changeInfo, tab ){
 
   }else{
     //this might be the overtab tab, or options tab or soemthing
-    console.log( "warn", "WARNING: update: not correct protocol", tab );
+    console.log( "warn", "WARNING: update: not correct protocol", tabProtocol, tab, tabId );
   }
 };
 
@@ -171,7 +171,7 @@ var screenCap = function( tab ){
 
         });
       }else{
-        console.log( "warn", "no active window found for this event" );
+        console.log( "warn", "screencap: no active window found >> result: "+result.id+" tab: "+tab.id+" old url: "+oldUrl);
       }
     });
   });
@@ -192,10 +192,12 @@ var tabActivated = function( tabInfo ){
           //what kind of check do we need here??
           if( tab && typeof tab.id !== "undefined" ){
             screenCap( tab );
+          }else{
+            //console.log( "warn", "tab activated but not in get");
           }
         });
     }else{
-      console.log( "warn", "tab activated but not found in ls", result );
+      console.log( "warn", "tab activated but not found in ls: tabid: "+id, result );
     }
 
   });
@@ -295,7 +297,7 @@ var browserActionClick = function( ){
 
         //yep, they're set
         if( tabIdResult && tabIdResult !== null && tabIdResult.hasOwnProperty( "OVERTAB_TAB_ID" ) && tabIdResult["OVERTAB_TAB_ID"] !== null ){
-          OVERTAB_TAB_ID = tabIdResult;
+          OVERTAB_TAB_ID = tabIdResult.OVERTAB_TAB_ID;
 
           getTab( tabIdResult.OVERTAB_TAB_ID, function( tab ){
 
@@ -343,9 +345,8 @@ var getAllTabs = function(){
     var parser = new Parser();
 
     //query for all the tabs
-
     tabsQuery( {}, function( chromeTabs ){
-      console.log("notify", "query all tabs", chromeTabs );
+      //console.log("notify", "query all tabs", chromeTabs );
       for( var i=0; i< chromeTabs.length; i++ ){
         //see if we are gonna allow it
         var tab = chromeTabs[i];
@@ -398,7 +399,7 @@ var startup = function(){
 
 var shutdown = function(){
   chrome.storage.local.clear();
-  //console.log("notify", "shutdown" );
+  console.log("notify", "shutdown" );
 };
 
 var install = function( details ){

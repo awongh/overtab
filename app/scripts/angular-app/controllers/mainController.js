@@ -326,6 +326,9 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
 
     }
 
+    //go and passively try to update the screenshot
+    $scope.updateScreenCap( newTab.id );
+
     //we can see if we need to update the edges here.
     //has the domain changed?
     //or something else?
