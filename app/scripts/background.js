@@ -112,7 +112,7 @@ var screenCap = function( tab ){
 
     tabQuery(activeCompleteQuery, function(result) {
       if ( result.id == tab.id && result.windowId == tab.windowId && oldUrl != result.url && DISALLOWED_SCREENCAP_URLS.indexOf(result.url) === -1 ) {
-        generateScreenCap(result.windowId, {format: "png"}, function( blob ){
+        generateScreenCap(result.windowId, {format: "jpeg"}, function( blob ){
 
           var canvas = document.createElement('canvas'),
             canvasContext = canvas.getContext('2d');
@@ -153,7 +153,7 @@ var screenCap = function( tab ){
             canvasContext.clearRect( 0, 0, canvas.width, canvas.height);
             canvasContext.drawImage(this, 0, 0, width, height);
 
-            setObj[capId] = canvas.toDataURL();
+            setObj[capId] = canvas.toDataURL("image/jpeg",0.7);
             setObj["screencap-url-"+tab.id] = result.url;
 
             lsSet( setObj, function(){
