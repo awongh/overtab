@@ -136,7 +136,7 @@ module.exports = function (grunt) {
                 run: true,
                 timeout: 6000,
                 src: ['testrunner.html'],
-                urls: ['http://localhost:<%= connect.options.port %>/index.html']
+                urls: ['http://localhost:<%= connect.test.options.port %>/index.html']
             }
         }
     },
