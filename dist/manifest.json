@@ -2,7 +2,7 @@
     "manifest_version": 2,
     "name": "Overtab",
     "description": "Visual chrome tab manager that respects your context.",
-    "version": "0.8.47",
+    "version": "0.8.48",
     "default_locale": "en",
     "icons": {
         "19": "images/OverTab_19.png",
@@ -23,10 +23,11 @@
     "homepage_url": "http://overtab.co",
     "minimum_chrome_version": "25.0",
     "commands": {
-        "_execute_browser_action": {
+        "browserActionClick": {
             "suggested_key": {
                 "default": "Ctrl+Shift+A"
-            }
+            },
+            "description": "open overTab"
         }
     },
     "options_page": "options.html",

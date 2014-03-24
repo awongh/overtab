@@ -202,7 +202,7 @@ function rangeConstrict(num ){
   //this evenly distributes the numbers b/c most will not
   //be anywhere near 1638
   num2 += 0.618033988749895;
-  return Math.round( num2 %= max1 );
+  return Math.abs( Math.round( num2 %= max1 ) );
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -233,7 +233,6 @@ var options = [
   { name: "test3", type:"text" }
 
   */
-
 ];
 
 ////////////////////////////////////////////////////////////////////////
@@ -264,11 +263,19 @@ var getTab = function( tabId, callback ){
 };
 
 //bring a tab into focus
-var tabFocus = function( tabId, windowId ){
+var tabFocus = function( tabId, windowId, oldTabId ){
     chrome.windows.update(windowId, {'focused': true}, function() {
-      chrome.tabs.update(tabId, {'active': true}, function() {} );
+      chrome.tabs.update(tabId, {'active': true}, function() {
+        //message the thing to say the tab
+        //send a message with this thing
+        tabEvent( oldTabId, "overtab" );
+      });
     });
 };
+
+var tabEvent = function( id, message ){
+  sendMessage(null, {message: message, id: id});
+}
 
 //send message
 var sendMessage = function( tabId, message, callback ){
@@ -293,6 +300,9 @@ var lsRemove = function( tabId, callback ){
   }
 };
 
+chrome.commands.onCommand.addListener(function(command) {
+  console.log('Command:', command);
+});
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 ////////////////     END SHARED CHROME INTERACTION      ////////////////
