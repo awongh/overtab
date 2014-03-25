@@ -88,7 +88,11 @@ var lsRemove = function( tabId, callback ){
 };
 
 chrome.commands.onCommand.addListener(function(command) {
-  console.log('Command:', command);
+  switch( command ){
+    case "open-overtab":
+      browserActionClick();
+      break;
+  }
 });
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////

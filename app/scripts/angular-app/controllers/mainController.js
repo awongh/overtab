@@ -348,16 +348,17 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
 
           $scope.tabs[tabIndex].screencap = screencap;
 
-          $scope.$apply();
+          $scope.$apply( function(){});
         }else{
           console.log( "warn", "couldnt set this records screencap: "+tabId );
         }
+
+        screencap = null;
       }else{
         console.log( "warn", "we dont have this screen cap record: "+tabId );
       }
 
-      //unset it
-      result = undefined;
+      result = null;
     });
   };
 

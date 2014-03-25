@@ -22,14 +22,14 @@
             "scripts/background.js"
         ]
     },
-    "homepage_url": "http://overtab.co",
+    "homepage_url": "http://awongh.github.io/overtab",
     "minimum_chrome_version": "25.0",
     "commands": {
-        "browserActionClick": {
+        "open-overtab": {
             "suggested_key": {
                 "default": "Ctrl+Shift+A"
             },
-            "description": "open overTab"
+            "description": "Open overTab."
         }
     },
     "options_page": "options.html",
