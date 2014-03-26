@@ -112,64 +112,8 @@ var screenCap = function( tab ){
 
     tabQuery(activeCompleteQuery, function(result) {
       if ( result.id == tab.id && result.windowId == tab.windowId && oldUrl != result.url && DISALLOWED_SCREENCAP_URLS.indexOf(result.url) === -1 ) {
-        generateScreenCap(result.windowId, {format: "jpeg"}, function( blob ){
+        generateScreenCap(result.windowId, {format: "jpeg"}, function(blob){ processImage( tab.id, result.url, blob); });
 
-          var canvas = document.createElement('canvas'),
-            canvasContext = canvas.getContext('2d');
-
-          canvas.width = THUMBSIZE;
-          canvas.height = THUMBSIZE;
-
-          var img = document.createElement('img');
-
-          img.onload = function() {
-
-            var cropLength = THUMBSIZE / SCREEN_CROP_RATIO,
-              height, width;
-
-            //figure out the size to draw the image.
-
-            //height is ratio corrected, so that we are fitting the
-            //screencrop's amount into the thumb height.
-            //the viewport of thumbsize is the visible portion of the screen_crop ratio's
-
-            if( this.height < this.width ){ //landscape
-
-              height = cropLength;
-
-              //figure out the ratio-calculated length of the adjacent side
-              //increase the longer side:
-              //computed length * local ratio <-- always > 1
-              width = cropLength * ( this.width / this.height );
-            }else{
-              width = cropLength;
-
-              height = cropLength * ( this.height / this.width );
-            }
-
-            var capId = "screencap-"+tab.id;
-            var setObj = {};
-
-            canvasContext.clearRect( 0, 0, canvas.width, canvas.height);
-            canvasContext.drawImage(this, 0, 0, width, height);
-
-            setObj[capId] = canvas.toDataURL("image/jpeg",0.7);
-            setObj["screencap-url-"+tab.id] = result.url;
-
-            lsSet( setObj, function(){
-              //storage is set, ready for ng app to get it
-              tabEvent( tab.id, "screencap" );
-            });
-
-            canvas = undefined;
-            canvasContext = undefined;
-          };
-
-          img.src = blob; // Set the image to the dataUrl and invoke the onload function
-          blob = undefined;
-          img = undefined;
-
-        });
       }else{
         console.log( "warn", "screencap: no active window found >> result: "+result.id+" tab: "+tab.id+" old url: "+oldUrl);
       }
