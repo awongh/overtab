@@ -52,14 +52,10 @@ var processImage = function( id, url, blob ){
 
       var returnedData = event.data.returnedData;
 
-      canvasContext.clearRect(0, 0, width, height);
-      canvasContext.putImageData(returnedData, 0, 0);
-
-      //canvasContext.clearRect( 0, 0, THUMBSIZE, THUMBSIZE );
-      //canvasContext.drawImage(that_image, 0, 0, width, height);
-
       //we put the canvascontext in here and the measurements
       //write everything out to the canvas
+      canvasContext.clearRect(0, 0, THUMBSIZE, THUMBSIZE);
+      canvasContext.putImageData(returnedData, 0, 0);
 
       var capId = "screencap-"+id;
       var setObj = {};
@@ -75,9 +71,6 @@ var processImage = function( id, url, blob ){
       setObj = null;
       canvasContext = undefined;
       canvas = undefined;
-
-      //console.log("error", "WUWUWUWUWUWUWUWUWUWUWUWUWUWUWUWUWUWUW", event.data );
-
     };
 
     my_worker.postMessage({
@@ -87,25 +80,9 @@ var processImage = function( id, url, blob ){
       w:THUMBSIZE,
       h:THUMBSIZE
     });
-
-    //console.log("warn", "foo", cc );
-    /*
-
-    setObj[capId] = canvas.toDataURL("image/jpeg",0.7);
-    setObj["screencap-url-"+id] = url;
-
-    lsSet( setObj, function(){
-      //storage is set, ready for ng app to get it
-      tabEvent( id, "screencap" );
-    });
-
-    canvas = undefined;
-    canvasContext = undefined;
-    */
   };
 
   img.src = blob; // Set the image to the dataUrl and invoke the onload function
   blob = undefined;
   img = undefined;
-
 };

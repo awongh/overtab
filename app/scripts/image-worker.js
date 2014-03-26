@@ -12,23 +12,16 @@ onmessage = function (oEvent) {
     rd = d;
 
   rd.data = resample_hermite( d.data, w, h, w2, h2 );
-  //postMessage({ "hi":"foo"});
   postMessage({returnedData:rd});
 };
 
 function resample_hermite(data, W, H, W2, H2){
 
-    //var time1 = Date.now();
-    //var img = canvas.getContext("2d").getImageData(0, 0, W, H);
-    //var img2 = canvas.getContext("2d").getImageData(0, 0, W2, H2);
-    //var data = img.data;
-    //var data = oEvent.data;
-    //var data2 = img2.data;
-    var data2 = [];
-    var ratio_w = W / W2;
-    var ratio_h = H / H2;
-    var ratio_w_half = Math.ceil(ratio_w/2);
-    var ratio_h_half = Math.ceil(ratio_h/2);
+    var data2 = [],
+      ratio_w = W / W2,
+      ratio_h = H / H2,
+      ratio_w_half = Math.ceil(ratio_w/2),
+      ratio_h_half = Math.ceil(ratio_h/2);
 
     for(var j = 0; j < H2; j++){
         for(var i = 0; i < W2; i++){
@@ -68,10 +61,6 @@ function resample_hermite(data, W, H, W2, H2){
         data2[x2 + 3] = gx_a / weights;
         }
     }
-    //console.log("hermite = "+(Math.round(Date.now() - time1)/1000)+" s");
-    //canvas.getContext("2d").clearRect(0, 0, Math.max(W, W2), Math.max(H, H2));
-    //canvas.getContext("2d").putImageData(img2, 0, 0);
 
-    //postMessage({data:data2});
     return data2;
 };
