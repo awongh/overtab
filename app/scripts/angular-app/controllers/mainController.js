@@ -415,35 +415,51 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
     window.requestAnimationFrame(function(){
       $scope.setWindowSize();
 
-      for( var i =0; i< $scope.edgesList.length; i++ ){
-        var tabId = $scope.edgesList[i][0];
-        var parentId = $scope.edgesList[i][1];
+      for( var i =0; i< $scope.tabs.length; i++ ){
+        var tab = $scope.tabs[i];
+        //if is in list
+        //for( var i =0; i< $scope.edgesList.length; i++ ){
+        //objectify this eventaully, please line:164
+        //var tabId = $scope.edgesList[i][0];
+        //var parentId = $scope.edgesList[i][1];
+        var tabId = tab.id;
+        var parentId = $scope.edges[tabId];
 
         //get the positions
         var edges = $scope.edgeCalc( tabId, parentId, i );
 
+        //get the edge
         if( edges ){
 
-          //get the edge
-          var elem = angular.element( '#line-'+tabId+'-'+parentId );
+          if( $scope.edges.hasOwnProperty( tab.id ) ){
 
-          //set the edge
-          //offset it the size of one node and the margin of the edge container
-          angular.element( elem ).attr( "y1", edges.y1 );
-          angular.element( elem ).attr( "x1", edges.x1 );
-          angular.element( elem ).attr( "y2", edges.y2 );
-          angular.element( elem ).attr( "x2", edges.x2 );
+              var elem = angular.element( '#line-'+tabId+'-'+parentId );
 
-          //set the size of the circle depending on how many connections there are
-          var node_size = Math.abs( edges.offset * 0.02 );
+              //set the edge
+              //offset it the size of one node and the margin of the edge container
+              angular.element( elem ).attr( "y1", edges.y1 );
+              angular.element( elem ).attr( "x1", edges.x1 );
+              angular.element( elem ).attr( "y2", edges.y2 );
+              angular.element( elem ).attr( "x2", edges.x2 );
 
-          //set a circle at the parent
-          //TODO: logic to not render if its already a parent
-          var cir = angular.element( '#circle-'+tabId+'-'+parentId );
-          angular.element( cir ).attr( "cy", edges.y2 );
-          angular.element( cir ).attr( "cx", edges.x2 );
-          angular.element( cir ).attr( "r", 5 + node_size );
+              //set the size of the circle depending on how many connections there are
+              //var node_size = Math.abs( edges.offset * 0.02 );
+              var node_size = 1.5; //Math.abs( edges.offset * 0.02 );
+
+              //set a circle at the parent
+              //TODO: logic to not render if its already a parent
+              var cir = angular.element( '#circle-'+tabId+'-'+parentId );
+              angular.element( cir ).attr( "cy", edges.y2 );
+              angular.element( cir ).attr( "cx", edges.x2 );
+              angular.element( cir ).attr( "r", 5 + node_size );
+
+          }
+
         }
+
+        var tabPositions = angular.element( '#'+tabId ).offset();
+        $scope.tabs[i]["y1"] = tabPositions.top;
+        $scope.tabs[i]["x1"] = tabPositions.left;
       }
     });
   };
@@ -459,7 +475,7 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
 
       //try to make the ends point to different locations on the child
       var side_offset = 0;
-      var offset = $scope.edgesList[edgeIndex][2];
+      //var offset = $scope.edgesList[edgeIndex][2];
       //offset = offset * 17 + 3;
 
 
@@ -491,15 +507,17 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
         parent_side_offset = box_width;
       }else if( pTabPos.left == tabPos.left ){
 
-        side_offset = box_width - offset;
+        //side_offset = box_width - offset;
+        side_offset = box_width; // - offset;
       }
 
       return {
         x1:tabPos.left + side_offset + child_side_offset,
-        y1:tabPos.top + offset + child_top_offset,
+        //y1:tabPos.top + offset + child_top_offset,
+        y1:tabPos.top + child_top_offset,
         x2:pTabPos.left + parent_side_offset,
-        y2:pTabPos.top + parent_top_offset,
-        offset:offset
+        y2:pTabPos.top + parent_top_offset //,
+        //offset:offset
       };
     }
   };
