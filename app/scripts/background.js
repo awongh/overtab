@@ -14,15 +14,44 @@
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 
+var isVerifiedTabUrl = function( tab ){
+  if( tab.hasOwnProperty( "url" ) ){
+    var parser = new Parser();
+
+    var tabProtocol = parser.href(tab.url).protocol();
+    var hostName = parser.href(tab.url).hostname();
+
+    //what conditions do we want to accept add adding a tab?
+    if (
+      tab.hasOwnProperty( "id" )
+      && ALLOWED_PROTOCOLS.indexOf( tabProtocol ) !== -1
+      && tab.id != OVERTAB_TAB_ID )
+    {
+      return true;
+    }
+  }
+
+  return false;
+};
+
+var setTabCount = function(){
+  tabsQuery({}, function(result) {
+
+    var count = 0;
+
+    for( var i = 0; i< result.length; i++ ){
+      if( isVerifiedTabUrl( result[i] ) ){
+        count++;
+      }
+    }
+
+    chromeBadge( count );
+  });
+};
+
 var tabCreated = function( tab ){
 
-  var parser = new Parser();
-
-  var tabProtocol = parser.href(tab.url).protocol();
-  var hostName = parser.href(tab.url).hostname();
-
-  //what conditions do we want to accept add adding a tab?
-  if (typeof tab.id !== "undefined" && ALLOWED_PROTOCOLS.indexOf( tabProtocol ) !== -1 && tab.id != OVERTAB_TAB_ID ){
+  if( isVerifiedTabUrl( tab ) ){
 
     var setObj = {};
     setObj[tab.id] = tab.url;
@@ -32,6 +61,8 @@ var tabCreated = function( tab ){
     lsSet( setObj, function(){
       //ok we set it, send an event
       tabEvent( tab.id, "created" );
+
+      setTabCount();
     });
   }else{
     //this might be the overtab tab, or options tab or soemthing
@@ -41,12 +72,7 @@ var tabCreated = function( tab ){
 
 var tabUpdated = function( tabId, changeInfo, tab ){
 
-  var parser = new Parser();
-
-  var tabProtocol = parser.href(tab.url).protocol();
-  var hostName = parser.href(tab.url).hostname();
-
-  if ( typeof tab.id !== "undefined" && ALLOWED_PROTOCOLS.indexOf( tabProtocol ) !== -1 && tabId != OVERTAB_TAB_ID ){
+  if( isVerifiedTabUrl( tab ) ){
 
     var id = tab.id;
     lsGet( id, function( result ){
@@ -78,7 +104,7 @@ var tabUpdated = function( tabId, changeInfo, tab ){
 
   }else{
     //this might be the overtab tab, or options tab or soemthing
-    console.log( "warn", "WARNING: update: not correct protocol", tabProtocol, tab, tabId );
+    console.log( "warn", "WARNING: update: not correct protocol", tab, tabId );
   }
 };
 
@@ -112,8 +138,9 @@ var screenCap = function( tab ){
 
     tabQuery(activeCompleteQuery, function(result) {
       if ( result.id == tab.id && result.windowId == tab.windowId && oldUrl != result.url && DISALLOWED_SCREENCAP_URLS.indexOf(result.url) === -1 ) {
-        generateScreenCap(result.windowId, {format: "jpeg"}, function(blob){ processImage( tab.id, result.url, blob); });
-
+        generateScreenCap(result.windowId, {format: "jpeg"}, function(blob){
+          processImage( tab.id, result.url, blob);
+        });
       }else{
         console.log( "warn", "screencap: no active window found >> result: "+result.id+" tab: "+tab.id+" old url: "+oldUrl);
       }
@@ -156,6 +183,8 @@ var tabRemoved = function( tabId, removeInfo ){
   }else{
     lsRemove(tabId, function(){
       tabEvent( tabId, "removed" );
+
+      setTabCount();
     });
   }
 };
@@ -295,11 +324,7 @@ var getAllTabs = function(){
         //see if we are gonna allow it
         var tab = chromeTabs[i];
 
-        var tabProtocol = parser.href(tab.url).protocol();
-        var hostName = parser.href(tab.url).hostname();
-
-        if ( typeof tab.id !== "undefined" && ALLOWED_PROTOCOLS.indexOf( tabProtocol ) !== -1 && tab.id != overtabId && tab.status === "complete" ){
-
+        if( isVerifiedTabUrl( tab ) && tab.id != overtabId && tab.status === "complete" ){
           tabCreated( tab );
         }
       }
