@@ -428,6 +428,14 @@ chrome.runtime.onSuspendCanceled.addListener( function(){ console.log("notify", 
 var getCurrentTab = function( callback ){
   chrome.tabs.getCurrent( callback );
 };
+
+chrome.commands.onCommand.addListener(function(command) {
+  switch( command ){
+    case "open-overtab":
+      browserActionClick();
+      break;
+  }
+});
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 ////////////////        END CHROME INTERACTION          ////////////////

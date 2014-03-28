@@ -37,7 +37,7 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
     console.log("notify", "NG message", request );
 
     if( typeof request.id === "undefined" || typeof request.id !== "number" ){
-      console.log("error", "badly formatted message", request );
+      console.log("error", "message was lacking an id", request );
       return;
     }
 

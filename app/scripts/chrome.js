@@ -87,14 +87,6 @@ var lsRemove = function( tabId, callback ){
   }
 };
 
-chrome.commands.onCommand.addListener(function(command) {
-  switch( command ){
-    case "open-overtab":
-      browserActionClick();
-      break;
-  }
-});
-
 var chromeBadge = function( text ){
   chrome.browserAction.setBadgeText( {text: String(text)} );
 };
