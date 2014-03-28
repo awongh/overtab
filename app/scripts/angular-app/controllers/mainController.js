@@ -125,7 +125,7 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
 
                 if ( typeof tab.id !== "undefined" && ALLOWED_PROTOCOLS.indexOf( tabProtocol ) !== -1 && tab.id != $scope.overtabId && tab.status === "complete" ){
 
-                  $scope.addTab( tab );
+                  $scope.addTab( tab, true );
                 }
               }
             };
