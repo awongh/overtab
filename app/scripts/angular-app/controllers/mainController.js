@@ -34,9 +34,7 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
 
   $scope.onMessage = function(request, sender, sendResponse) {
 
-    console.log("notify", "NG message", request );
-
-    if( typeof request.id === "undefined" || typeof request.id !== "number" ){
+    if( !request.hasOwnProperty( "id" ) || typeof request.id !== "number" ){
       console.log("error", "message was lacking an id", request );
       return;
     }
@@ -51,7 +49,6 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
 
       case "created":
 
-        console.log("notify", "createed", request );
         $scope.createTab( request.id );
         break;
 
@@ -65,18 +62,15 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
       case "favicon":
       case "activated":
 
-        console.log("notify", "updating the tab", request );
         $scope.updateTab( request.id );
         break;
 
       case "screencap":
-        console.log("notify", "we have a screencap, virginia", request );
         $scope.updateScreenCap( request.id );
 
         break;
 
       case "removed":
-        console.log("notify", "revmoes", request );
         $scope.removeTab( request.id );
         break;
 
@@ -123,7 +117,7 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
                 var tabProtocol = parser.href(tab.url).protocol();
                 var hostName = parser.href(tab.url).hostname();
 
-                if ( typeof tab.id !== "undefined" && ALLOWED_PROTOCOLS.indexOf( tabProtocol ) !== -1 && tab.id != $scope.overtabId && tab.status === "complete" ){
+                if ( tab.hasOwnProperty("id") && ALLOWED_PROTOCOLS.indexOf( tabProtocol ) !== -1 && tab.id != $scope.overtabId && tab.status === "complete" ){
 
                   $scope.addTab( tab, true );
                 }
@@ -143,7 +137,7 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
 
   $scope.tabEdgeSet = function( tab, callback ){
 
-    if(typeof tab.openerTabId === 'undefined'){
+    if(!tab.hasOwnProperty( "openerTabId" ) ){
       return false;
     }
 
@@ -199,7 +193,6 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
   };
 
   $scope.createTab = function( tabId ){
-    console.log("notify", "add tba");
 
     //get a tab object from local storage, etc
     $scope.getChromeTab( tabId, $scope.addTab );
@@ -225,11 +218,11 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
 
     tab.domainInt = 0;
 
-    if( typeof tab.url !== "undefined" && parser.href(tab.url).protocol() !== "chrome:" ){
+    if( tab.hasOwnProperty( "url" ) && parser.href(tab.url).protocol() !== "chrome:" ){
       tab.domainInt = stringToInt( domain );
     }
 
-    if( typeof tab.favIconUrl !== "undefined" && parser.href(tab.favIconUrl).protocol() === "chrome:" ){
+    if( tab.hasOwnProperty( "favIconUrl" ) && parser.href(tab.favIconUrl).protocol() === "chrome:" ){
       delete tab.favIconUrl;
     }
 
@@ -270,7 +263,6 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
     if (tabId) {
       var tabPosition = $scope.tabs.valuePropertyIndex("id", tabId);
       if( tabPosition !== false ){
-        console.log( "warn", "about to remove tabs:", tabId, tabPosition, $scope.tabs );
 
         $scope.tabEdgeRemove( tabId, $scope.edgesRender );
 
@@ -286,13 +278,12 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
   $scope.updateLocalTab = function( newTab, oldTab ){
     var parser = new Parser();
 
-    console.log( "warn", "about to update local tab", newTab, oldTab );
     //run through each property of the tab and update it in the list of objects
     for( var i=0; i<$scope.tabUpdateProperties.length; i++ ){
       var property = $scope.tabUpdateProperties[i];
 
       if( property == "favIconUrl"
-        && typeof newTab.favIconUrl !== "undefined"
+        && newTab.hasOwnProperty( "favIconUrl" )
         && parser.href(newTab.favIconUrl).protocol() === "chrome:"
       ){
         continue;
@@ -320,7 +311,6 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
         && newTab[property]
         && newTab[property] !== oldTab[property]
       ){
-        console.log("notify", "updating "+property+" from "+ oldTab[property] +" to "+ newTab[property] );
         oldTab[property] = newTab[property];
       }
 
@@ -343,7 +333,7 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
         var screencap = result["screencap-"+tabId];
         var tab = $scope.tabs.getByValueProperty( "id", tabId );
 
-        if( ( typeof tab.screencap !== "undefined" && tab.screencap != screencap ) || typeof tab.screencap == "undefined" || !tab.screencap ){
+        if( ( tab.hasOwnProperty( "screencap" ) && tab.screencap != screencap ) || !tab.hasOwnProperty( "screencap" ) || !tab.screencap ){
           var tabIndex = $scope.tabs.valuePropertyIndex( "id", tabId );
 
           $scope.tabs[tabIndex].screencap = screencap;
@@ -364,11 +354,8 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
 
   $scope.updateTab = function( tabId ){
 
-    console.log("notify","about to get "+tabId);
     //get the tab from chrome
     $scope.getChromeTab( tabId, function( chromeTab ){
-
-      console.log("notify","about to gbvp");
 
       var tab = $scope.tabs.getByValueProperty("id", tabId );
 
@@ -401,7 +388,6 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
   $scope.setWindowSize = function(){
     var i = document.getElementById('node-container').scrollWidth;
     var j = document.getElementById('node-container').scrollHeight;
-    console.log("notify", "width", i, "height", j );
 
     $scope.windowWidth = i;
     $scope.windowHeight = j;
@@ -509,7 +495,6 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
   };
 
   $scope.init = function() {
-    console.log("notify", "init" );
 
     //100 is just a guess, we should fix this later with something more scientific
     $scope.windowHeight = ( window.innerHeight - $scope.headerMargin ) -100; //correct for filter heder
