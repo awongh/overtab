@@ -308,6 +308,7 @@ module.exports = function (grunt) {
           cwd: '<%= yeoman.app %>',
           dest: '<%= yeoman.dist %>',
           src: [
+            'scripts/image-worker.js',
             '*.{ico,png,txt}',
             '.htaccess',
             '*.html',
@@ -356,6 +357,7 @@ module.exports = function (grunt) {
                         'scripts/chromereload.js',
                         'scripts/angular-app/*',
                         'scripts/angular-chrome.js',
+                        'scripts/image-worker.js',
                         'scripts/options.js'
                     ]
                 }
