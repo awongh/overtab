@@ -1,11 +1,9 @@
 "use strict";
 
 var tabFilter = function( ) {
-    return function(input) {
+    return function(tabs, input) {
 
-      var inpu = this.tabFilter;
-
-      if( inpu ){
+      if( input ){
 
         /*
         var t=inpu.split('');
@@ -16,10 +14,10 @@ var tabFilter = function( ) {
         console.log( "error", reg );
         */
 
-        var reg = new RegExp(inpu.split('').join('\\w*.*').replace(/\W/, ""), 'i');
+        var reg = new RegExp(input.split('').join('\\w*.*').replace(/\W/, ""), 'i');
 
         //array of values
-        var output = input.filter(function(tab) {
+        var output = tabs.filter(function(tab) {
 
           if (tab.url.match(reg) || tab.title.match(reg)) {
             return tab;
@@ -30,7 +28,7 @@ var tabFilter = function( ) {
         return output;
 
       }else{
-        return input;
+        return tabs;
       }
 
     };

@@ -28,9 +28,10 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
   $scope.tabs = [];
   $scope.tabIndex = {};
 
-  $scope.edges = {};
-  $scope.edgesList = [];
+  $scope.edges = [];
+  $scope.edgesChildIndex = {};
   $scope.edgesParentIndex = {};
+  $scope.currentEdgeFilter = "";
 
   $scope.onMessage = function(request, sender, sendResponse) {
 
@@ -141,21 +142,19 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
       return false;
     }
 
-    var sibling_count = 0;
-    $scope.edges[tab.id] = tab.openerTabId;
+    $scope.edgesChildIndex[tab.id] = tab.openerTabId;
 
     if (typeof $scope.edgesParentIndex[tab.openerTabId] === 'undefined') {
 
-      $scope.edgesParentIndex[tab.openerTabId] = [tab.id];
+      $scope.edgesParentIndex[tab.openerTabId] = [];
+      $scope.edgesParentIndex[tab.openerTabId].push( tab.id );
     }else{
-
-      sibling_count = $scope.edgesParentIndex[tab.openerTabId].length++;
 
       $scope.edgesParentIndex[tab.openerTabId].push( tab.id );
     }
 
     //objectify this eventaully, please
-    $scope.edgesList.push( [ tab.id, tab.openerTabId, sibling_count ] );
+    $scope.edges.push( { tabId: tab.id, parentId: tab.openerTabId } );
 
     callback();
 
@@ -163,24 +162,24 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
 
   $scope.tabEdgeRemove = function( tabId, callback ){
 
-    //remove edge
-    if(typeof typeof $scope.edges[tabId] !== "undefined" ){
+    var k = $scope.edges.valuePropertyIndex("tabId", tabId);
 
-      delete $scope.edges[tabId];
-    }
+    if( k ){
+      delete $scope.edges[k];
 
-    //let's look through all the edges to make sure its not a parent
+      //look in parent edges
+      if(typeof $scope.edgesParentIndex[tabId] !== 'undefined' ){
+        for( var i=0; i<$scope.edgesParentIndex[tabId].length; i++ ){
 
-    //look in parent edges
-    if(typeof $scope.edgesParentIndex[tabId] !== 'undefined' ){
-      for( var i=0; i<$scope.edgesParentIndex[tabId].length; i++ ){
-        var edgeIndex = $scope.edgesParentIndex[tabId][i];
-        delete $scope.edges[edgeIndex];
+          var edgeIndex = $scope.edgesParentIndex[tabId][i];
 
-        delete $scope.edgesParentIndex[tabId][i];
+          //var parentId = $scope.edgesChildIndex[edgeIndex];
+          delete $scope.edgesChildIndex[edgeIndex];
+        }
+
+        delete $scope.edgesParentIndex[tabId];
       }
 
-      delete $scope.edges[tabId];
     }
 
     callback();
@@ -248,7 +247,7 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
     }else{
 
       //set the edge
-      $scope.tabEdgeSet( tab, $scope.edgesRender );
+      $scope.tabEdgeSet( tab, $scope.currentEdgesRender );
 
       //scroll to the newest tab
       setTimeout(function() {
@@ -264,13 +263,11 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
       var tabPosition = $scope.tabs.valuePropertyIndex("id", tabId);
       if( tabPosition !== false ){
 
-        $scope.tabEdgeRemove( tabId, $scope.edgesRender );
+        $scope.tabEdgeRemove( tabId, $scope.currentEdgesRender );
 
         $scope.tabs.remove(tabPosition);
 
         $scope.setWindowSize();
-
-        $scope.edgesRender();
       }
     }
   };
@@ -322,7 +319,7 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
     //we can see if we need to update the edges here.
     //has the domain changed?
     //or something else?
-    $scope.tabEdgeSet( oldTab, $scope.edgesRender );
+    $scope.tabEdgeSet( oldTab, $scope.currentEdgesRender );
 
     $scope.$apply();
   };
@@ -396,22 +393,52 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
     //$scope.apply();
   };
 
-  $scope.edgesRender = function(){
+  $scope.catchTabFilter = function( tabs ){
+
+    var output = [];
+    angular.forEach( tabs, function( tab, key ){
+      if( $scope.edgesChildIndex[tab.id] != "undefined" ){
+
+        if( tab.hasOwnProperty("openerTabId") && $scope.edgesParentIndex[tab.openerTabId] != "undefined" ){
+          //add it
+          output.push( {tabId:tab.id,parentId:tab.openerTabId} );
+        }
+      }
+    });
+
+    $scope.delayedEdgesRender( output );
+
+    return tabs;
+  };
+
+  $scope.delayedEdgesRender = function( edgesList ){
+    $timeout( function(){$scope.edgesRender( edgesList ); }, 1);
+  };
+
+  $scope.currentEdgesRender = function( ){
+    $scope.edgesRender( $scope.edges );
+  };
+
+  $scope.edgesRender = function( edgesList ){
 
     window.requestAnimationFrame(function(){
       $scope.setWindowSize();
 
-      for( var i =0; i< $scope.edgesList.length; i++ ){
-        var tabId = $scope.edgesList[i][0];
-        var parentId = $scope.edgesList[i][1];
+      for( var i =0; i< edgesList.length; i++ ){
+        var tabId = edgesList[i].tabId;
+        var parentId = edgesList[i].parentId;
 
         //get the positions
         var edges = $scope.edgeCalc( tabId, parentId, i );
+        var cir = angular.element( '#circle-'+tabId+'-'+parentId );
 
+        //get the edge
+        var elem = angular.element( '#line-'+tabId+'-'+parentId );
+
+        //if we didnt find any tabs this will return false
         if( edges ){
-
-          //get the edge
-          var elem = angular.element( '#line-'+tabId+'-'+parentId );
+          angular.element( elem ).show();
+          angular.element( cir ).show();
 
           //set the edge
           //offset it the size of one node and the margin of the edge container
@@ -421,14 +448,16 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
           angular.element( elem ).attr( "x2", edges.x2 );
 
           //set the size of the circle depending on how many connections there are
-          var node_size = Math.abs( edges.offset * 0.02 );
+          //var node_size = Math.abs( edges.offset * 0.02 );
+          var node_size = 0;
 
           //set a circle at the parent
-          //TODO: logic to not render if its already a parent
-          var cir = angular.element( '#circle-'+tabId+'-'+parentId );
           angular.element( cir ).attr( "cy", edges.y2 );
           angular.element( cir ).attr( "cx", edges.x2 );
           angular.element( cir ).attr( "r", 5 + node_size );
+        }else{
+          angular.element( elem ).hide();
+          angular.element( cir ).hide();
         }
       }
     });
@@ -442,7 +471,8 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
     if( tabPos && pTabPos && tabPos.left && tabPos.top && pTabPos.left && pTabPos.top ){
 
       //calculate the offsets of all the things
-      var offset = $scope.edgesList[edgeIndex][2];
+      //var offset = $scope.edgesList[edgeIndex][2];
+      var offset = 0;
 
       var child_side_offset = -4;
       var parent_side_offset = 0;
