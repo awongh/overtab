@@ -501,7 +501,7 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
 
           //move the parent edge down
           //is the child above the parent
-          parent_top_offset = parent_top_offset + 14;
+          parent_top_offset = parent_top_offset + 22;
         }
 
       }else if( pTabPos.top < tabPos.top ){ //child is lower than parent
