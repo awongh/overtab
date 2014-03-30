@@ -322,7 +322,7 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
     //we can see if we need to update the edges here.
     //has the domain changed?
     //or something else?
-    $scope.edgesRender();
+    $scope.tabEdgeSet( oldTab, $scope.edgesRender );
 
     $scope.$apply();
   };
@@ -336,7 +336,7 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
         if( ( tab.hasOwnProperty( "screencap" ) && tab.screencap != screencap ) || !tab.hasOwnProperty( "screencap" ) || !tab.screencap ){
           var tabIndex = $scope.tabs.valuePropertyIndex( "id", tabId );
 
-          $scope.tabs[tabIndex].screencap = screencap;
+          $scope.tabs[tabIndex]['screencap'] = screencap;
 
           $scope.$apply( function(){});
         }else{
@@ -442,47 +442,81 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
     if( tabPos && pTabPos && tabPos.left && tabPos.top && pTabPos.left && pTabPos.top ){
 
       //calculate the offsets of all the things
-
-      //try to make the ends point to different locations on the child
-      var side_offset = 0;
       var offset = $scope.edgesList[edgeIndex][2];
-      //offset = offset * 17 + 3;
 
-
-      var child_side_offset = 0;
+      var child_side_offset = -4;
       var parent_side_offset = 0;
-      var child_top_offset = 0;
-      var parent_top_offset = 0;
+      var child_top_offset = -6;
+      var parent_top_offset = -2;
 
       //determine the side offset:
       //if a higher than b, a -> no offset, b offset to bottom
       //if b higher than a, b -> no offset, a offset to bottom
 
       var box_width = 165;
-      var box_height = 180;
+      var box_height = 185;
 
-      if( pTabPos.top > tabPos.top ){ //parent is higher than child
+      if( pTabPos.top > tabPos.top ){ //parent is lower than child
 
-        child_top_offset = box_height;
-      }else if( pTabPos.top < tabPos.top ){ //child is higher than parent
+        child_top_offset = child_top_offset + box_height;
 
-        parent_top_offset = box_height;
+        if( pTabPos.left != tabPos.left ){
+
+          child_top_offset = child_top_offset - 12
+        }else if( ptabPos.left == pTabPos.left ){
+          child_side_offset = child_side_offset + 12;
+        }
+
+        if( pTabPos.left < tabPos.left ){
+
+          //move the parent edge down
+          //is the child above the parent
+          parent_top_offset = parent_top_offset + 14;
+        }
+
+      }else if( pTabPos.top < tabPos.top ){ //child is lower than parent
+
+        parent_top_offset = parent_top_offset + box_height;
+
+        if( pTabPos.left < tabPos.left ){
+          child_side_offset = child_side_offset + 12;
+        }else if( pTabPos.left > tabPos.left || pTabPos.left == tabPos.left ){
+          parent_side_offset = parent_side_offset + 14;
+        }
+
+      }else if( pTabPos.top == tabPos.top ){
+        child_top_offset = child_top_offset + 12;
+        parent_top_offset = parent_top_offset + 14;
       }
 
+      //parent to right of child
       if( pTabPos.left > tabPos.left ){
 
-        child_side_offset = box_width;
+        child_side_offset = child_side_offset + box_width;
+
+        //move child to the left
+        child_side_offset = child_side_offset - 11;
+
+      //child to right of parent
       }else if( pTabPos.left < tabPos.left ){
 
-        parent_side_offset = box_width;
+        parent_side_offset = parent_side_offset + box_width;
+
+        parent_side_offset = parent_side_offset + 4;
+
+      //on top of eachother
       }else if( pTabPos.left == tabPos.left ){
 
-        side_offset = box_width - offset;
+        child_side_offset = child_side_offset + box_width;
+
+        //offset it to the left subtract more than above
+        //closebox offset
+        child_side_offset = child_side_offset - 19;
       }
 
       return {
-        x1:tabPos.left + side_offset + child_side_offset,
-        y1:tabPos.top + offset + child_top_offset,
+        x1:tabPos.left + child_side_offset,
+        y1:tabPos.top + child_top_offset,
         x2:pTabPos.left + parent_side_offset,
         y2:pTabPos.top + parent_top_offset,
         offset:offset
