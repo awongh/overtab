@@ -19,7 +19,7 @@
             </div>
 
             <div id="node-container" class="node-cont" style="height:{{windowHeight}}px; width:{{windowWidth}}px;">
-              <div ng-repeat="tab in tabs | filter:tabFilter" class="border-color-{{borderColor()}} tab-node" ng-click="switchToTab(tab)" id="{{tab.id}}">
+              <div ng-repeat="tab in tabs | tabFilter" class="border-color-{{borderColor()}} tab-node" ng-click="switchToTab(tab)" id="{{tab.id}}">
                   <img class="border-color-{{borderColor()}} favicon" ng-src="{{tab.favIconUrl || '/images/20x20.gif'}}" />
                   <a class="close-button" ng-click="tabClose()"><img ng-src="/images/close_button.svg"/></a>
                   <div class="thumbnail"><img class="tab-close-img" width="150px" ng-src="{{tab.screencap || '/images/112x140.gif'}}"></div>
@@ -48,7 +48,7 @@
         <script src="scripts/chrome.js"></script>
         <script src="scripts/angular-chrome.js"></script>
         <script src="scripts/angular-app/controllers/mainController.js"></script>
-        <script src="scripts/angular-app/filters/domainExtractionFilter.js"></script>
+        <script src="scripts/angular-app/filters/tabFilter.js"></script>
         <script src="scripts/angular-app/modules/app.js"></script>
         <!-- endbuild -->
 
