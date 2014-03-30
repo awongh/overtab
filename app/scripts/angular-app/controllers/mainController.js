@@ -28,16 +28,14 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
   $scope.tabs = [];
   $scope.tabIndex = {};
 
-  $scope.edges = {};
-  $scope.edgesList = [];
+  $scope.edges = [];
+  $scope.edgesChildIndex = {};
   $scope.edgesParentIndex = {};
 
   $scope.onMessage = function(request, sender, sendResponse) {
 
-    console.log("notify", "NG message", request );
-
-    if( typeof request.id === "undefined" || typeof request.id !== "number" ){
-      console.log("error", "badly formatted message", request );
+    if( !request.hasOwnProperty( "id" ) || typeof request.id !== "number" ){
+      console.log("error", "message was lacking an id", request );
       return;
     }
 
@@ -51,7 +49,6 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
 
       case "created":
 
-        console.log("notify", "createed", request );
         $scope.createTab( request.id );
         break;
 
@@ -65,18 +62,15 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
       case "favicon":
       case "activated":
 
-        console.log("notify", "updating the tab", request );
         $scope.updateTab( request.id );
         break;
 
       case "screencap":
-        console.log("notify", "we have a screencap, virginia", request );
         $scope.updateScreenCap( request.id );
 
         break;
 
       case "removed":
-        console.log("notify", "revmoes", request );
         $scope.removeTab( request.id );
         break;
 
@@ -123,7 +117,7 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
                 var tabProtocol = parser.href(tab.url).protocol();
                 var hostName = parser.href(tab.url).hostname();
 
-                if ( typeof tab.id !== "undefined" && ALLOWED_PROTOCOLS.indexOf( tabProtocol ) !== -1 && tab.id != $scope.overtabId && tab.status === "complete" ){
+                if ( tab.hasOwnProperty("id") && ALLOWED_PROTOCOLS.indexOf( tabProtocol ) !== -1 && tab.id != $scope.overtabId && tab.status === "complete" ){
 
                   $scope.addTab( tab );
                 }
@@ -143,25 +137,23 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
 
   $scope.tabEdgeSet = function( tab, callback ){
 
-    if(typeof tab.openerTabId === 'undefined'){
+    if(!tab.hasOwnProperty( "openerTabId" ) ){
       return false;
     }
 
-    var sibling_count = 0;
-    $scope.edges[tab.id] = tab.openerTabId;
+    $scope.edgesChildIndex[tab.id] = tab.openerTabId;
 
     if (typeof $scope.edgesParentIndex[tab.openerTabId] === 'undefined') {
 
-      $scope.edgesParentIndex[tab.openerTabId] = [tab.id];
+      $scope.edgesParentIndex[tab.openerTabId] = [];
+      $scope.edgesParentIndex[tab.openerTabId].push( tab.id );
     }else{
-
-      sibling_count = $scope.edgesParentIndex[tab.openerTabId].length++;
 
       $scope.edgesParentIndex[tab.openerTabId].push( tab.id );
     }
 
     //objectify this eventaully, please
-    $scope.edgesList.push( [ tab.id, tab.openerTabId, sibling_count ] );
+    $scope.edges.push( { tabId: tab.id, parentId: tab.openerTabId } );
 
     callback();
 
@@ -169,24 +161,24 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
 
   $scope.tabEdgeRemove = function( tabId, callback ){
 
-    //remove edge
-    if(typeof typeof $scope.edges[tabId] !== "undefined" ){
+    var k = $scope.edges.valuePropertyIndex("tabId", tabId);
 
-      delete $scope.edges[tabId];
-    }
+    if( k ){
+      delete $scope.edges[k];
 
-    //let's look through all the edges to make sure its not a parent
+      //look in parent edges
+      if(typeof $scope.edgesParentIndex[tabId] !== 'undefined' ){
+        for( var i=0; i<$scope.edgesParentIndex[tabId].length; i++ ){
 
-    //look in parent edges
-    if(typeof $scope.edgesParentIndex[tabId] !== 'undefined' ){
-      for( var i=0; i<$scope.edgesParentIndex[tabId].length; i++ ){
-        var edgeIndex = $scope.edgesParentIndex[tabId][i];
-        delete $scope.edges[edgeIndex];
+          var edgeIndex = $scope.edgesParentIndex[tabId][i];
 
-        delete $scope.edgesParentIndex[tabId][i];
+          //var parentId = $scope.edgesChildIndex[edgeIndex];
+          delete $scope.edgesChildIndex[edgeIndex];
+        }
+
+        delete $scope.edgesParentIndex[tabId];
       }
 
-      delete $scope.edges[tabId];
     }
 
     callback();
@@ -199,7 +191,6 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
   };
 
   $scope.createTab = function( tabId ){
-    console.log("notify", "add tba");
 
     //get a tab object from local storage, etc
     $scope.getChromeTab( tabId, $scope.addTab );
@@ -225,11 +216,11 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
 
     tab.domainInt = 0;
 
-    if( typeof tab.url !== "undefined" && parser.href(tab.url).protocol() !== "chrome:" ){
+    if( tab.hasOwnProperty( "url" ) && parser.href(tab.url).protocol() !== "chrome:" ){
       tab.domainInt = stringToInt( domain );
     }
 
-    if( typeof tab.favIconUrl !== "undefined" && parser.href(tab.favIconUrl).protocol() === "chrome:" ){
+    if( tab.hasOwnProperty( "favIconUrl" ) && parser.href(tab.favIconUrl).protocol() === "chrome:" ){
       delete tab.favIconUrl;
     }
 
@@ -255,7 +246,7 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
     }else{
 
       //set the edge
-      $scope.tabEdgeSet( tab, $scope.edgesRender );
+      $scope.tabEdgeSet( tab, $scope.currentEdgesRender );
 
       //scroll to the newest tab
       setTimeout(function() {
@@ -270,15 +261,12 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
     if (tabId) {
       var tabPosition = $scope.tabs.valuePropertyIndex("id", tabId);
       if( tabPosition !== false ){
-        console.log( "warn", "about to remove tabs:", tabId, tabPosition, $scope.tabs );
 
-        $scope.tabEdgeRemove( tabId, $scope.edgesRender );
+        $scope.tabEdgeRemove( tabId, $scope.currentEdgesRender );
 
         $scope.tabs.remove(tabPosition);
 
         $scope.setWindowSize();
-
-        $scope.edgesRender();
       }
     }
   };
@@ -286,13 +274,12 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
   $scope.updateLocalTab = function( newTab, oldTab ){
     var parser = new Parser();
 
-    console.log( "warn", "about to update local tab", newTab, oldTab );
     //run through each property of the tab and update it in the list of objects
     for( var i=0; i<$scope.tabUpdateProperties.length; i++ ){
       var property = $scope.tabUpdateProperties[i];
 
       if( property == "favIconUrl"
-        && typeof newTab.favIconUrl !== "undefined"
+        && newTab.hasOwnProperty( "favIconUrl" )
         && parser.href(newTab.favIconUrl).protocol() === "chrome:"
       ){
         continue;
@@ -320,7 +307,6 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
         && newTab[property]
         && newTab[property] !== oldTab[property]
       ){
-        console.log("notify", "updating "+property+" from "+ oldTab[property] +" to "+ newTab[property] );
         oldTab[property] = newTab[property];
       }
 
@@ -332,7 +318,7 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
     //we can see if we need to update the edges here.
     //has the domain changed?
     //or something else?
-    $scope.edgesRender();
+    $scope.tabEdgeSet( oldTab, $scope.currentEdgesRender );
 
     $scope.$apply();
   };
@@ -343,10 +329,10 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
         var screencap = result["screencap-"+tabId];
         var tab = $scope.tabs.getByValueProperty( "id", tabId );
 
-        if( ( typeof tab.screencap !== "undefined" && tab.screencap != screencap ) || typeof tab.screencap == "undefined" || !tab.screencap ){
+        if( ( tab.hasOwnProperty( "screencap" ) && tab.screencap != screencap ) || !tab.hasOwnProperty( "screencap" ) || !tab.screencap ){
           var tabIndex = $scope.tabs.valuePropertyIndex( "id", tabId );
 
-          $scope.tabs[tabIndex].screencap = screencap;
+          $scope.tabs[tabIndex]['screencap'] = screencap;
 
           $scope.$apply( function(){});
         }else{
@@ -364,11 +350,8 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
 
   $scope.updateTab = function( tabId ){
 
-    console.log("notify","about to get "+tabId);
     //get the tab from chrome
     $scope.getChromeTab( tabId, function( chromeTab ){
-
-      console.log("notify","about to gbvp");
 
       var tab = $scope.tabs.getByValueProperty("id", tabId );
 
@@ -401,7 +384,6 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
   $scope.setWindowSize = function(){
     var i = document.getElementById('node-container').scrollWidth;
     var j = document.getElementById('node-container').scrollHeight;
-    console.log("notify", "width", i, "height", j );
 
     $scope.windowWidth = i;
     $scope.windowHeight = j;
@@ -410,51 +392,69 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
     //$scope.apply();
   };
 
-  $scope.edgesRender = function(){
+  $scope.catchTabFilter = function( tabs ){
+
+    var output = [];
+    angular.forEach( tabs, function( tab, key ){
+      if( $scope.edgesChildIndex[tab.id] != "undefined" ){
+
+        if( tab.hasOwnProperty("openerTabId") && $scope.edgesParentIndex[tab.openerTabId] != "undefined" ){
+          //add it
+          output.push( {tabId:tab.id,parentId:tab.openerTabId} );
+        }
+      }
+    });
+
+    $scope.delayedEdgesRender( output );
+
+    return tabs;
+  };
+
+  $scope.delayedEdgesRender = function( edgesList ){
+    $timeout( function(){$scope.edgesRender( edgesList ); }, 1);
+  };
+
+  $scope.currentEdgesRender = function( ){
+    $scope.edgesRender( $scope.edges );
+  };
+
+  $scope.edgesRender = function( edgesList ){
 
     window.requestAnimationFrame(function(){
       $scope.setWindowSize();
 
-      for( var i =0; i< $scope.tabs.length; i++ ){
-        var tab = $scope.tabs[i];
-        //if is in list
-        //for( var i =0; i< $scope.edgesList.length; i++ ){
-        //objectify this eventaully, please line:164
-        //var tabId = $scope.edgesList[i][0];
-        //var parentId = $scope.edgesList[i][1];
-        var tabId = tab.id;
-        var parentId = $scope.edges[tabId];
+      for( var i =0; i< edgesList.length; i++ ){
+        var tabId = edgesList[i].tabId;
+        var parentId = edgesList[i].parentId;
 
         //get the positions
         var edges = $scope.edgeCalc( tabId, parentId, i );
+        var cir = angular.element( '#circle-'+tabId+'-'+parentId );
+        var elem = angular.element( '#line-'+tabId+'-'+parentId );
 
-        //get the edge
+        //if we didnt find any tabs this will return false
         if( edges ){
+          angular.element( elem ).show();
+          angular.element( cir ).show();
 
-          if( $scope.edges.hasOwnProperty( tab.id ) ){
+          //set the edge
+          //offset it the size of one node and the margin of the edge container
+          angular.element( elem ).attr( "y1", edges.y1 );
+          angular.element( elem ).attr( "x1", edges.x1 );
+          angular.element( elem ).attr( "y2", edges.y2 );
+          angular.element( elem ).attr( "x2", edges.x2 );
 
-              var elem = angular.element( '#line-'+tabId+'-'+parentId );
+          //set the size of the circle depending on how many connections there are
+          //var node_size = Math.abs( edges.offset * 0.02 );
+          var node_size = 0;
 
-              //set the edge
-              //offset it the size of one node and the margin of the edge container
-              angular.element( elem ).attr( "y1", edges.y1 );
-              angular.element( elem ).attr( "x1", edges.x1 );
-              angular.element( elem ).attr( "y2", edges.y2 );
-              angular.element( elem ).attr( "x2", edges.x2 );
-
-              //set the size of the circle depending on how many connections there are
-              //var node_size = Math.abs( edges.offset * 0.02 );
-              var node_size = 1.5; //Math.abs( edges.offset * 0.02 );
-
-              //set a circle at the parent
-              //TODO: logic to not render if its already a parent
-              var cir = angular.element( '#circle-'+tabId+'-'+parentId );
-              angular.element( cir ).attr( "cy", edges.y2 );
-              angular.element( cir ).attr( "cx", edges.x2 );
-              angular.element( cir ).attr( "r", 5 + node_size );
-
-          }
-
+          //set a circle at the parent
+          angular.element( cir ).attr( "cy", edges.y2 );
+          angular.element( cir ).attr( "cx", edges.x2 );
+          angular.element( cir ).attr( "r", 5 + node_size );
+        }else{
+          angular.element( elem ).hide();
+          angular.element( cir ).hide();
         }
 
         var tabPositions = angular.element( '#'+tabId ).offset();
@@ -472,48 +472,81 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
     if( tabPos && pTabPos && tabPos.left && tabPos.top && pTabPos.left && pTabPos.top ){
 
       //calculate the offsets of all the things
-
-      //try to make the ends point to different locations on the child
-      var side_offset = 0;
       //var offset = $scope.edgesList[edgeIndex][2];
-      //offset = offset * 17 + 3;
+      var offset = 0;
 
-
-      var child_side_offset = 0;
+      var child_side_offset = -4;
       var parent_side_offset = 0;
-      var child_top_offset = 0;
-      var parent_top_offset = 0;
+      var child_top_offset = -6;
+      var parent_top_offset = -2;
 
       //determine the side offset:
       //if a higher than b, a -> no offset, b offset to bottom
       //if b higher than a, b -> no offset, a offset to bottom
 
       var box_width = 165;
-      var box_height = 180;
+      var box_height = 185;
 
-      if( pTabPos.top > tabPos.top ){ //parent is higher than child
+      if( pTabPos.top > tabPos.top ){ //parent is lower than child
 
-        child_top_offset = box_height;
-      }else if( pTabPos.top < tabPos.top ){ //child is higher than parent
+        child_top_offset = child_top_offset + box_height;
 
-        parent_top_offset = box_height;
+        if( pTabPos.left != tabPos.left ){
+
+          child_top_offset = child_top_offset - 12
+        }else if( ptabPos.left == pTabPos.left ){
+          child_side_offset = child_side_offset + 12;
+        }
+
+        if( pTabPos.left < tabPos.left ){
+
+          //move the parent edge down
+          //is the child above the parent
+          parent_top_offset = parent_top_offset + 22;
+        }
+
+      }else if( pTabPos.top < tabPos.top ){ //child is lower than parent
+
+        parent_top_offset = parent_top_offset + box_height;
+
+        if( pTabPos.left < tabPos.left ){
+          child_side_offset = child_side_offset + 12;
+        }else if( pTabPos.left > tabPos.left || pTabPos.left == tabPos.left ){
+          parent_side_offset = parent_side_offset + 14;
+        }
+
+      }else if( pTabPos.top == tabPos.top ){
+        child_top_offset = child_top_offset + 12;
+        parent_top_offset = parent_top_offset + 14;
       }
 
+      //parent to right of child
       if( pTabPos.left > tabPos.left ){
 
-        child_side_offset = box_width;
+        child_side_offset = child_side_offset + box_width;
+
+        //move child to the left
+        child_side_offset = child_side_offset - 11;
+
+      //child to right of parent
       }else if( pTabPos.left < tabPos.left ){
 
-        parent_side_offset = box_width;
+        parent_side_offset = parent_side_offset + box_width;
+
+        parent_side_offset = parent_side_offset + 4;
+
+      //on top of eachother
       }else if( pTabPos.left == tabPos.left ){
 
-        //side_offset = box_width - offset;
-        side_offset = box_width; // - offset;
+        child_side_offset = child_side_offset + box_width;
+
+        //offset it to the left subtract more than above
+        //closebox offset
+        child_side_offset = child_side_offset - 19;
       }
 
       return {
-        x1:tabPos.left + side_offset + child_side_offset,
-        //y1:tabPos.top + offset + child_top_offset,
+        x1:tabPos.left + child_side_offset,
         y1:tabPos.top + child_top_offset,
         x2:pTabPos.left + parent_side_offset,
         y2:pTabPos.top + parent_top_offset //,
@@ -527,7 +560,6 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
   };
 
   $scope.init = function() {
-    console.log("notify", "init" );
 
     //100 is just a guess, we should fix this later with something more scientific
     $scope.windowHeight = ( window.innerHeight - $scope.headerMargin ) -100; //correct for filter heder

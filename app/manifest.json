@@ -19,6 +19,8 @@
         "scripts": [
             "scripts/convenience.js",
             "scripts/chrome.js",
+            "scripts/image.js",
+            "scripts/image-worker.js",
             "scripts/background.js"
         ]
     },

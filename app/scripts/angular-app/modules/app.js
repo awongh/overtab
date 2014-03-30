@@ -13,5 +13,5 @@ overtabApp.config(function($filterProvider, $compileProvider){
     $compileProvider.imgSrcSanitizationWhitelist(/^\s*(https?|data|mailto|chrome-extension):/);
     // Angular before v1.2 uses $compileProvider.urlSanitizationWhitelist(...)
 })
-.filter('domainExtraction', domainExtractionFilter)
+.filter('tabFilter', tabFilter)
 .controller('mainController', ['$scope', '$rootScope', '$timeout', '$filter', mainController]);

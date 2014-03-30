@@ -14,15 +14,44 @@
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 
+var isVerifiedTabUrl = function( tab ){
+  if( tab.hasOwnProperty( "url" ) ){
+    var parser = new Parser();
+
+    var tabProtocol = parser.href(tab.url).protocol();
+    var hostName = parser.href(tab.url).hostname();
+
+    //what conditions do we want to accept add adding a tab?
+    if (
+      tab.hasOwnProperty( "id" )
+      && ALLOWED_PROTOCOLS.indexOf( tabProtocol ) !== -1
+      && tab.id != OVERTAB_TAB_ID )
+    {
+      return true;
+    }
+  }
+
+  return false;
+};
+
+var setTabCount = function(){
+  tabsQuery({}, function(result) {
+
+    var count = 0;
+
+    for( var i = 0; i< result.length; i++ ){
+      if( isVerifiedTabUrl( result[i] ) ){
+        count++;
+      }
+    }
+
+    chromeBadge( count );
+  });
+};
+
 var tabCreated = function( tab ){
 
-  var parser = new Parser();
-
-  var tabProtocol = parser.href(tab.url).protocol();
-  var hostName = parser.href(tab.url).hostname();
-
-  //what conditions do we want to accept add adding a tab?
-  if (typeof tab.id !== "undefined" && ALLOWED_PROTOCOLS.indexOf( tabProtocol ) !== -1 && tab.id != OVERTAB_TAB_ID ){
+  if( isVerifiedTabUrl( tab ) ){
 
     var setObj = {};
     setObj[tab.id] = tab.url;
@@ -32,6 +61,8 @@ var tabCreated = function( tab ){
     lsSet( setObj, function(){
       //ok we set it, send an event
       tabEvent( tab.id, "created" );
+
+      setTabCount();
     });
   }else{
     //this might be the overtab tab, or options tab or soemthing
@@ -41,12 +72,7 @@ var tabCreated = function( tab ){
 
 var tabUpdated = function( tabId, changeInfo, tab ){
 
-  var parser = new Parser();
-
-  var tabProtocol = parser.href(tab.url).protocol();
-  var hostName = parser.href(tab.url).hostname();
-
-  if ( typeof tab.id !== "undefined" && ALLOWED_PROTOCOLS.indexOf( tabProtocol ) !== -1 && tabId != OVERTAB_TAB_ID ){
+  if( isVerifiedTabUrl( tab ) ){
 
     var id = tab.id;
     lsGet( id, function( result ){
@@ -78,7 +104,7 @@ var tabUpdated = function( tabId, changeInfo, tab ){
 
   }else{
     //this might be the overtab tab, or options tab or soemthing
-    console.log( "warn", "WARNING: update: not correct protocol", tabProtocol, tab, tabId );
+    console.log( "warn", "WARNING: update: not correct protocol", tab, tabId );
   }
 };
 
@@ -112,63 +138,8 @@ var screenCap = function( tab ){
 
     tabQuery(activeCompleteQuery, function(result) {
       if ( result.id == tab.id && result.windowId == tab.windowId && oldUrl != result.url && DISALLOWED_SCREENCAP_URLS.indexOf(result.url) === -1 ) {
-        generateScreenCap(result.windowId, {format: "jpeg"}, function( blob ){
-
-          var canvas = document.createElement('canvas'),
-            canvasContext = canvas.getContext('2d');
-
-          canvas.width = THUMBSIZE;
-          canvas.height = THUMBSIZE;
-
-          var img = document.createElement('img');
-
-          img.onload = function() {
-
-            var cropLength = THUMBSIZE / SCREEN_CROP_RATIO,
-              height, width;
-
-            //figure out the size to draw the image.
-
-            //height is ratio corrected, so that we are fitting the
-            //screencrop's amount into the thumb height.
-            //the viewport of thumbsize is the visible portion of the screen_crop ratio's
-
-            if( this.height < this.width ){ //landscape
-
-              height = cropLength;
-
-              //figure out the ratio-calculated length of the adjacent side
-              //increase the longer side:
-              //computed length * local ratio <-- always > 1
-              width = cropLength * ( this.width / this.height );
-            }else{
-              width = cropLength;
-
-              height = cropLength * ( this.height / this.width );
-            }
-
-            var capId = "screencap-"+tab.id;
-            var setObj = {};
-
-            canvasContext.clearRect( 0, 0, canvas.width, canvas.height);
-            canvasContext.drawImage(this, 0, 0, width, height);
-
-            setObj[capId] = canvas.toDataURL("image/jpeg",0.7);
-            setObj["screencap-url-"+tab.id] = result.url;
-
-            lsSet( setObj, function(){
-              //storage is set, ready for ng app to get it
-              tabEvent( tab.id, "screencap" );
-            });
-
-            canvas = undefined;
-            canvasContext = undefined;
-          };
-
-          img.src = blob; // Set the image to the dataUrl and invoke the onload function
-          blob = undefined;
-          img = undefined;
-
+        generateScreenCap(result.windowId, {format: "jpeg"}, function(blob){
+          processImage( tab.id, result.url, blob);
         });
       }else{
         console.log( "warn", "screencap: no active window found >> result: "+result.id+" tab: "+tab.id+" old url: "+oldUrl);
@@ -212,6 +183,8 @@ var tabRemoved = function( tabId, removeInfo ){
   }else{
     lsRemove(tabId, function(){
       tabEvent( tabId, "removed" );
+
+      setTabCount();
     });
   }
 };
@@ -351,11 +324,7 @@ var getAllTabs = function(){
         //see if we are gonna allow it
         var tab = chromeTabs[i];
 
-        var tabProtocol = parser.href(tab.url).protocol();
-        var hostName = parser.href(tab.url).hostname();
-
-        if ( typeof tab.id !== "undefined" && ALLOWED_PROTOCOLS.indexOf( tabProtocol ) !== -1 && tab.id != overtabId && tab.status === "complete" ){
-
+        if( isVerifiedTabUrl( tab ) && tab.id != overtabId && tab.status === "complete" ){
           tabCreated( tab );
         }
       }
@@ -459,6 +428,14 @@ chrome.runtime.onSuspendCanceled.addListener( function(){ console.log("notify", 
 var getCurrentTab = function( callback ){
   chrome.tabs.getCurrent( callback );
 };
+
+chrome.commands.onCommand.addListener(function(command) {
+  switch( command ){
+    case "open-overtab":
+      browserActionClick();
+      break;
+  }
+});
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 ////////////////        END CHROME INTERACTION          ////////////////
