@@ -356,7 +356,8 @@ module.exports = function (grunt) {
                         'scripts/chromereload.js',
                         'scripts/angular-app/*',
                         'scripts/angular-chrome.js',
-                        'scripts/options.js'
+                        'scripts/options.js',
+                        'scripts/image-worker.js'
                     ]
                 }
             },
