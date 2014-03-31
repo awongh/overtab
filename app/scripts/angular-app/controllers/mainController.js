@@ -516,7 +516,7 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
 
       }else if( pTabPos.top == tabPos.top ){
         child_top_offset = child_top_offset + 12;
-        parent_top_offset = parent_top_offset + 14;
+        parent_top_offset = parent_top_offset + 22;
       }
 
       //parent to right of child
