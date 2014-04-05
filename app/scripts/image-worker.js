@@ -13,6 +13,7 @@ onmessage = function (oEvent) {
 
   rd.data = resample_hermite( d.data, w, h, w2, h2 );
   postMessage({returnedData:rd});
+  rd = undefined;
 };
 
 function resample_hermite(data, W, H, W2, H2){
