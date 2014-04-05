@@ -217,6 +217,13 @@ module.exports = function (grunt) {
       html: '<%= yeoman.app %>/{,*/}*.html',
       options: {
 
+        compress: {
+          global_defs: {
+            "DEBUG": false
+          },
+          dead_code: true
+        },
+
         flow: {
           html: {
             //take out uglify if it makes angular go nuts
