@@ -34,32 +34,6 @@ var processImage = function( id, url, blob ){
   canvas.width = THUMBSIZE,
   canvas.height = THUMBSIZE;
 
-  var my_worker = new Worker("scripts/image-worker.js");
-
-  my_worker.onmessage = function(event){
-
-    //we've returned with the processed data
-    var returnedData = event.data.returnedData;
-
-    //we put the canvascontext in here and the measurements
-    //write everything out to the canvas
-    canvasContext.clearRect(0, 0, THUMBSIZE, THUMBSIZE);
-    canvasContext.putImageData(returnedData, 0, 0);
-
-    var capId = "screencap-"+id;
-    var setObj = {};
-
-    setObj[capId] = canvas.toDataURL("jpeg",0.9);
-    setObj["screencap-url-"+id] = url;
-
-    lsSet( setObj, function(){
-      //storage is set, ready for ng app to get it
-      tabEvent( id, "screencap" );
-    });
-
-    canvas = undefined;
-  };
-
   img.onload = function() {
 
     var dimensions = calcDimensions( this.height, this.width );
@@ -70,20 +44,20 @@ var processImage = function( id, url, blob ){
     //draw an image at this height
     canvasContext.drawImage(this, 0, 0, dimensions.width, dimensions.height);
 
-    //the data we are putting into the web worker:
-    var cc = canvasContext.getImageData(0, 0, dimensions.width, dimensions.height);
+    var capId = "screencap-"+id;
+    var setObj = {};
 
-    //load the cc in here
-    my_worker.postMessage({
-      data:cc,
-      w2:dimensions.width,
-      h2:dimensions.height,
-      w:THUMBSIZE,
-      h:THUMBSIZE
+    setObj[capId] = canvas.toDataURL();
+    setObj["screencap-url-"+id] = url;
+
+    lsSet( setObj, function(){
+      //storage is set, ready for ng app to get it
+      tabEvent( id, "screencap" );
     });
 
-    cc = undefined;
-    my_worker = undefined;
+    canvas = undefined;
+    setObj = undefined;
+    canvasContext = undefined;
   };
 
   if( blob ){
