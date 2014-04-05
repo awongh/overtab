@@ -14,6 +14,7 @@
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 
+//make sure it's a real tab, not dev-tools, or something
 var isVerifiedTabUrl = function( tab ){
   if( tab.hasOwnProperty( "url" ) ){
     var parser = new Parser();
@@ -66,7 +67,7 @@ var tabCreated = function( tab ){
     });
   }else{
     //this might be the overtab tab, or options tab or soemthing
-    console.log( "error", "ERROR: something happened on create:", tab );
+    //console.log( "error", "ERROR: something happened on create:", tab );
   }
 };
 
@@ -104,7 +105,7 @@ var tabUpdated = function( tabId, changeInfo, tab ){
 
   }else{
     //this might be the overtab tab, or options tab or soemthing
-    console.log( "warn", "WARNING: update: not correct protocol", tab, tabId );
+    //console.log( "warn", "WARNING: update: not correct protocol", tab, tabId );
   }
 };
 
@@ -116,7 +117,7 @@ var screenCap = function( tab ){
 
     if( !screenCapUrl || !screenCapUrl.hasOwnProperty( screenCapUrlId ) ){
       //didnt find!!
-      console.log("warn", "we couldnt find this screencap record:", screenCapUrlId, tabId, tab);
+      //console.log("warn", "we couldnt find this screencap record:", screenCapUrlId, tabId, tab);
       return false;
     }
 
@@ -140,9 +141,10 @@ var screenCap = function( tab ){
       if ( result.id == tab.id && result.windowId == tab.windowId && oldUrl != result.url && DISALLOWED_SCREENCAP_URLS.indexOf(result.url) === -1 ) {
         generateScreenCap(result.windowId, {format: "jpeg"}, function(blob){
           processImage( tab.id, result.url, blob);
+          blob = undefined;
         });
       }else{
-        console.log( "warn", "screencap: no active window found >> result: "+result.id+" tab: "+tab.id+" old url: "+oldUrl);
+        //console.log( "warn", "screencap: no active window found >> result: "+result.id+" tab: "+tab.id+" old url: "+oldUrl);
       }
     });
   });
@@ -168,7 +170,7 @@ var tabActivated = function( tabInfo ){
           }
         });
     }else{
-      console.log( "warn", "tab activated but not found in ls: tabid: "+id, result );
+      //console.log( "warn", "tab activated but not found in ls: tabid: "+id, result );
     }
 
   });
@@ -230,7 +232,7 @@ var openOverTab = function( oldTabId ){
         if( result ){
           chromeObj = result;
         }else{
-          console.log( "error", "we couldnt find an active tab in the return value");
+          //console.log( "error", "we couldnt find an active tab in the return value");
           return;
         }
       }
@@ -335,7 +337,7 @@ var getAllTabs = function(){
 var tabReplaced = function( newTabId, oldTabId ){
 
   //replace the old tab with the new one
-  console.log("warn", "WARN: XXXXXXX a tab was replaced" );
+  //console.log("warn", "WARN: XXXXXXX a tab was replaced" );
 
   //what kind of race conditions will we get when we are trying to set this???
   lsGet( oldTabId, function( result ){
@@ -353,7 +355,7 @@ var tabReplaced = function( newTabId, oldTabId ){
         sendMessage(null, {message: "replaced", id: newTabId, oldId: oldTabId});
       });
     }else{
-      console.log("warn", "couldnt find tab on replace");
+      //console.log("warn", "couldnt find tab on replace");
     }
   });
 };
@@ -361,14 +363,14 @@ var tabReplaced = function( newTabId, oldTabId ){
 var startup = function(){
   chrome.storage.local.clear();
   //set some local storage stuff???
-  console.log("notify", "startup" );
+  //console.log("notify", "startup" );
 
   getAllTabs();
 };
 
 var shutdown = function(){
   chrome.storage.local.clear();
-  console.log("notify", "shutdown" );
+  //console.log("notify", "shutdown" );
 };
 
 var install = function( details ){
@@ -376,7 +378,7 @@ var install = function( details ){
   //set some options????
   getAllTabs();
 
-  console.log("notify", "installed", details.reason, details.previousVersion );
+  //console.log("notify", "installed", details.reason, details.previousVersion );
 };
 
 ////////////////////////////////////////////////////////////////////////
@@ -422,8 +424,12 @@ chrome.browserAction.onClicked.addListener( browserActionClick );
 //if a tab is replaced (only for prerender)
 chrome.tabs.onReplaced.addListener( tabReplaced );
 
-chrome.runtime.onSuspend.addListener( function(){ console.log("notify", "suspended"); });
-chrome.runtime.onSuspendCanceled.addListener( function(){ console.log("notify", "suspend cancelled"); });
+chrome.runtime.onSuspend.addListener( function(){
+  //console.log("notify", "suspended");
+});
+chrome.runtime.onSuspendCanceled.addListener( function(){
+  //console.log("notify", "suspend cancelled");
+});
 
 var getCurrentTab = function( callback ){
   chrome.tabs.getCurrent( callback );

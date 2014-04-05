@@ -75,6 +75,7 @@ var lsGet = function( id, callback ){
 
 var lsSet = function( thing, callback ){
   chrome.storage.local.set( thing, callback );
+  thing = undefined;
 };
 
 var lsRemove = function( tabId, callback ){
