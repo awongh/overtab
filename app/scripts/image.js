@@ -55,9 +55,8 @@ var processImage = function( id, url, blob ){
       tabEvent( id, "screencap" );
     });
 
-    canvas = undefined;
-    setObj = undefined;
     canvasContext = undefined;
+    canvas = undefined;
   };
 
   if( blob ){
