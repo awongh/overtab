@@ -58,6 +58,7 @@ var processImage = function( id, url, blob ){
     });
 
     canvas = undefined;
+    canvasContext = undefined;
   };
 
   img.onload = function() {

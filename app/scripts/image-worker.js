@@ -4,16 +4,14 @@ onmessage = function (oEvent) {
   //an image data object needs to be returned
   //this is a hack, but let's make a copy and return it
 
-  var d = oEvent.data.data,
-    w = oEvent.data.w,
+  var w = oEvent.data.w,
     h = oEvent.data.h,
     w2 = oEvent.data.w2,
     h2 = oEvent.data.h2,
-    rd = d;
+    d = oEvent.data.data;
 
-  rd.data = resample_hermite( d.data, w, h, w2, h2 );
-  postMessage({returnedData:rd});
-  rd = undefined;
+  d.data = resample_hermite( d.data, w, h, w2, h2 );
+  postMessage({returnedData:d});
 };
 
 function resample_hermite(data, W, H, W2, H2){
