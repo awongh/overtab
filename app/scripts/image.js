@@ -1,4 +1,4 @@
-var calcDimensions = function( h, w ){
+var calcDimensions = function( w, h ){
    var cropLength = THUMBSIZE / SCREEN_CROP_RATIO,
       height, width;
 
@@ -25,7 +25,7 @@ var calcDimensions = function( h, w ){
     return { height:height, width:width };
 };
 
-var processImage = function( id, url, blob ){
+var processImage = function( id, url, blob, width, height ){
 
   var canvas = document.createElement('canvas'),
     canvasContext = canvas.getContext('2d'),
@@ -61,38 +61,25 @@ var processImage = function( id, url, blob ){
     canvasContext = undefined;
   };
 
-  img.onload = function() {
+  if( blob ){
+    var dimensions = calcDimensions( width, height );
 
-    var dimensions = calcDimensions( this.height, this.width );
+    var imageData = canvasContext.createImageData( dimensions.width, dimensions.height );
 
-    //clear the canvas
-    canvasContext.clearRect( 0, 0, THUMBSIZE, THUMBSIZE);
-
-    //draw an image at this height
-    canvasContext.drawImage(this, 0, 0, dimensions.width, dimensions.height);
-
-    //the data we are putting into the web worker:
-    var cc = canvasContext.getImageData(0, 0, dimensions.width, dimensions.height);
-
-    //load the cc in here
     my_worker.postMessage({
-      data:cc,
+      url:blob,
+      imageData:imageData,
       w2:dimensions.width,
       h2:dimensions.height,
-      w:THUMBSIZE,
-      h:THUMBSIZE
+      w:width,
+      h:height
     });
 
-    cc = undefined;
-    my_worker = undefined;
-  };
-
-  if( blob ){
-    img.src = blob; // Set the image to the dataUrl and invoke the onload function
   }else{
     //console.log("error", "didnt get blob");
   }
 
+  my_worker = undefined;
   blob = undefined;
   img = undefined;
 };

@@ -18,6 +18,8 @@
         "persistent": false,
         "scripts": [
             "scripts/convenience.js",
+            "bower_components/png-js/png.js",
+            "bower_components/png-js/zlib.js",
             "scripts/chrome.js",
             "scripts/image.js",
             "scripts/background.js"

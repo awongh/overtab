@@ -4,6 +4,7 @@
   "dependencies": {
     "angular": "1.2.6",
     "json3": "~3.2.6",
+    "png-js": "https://github.com/awongh/png.js.git",
     "jquery": "2.1.0"
   },
   "devDependencies": {

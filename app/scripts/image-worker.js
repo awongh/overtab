@@ -1,17 +1,40 @@
-onmessage = function (oEvent) {
+//this wont work in prod: figure out how to modify the gruntfile for this
+importScripts('../bower_components/png-js/png.js', '../bower_components/png-js/zlib.js');
 
-  //we are passing around an "ImageData" object.
-  //an image data object needs to be returned
-  //this is a hack, but let's make a copy and return it
+onmessage = function (oEvent) {
 
   var w = oEvent.data.w,
     h = oEvent.data.h,
     w2 = oEvent.data.w2,
     h2 = oEvent.data.h2,
-    d = oEvent.data.data;
+    imageData = oEvent.data.imageData,
+    url = oEvent.data.url;
 
-  d.data = resample_hermite( d.data, w, h, w2, h2 );
-  postMessage({returnedData:d});
+  var BASE64_MARKER = ';base64,';
+  var base64Index = url.indexOf(BASE64_MARKER) + BASE64_MARKER.length;
+  var base64 = url.substring(base64Index);
+
+  var raw = base64decode(base64);
+
+  var rawLength = raw.length;
+
+  var ra = new Uint8Array(new ArrayBuffer(rawLength));
+
+  for(var i = 0; i < rawLength; i++){
+    ra[i] = raw.charCodeAt(i);
+  }
+
+  var png = new PNG( ra );
+
+  var pixel_array = png.decode();
+
+  var image_data_array = resample_hermite( pixel_array, w, h, w2, h2 );
+
+  for (var i=0; i<image_data_array.length; i++) {
+      imageData.data[i] = image_data_array[i];
+  }
+
+  postMessage({returnedData:imageData});
 };
 
 function resample_hermite(data, W, H, W2, H2){
@@ -63,3 +86,65 @@ function resample_hermite(data, W, H, W2, H2){
 
     return data2;
 };
+
+var base64DecodeChars = new Array(
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 62, -1, -1, -1, 63,
+    52, 53, 54, 55, 56, 57, 58, 59, 60, 61, -1, -1, -1, -1, -1, -1,
+    -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
+    15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, -1, -1, -1, -1, -1,
+    -1, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
+    41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, -1, -1, -1, -1, -1);
+
+function base64decode(str) {
+    var c1, c2, c3, c4;
+    var i, len, out;
+
+    len = str.length;
+    i = 0;
+    out = "";
+    while(i < len) {
+        /* c1 */
+        do {
+            c1 = base64DecodeChars[str.charCodeAt(i++) & 0xff];
+        } while(i < len && c1 == -1);
+        if(c1 == -1)
+            break;
+
+        /* c2 */
+        do {
+            c2 = base64DecodeChars[str.charCodeAt(i++) & 0xff];
+        } while(i < len && c2 == -1);
+        if(c2 == -1)
+            break;
+
+        out += String.fromCharCode((c1 << 2) | ((c2 & 0x30) >> 4));
+
+        /* c3 */
+        do {
+            c3 = str.charCodeAt(i++) & 0xff;
+            if(c3 == 61)
+                return out;
+            c3 = base64DecodeChars[c3];
+        } while(i < len && c3 == -1);
+        if(c3 == -1)
+            break;
+
+        out += String.fromCharCode(((c2 & 0XF) << 4) | ((c3 & 0x3C) >> 2));
+
+        /* c4 */
+        do {
+            c4 = str.charCodeAt(i++) & 0xff;
+            if(c4 == 61)
+                return out;
+            c4 = base64DecodeChars[c4];
+        } while(i < len && c4 == -1);
+        if(c4 == -1)
+            break;
+        out += String.fromCharCode(((c3 & 0x03) << 6) | c4);
+    }
+    return out;
+}
+
+
