@@ -22,17 +22,17 @@ var calcDimensions = function( w, h ){
       height = cropLength * ( h / w );
     }
 
-    return { height:height, width:width };
+    return { height:Math.round( height ), width:Math.round( width ) };
 };
 
 var processImage = function( id, url, blob, width, height ){
+  var dimensions = calcDimensions( width, height );
 
   var canvas = document.createElement('canvas'),
-    canvasContext = canvas.getContext('2d'),
-    img = document.createElement('img');
+    canvasContext = canvas.getContext('2d');
 
-  canvas.width = THUMBSIZE,
-  canvas.height = THUMBSIZE;
+  canvas.width = dimensions.width,
+  canvas.height = dimensions.height;
 
   var my_worker = new Worker("scripts/image-worker.js");
 
@@ -43,7 +43,7 @@ var processImage = function( id, url, blob, width, height ){
 
     //we put the canvascontext in here and the measurements
     //write everything out to the canvas
-    canvasContext.clearRect(0, 0, THUMBSIZE, THUMBSIZE);
+    canvasContext.clearRect(0, 0, dimensions.width, dimensions.height);
     canvasContext.putImageData(returnedData, 0, 0);
 
     var capId = "screencap-"+id;
@@ -62,7 +62,6 @@ var processImage = function( id, url, blob, width, height ){
   };
 
   if( blob ){
-    var dimensions = calcDimensions( width, height );
 
     var imageData = canvasContext.createImageData( dimensions.width, dimensions.height );
 
@@ -70,10 +69,10 @@ var processImage = function( id, url, blob, width, height ){
       url:blob,
       imageData:imageData,
       w2:dimensions.width,
-      h2:dimensions.height,
-      w:width,
-      h:height
+      h2:dimensions.height
     });
+
+    console.log( "dims", "w", width, "h", height, "w2", dimensions.width, "h2", dimensions.height );
 
   }else{
     //console.log("error", "didnt get blob");

@@ -3,9 +3,7 @@ importScripts('../bower_components/png-js/png.js', '../bower_components/png-js/z
 
 onmessage = function (oEvent) {
 
-  var w = oEvent.data.w,
-    h = oEvent.data.h,
-    w2 = oEvent.data.w2,
+  var w2 = oEvent.data.w2,
     h2 = oEvent.data.h2,
     imageData = oEvent.data.imageData,
     url = oEvent.data.url;
@@ -18,7 +16,7 @@ onmessage = function (oEvent) {
 
   var rawLength = raw.length;
 
-  var ra = new Uint8Array(new ArrayBuffer(rawLength));
+  var ra = new Uint8ClampedArray(new ArrayBuffer(rawLength));
 
   for(var i = 0; i < rawLength; i++){
     ra[i] = raw.charCodeAt(i);
@@ -26,9 +24,14 @@ onmessage = function (oEvent) {
 
   var png = new PNG( ra );
 
+  var w = png.width;
+  var h = png.height;
+
   var pixel_array = png.decode();
 
   var image_data_array = resample_hermite( pixel_array, w, h, w2, h2 );
+
+  console.log( "dims", w, h, w2, h2 );
 
   for (var i=0; i<image_data_array.length; i++) {
       imageData.data[i] = image_data_array[i];
@@ -146,5 +149,3 @@ function base64decode(str) {
     }
     return out;
 }
-
-
