@@ -26,6 +26,9 @@ var calcDimensions = function( w, h ){
 };
 
 var processImage = function( id, url, blob, width, height ){
+
+  //even though these aren't the pixel dimensions, they are
+  //ratio correct so they'll give us an accurate downsize dimension
   var dimensions = calcDimensions( width, height );
 
   var canvas = document.createElement('canvas'),
@@ -57,8 +60,8 @@ var processImage = function( id, url, blob, width, height ){
       tabEvent( id, "screencap" );
     });
 
-    canvas = undefined;
     canvasContext = undefined;
+    canvas = undefined;
   };
 
   if( blob ){
@@ -71,8 +74,6 @@ var processImage = function( id, url, blob, width, height ){
       w2:dimensions.width,
       h2:dimensions.height
     });
-
-    console.log( "dims", "w", width, "h", height, "w2", dimensions.width, "h2", dimensions.height );
 
   }else{
     //console.log("error", "didnt get blob");
