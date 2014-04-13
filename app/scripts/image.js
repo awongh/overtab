@@ -81,5 +81,4 @@ var processImage = function( id, url, blob, width, height ){
 
   my_worker = undefined;
   blob = undefined;
-  img = undefined;
 };
