@@ -14,6 +14,8 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
     "status"
   ];
 
+  $scope.busy = false;
+
   //css margins for calculating horiz scroll:
   $scope.headerMargin = 80;
   $scope.nodeTopBottomMargin = 18;
@@ -411,8 +413,17 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
     return tabs;
   };
 
+  $scope.fooo = function(){
+    console.log("wut");
+  };
+
   $scope.delayedEdgesRender = function( edgesList ){
-    $timeout( function(){$scope.edgesRender( edgesList ); }, 1);
+    $timeout( function(){
+
+      console.log( "delayed edges render");
+
+      $scope.edgesRender( edgesList );
+    }, 100);
   };
 
   $scope.currentEdgesRender = function( ){

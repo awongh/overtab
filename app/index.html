@@ -19,7 +19,7 @@
             </div>
 
             <div id="node-container" class="node-cont" style="height:{{windowHeight}}px; width:{{windowWidth}}px;">
-              <div ng-repeat="tab in catchTabFilter( (tabs | tabFilter:tabFilterInput) )" class="border-color-{{borderColor()}} tab-node" ng-click="switchToTab(tab)" id="{{tab.id}}">
+              <div ng-repeat="tab in tabs | tabFilter:tabFilterInput" class="border-color-{{borderColor()}} tab-node" ng-click="switchToTab(tab)" id="{{tab.id}}">
                   <img class="border-color-{{borderColor()}} favicon" ng-src="{{tab.favIconUrl || '/images/20x20.gif'}}" />
                   <a class="close-button" ng-click="tabClose()"><img ng-src="/images/close_button.svg"/></a>
                   <div class="thumbnail"><img class="tab-close-img" width="150px" ng-src="{{tab.screencap || '/images/112x140.gif'}}"></div>
@@ -28,7 +28,7 @@
             </div>
             <div class="edge-cont" style="height:{{windowHeight}}px; width:{{windowWidth}}px;">
               <svg xmlns="http://www.w3.org/2000/svg" version="1.1">
-              <g ng-repeat="edge in edges" id="{{edge.tabId}}-{{edge.parentId}}" class="edge" edge-render>
+              <g ng-repeat="edge in edges| edgeFilter:tabFilterInput" id="{{edge.tabId}}-{{edge.parentId}}" class="edge" edge-render>
                 <line id="line-{{edge.tabId}}-{{edge.parentId}}" class="edge-line"></line>
                 <circle id="circle-{{edge.tabId}}-{{edge.parentId}}" class="edge-circle"></circle>
               </g>
@@ -50,6 +50,7 @@
         <script src="scripts/angular-chrome.js"></script>
         <script src="scripts/angular-app/controllers/mainController.js"></script>
         <script src="scripts/angular-app/filters/tabFilter.js"></script>
+        <script src="scripts/angular-app/filters/edgeFilter.js"></script>
         <script src="scripts/angular-app/modules/app.js"></script>
         <!-- endbuild -->
 
