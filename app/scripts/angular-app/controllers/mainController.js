@@ -412,7 +412,7 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
   };
 
   $scope.delayedEdgesRender = function( edgesList ){
-    $timeout( function(){$scope.edgesRender( edgesList ); }, 1);
+    $scope.edgesRender( edgesList );
   };
 
   $scope.currentEdgesRender = function( ){
@@ -424,41 +424,59 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
     window.requestAnimationFrame(function(){
       $scope.setWindowSize();
 
-      for( var i =0; i< edgesList.length; i++ ){
-        var tabId = edgesList[i].tabId;
-        var parentId = edgesList[i].parentId;
+      for( var i =0; i< $scope.edges.length; i++ ){
 
-        //get the positions
-        var edges = $scope.edgeCalc( tabId, parentId, i );
-        var cir = angular.element( '#circle-'+tabId+'-'+parentId );
+        var found = false,
+          tabId = $scope.edges[i].tabId,
+          parentId = $scope.edges[i].parentId;
 
         //get the edge
-        var elem = angular.element( '#line-'+tabId+'-'+parentId );
+        var elem = angular.element( '#line-'+tabId+'-'+parentId ),
+          cir = angular.element( '#circle-'+tabId+'-'+parentId );
 
-        //if we didnt find any tabs this will return false
-        if( edges ){
-          angular.element( elem ).show();
-          angular.element( cir ).show();
-
-          //set the edge
-          //offset it the size of one node and the margin of the edge container
-          angular.element( elem ).attr( "y1", edges.y1 );
-          angular.element( elem ).attr( "x1", edges.x1 );
-          angular.element( elem ).attr( "y2", edges.y2 );
-          angular.element( elem ).attr( "x2", edges.x2 );
-
-          //set the size of the circle depending on how many connections there are
-          //var node_size = Math.abs( edges.offset * 0.02 );
-          var node_size = 0;
-
-          //set a circle at the parent
-          angular.element( cir ).attr( "cy", edges.y2 );
-          angular.element( cir ).attr( "cx", edges.x2 );
-          angular.element( cir ).attr( "r", 5 + node_size );
-        }else{
-          angular.element( elem ).hide();
-          angular.element( cir ).hide();
+        //determine if its in the edge list
+        for( var j=0; j < edgesList.length; j++ ){
+          if( edgesList[j].tabId == tabId && edgesList[j].parentId == parentId ){
+            found = true;
+            break;
+          }
         }
+
+        if( found ){
+
+          //get the positions
+          var edges = $scope.edgeCalc( tabId, parentId, i );
+
+          //if we didnt find any tabs this will return false
+          if( edges ){
+
+            //set the edge
+            //offset it the size of one node and the margin of the edge container
+            angular.element( elem ).attr( "y1", edges.y1 );
+            angular.element( elem ).attr( "x1", edges.x1 );
+            angular.element( elem ).attr( "y2", edges.y2 );
+            angular.element( elem ).attr( "x2", edges.x2 );
+
+            //set the size of the circle depending on how many connections there are
+            //var node_size = Math.abs( edges.offset * 0.02 );
+            var node_size = 0;
+
+            //set a circle at the parent
+            angular.element( cir ).attr( "cy", edges.y2 );
+            angular.element( cir ).attr( "cx", edges.x2 );
+            angular.element( cir ).attr( "r", 5 + node_size );
+
+
+            angular.element( elem ).show();
+            angular.element( cir ).show();
+
+            continue;
+          }
+        }
+
+        //this is what we do anywyas
+        angular.element( elem ).hide();
+        angular.element( cir ).hide();
       }
     });
   };

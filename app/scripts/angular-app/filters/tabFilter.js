@@ -5,6 +5,7 @@ var tabFilter = function( ) {
 
       if( input ){
 
+        //setup the regex
         /*
         var t=inpu.split('');
         var h = t.join('\\w*.*');  //replace(/\W/, ""), 'i');
