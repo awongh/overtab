@@ -215,6 +215,7 @@ module.exports = function (grunt) {
     // additional tasks can operate on them
     useminPrepare: {
       html: '<%= yeoman.app %>/{,*/}*.html',
+      js: '<%= yeoman.app %>/{,*/}*.js',
       options: {
 
         compress: {
@@ -317,12 +318,24 @@ module.exports = function (grunt) {
           src: [
             'scripts/image-worker.js',
             '*.{ico,png,txt}',
-            '.htaccess',
             '*.html',
             '_locales/**/*',
             'images/{,*/}*.{webp}',
-            'styles/{,*/}*.css',
-            'fonts/*'
+            'styles/{,*/}*.css'
+          ]
+
+        //we aren't minimizing this yet, maybe we should
+        }, {
+          expand: false,
+          dest: '<%= yeoman.dist %>/scripts/bower-png.js',
+          src: [
+            '<%= yeoman.app %>/bower_components/png-js/png.js'
+          ]
+        }, {
+          expand: false,
+          dest: '<%= yeoman.dist %>/scripts/bower-zlib.js',
+          src: [
+            '<%= yeoman.app %>/bower_components/png-js/zlib.js'
           ]
         }, {
           expand: true,
@@ -365,6 +378,7 @@ module.exports = function (grunt) {
                         'scripts/angular-app/*',
                         'scripts/angular-chrome.js',
                         'scripts/image-worker.js',
+                        'scripts/worker-bower-components.js',
                         'scripts/options.js'
                     ]
                 }

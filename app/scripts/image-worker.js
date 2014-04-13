@@ -1,5 +1,5 @@
 //this wont work in prod: figure out how to modify the gruntfile for this
-importScripts('../bower_components/png-js/png.js', '../bower_components/png-js/zlib.js');
+importScripts('bower-png.js', 'bower-zlib.js');
 
 onmessage = function (oEvent) {
 
