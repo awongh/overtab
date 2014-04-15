@@ -31,8 +31,6 @@ onmessage = function (oEvent) {
 
   var image_data_array = resample_hermite( pixel_array, w, h, w2, h2 );
 
-  console.log( "dims", w, h, w2, h2 );
-
   for (var i=0; i<image_data_array.length; i++) {
       imageData.data[i] = image_data_array[i];
   }

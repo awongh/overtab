@@ -138,7 +138,7 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
 
   $scope.tabEdgeSet = function( tab, callback ){
 
-    if(!tab.hasOwnProperty( "openerTabId" ) ){
+    if( !tab.hasOwnProperty( "id" ) || !tab.hasOwnProperty( "openerTabId" ) ){
       return false;
     }
 
@@ -153,7 +153,7 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
       $scope.edgesParentIndex[tab.openerTabId].push( tab.id );
     }
 
-    //objectify this eventaully, please
+    console.log("edge tab id: "+ tab.id+" "+tab.openerTabId );
     $scope.edges.push( { tabId: tab.id, parentId: tab.openerTabId } );
 
     callback();
@@ -165,7 +165,8 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
     var k = $scope.edges.valuePropertyIndex("tabId", tabId);
 
     if( k ){
-      delete $scope.edges[k];
+      //delete $scope.edges[k];
+      $scope.edges.remove(k);
 
       //look in parent edges
       if(typeof $scope.edgesParentIndex[tabId] !== 'undefined' ){
@@ -173,18 +174,19 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
 
           var edgeIndex = $scope.edgesParentIndex[tabId][i];
 
-          //var parentId = $scope.edgesChildIndex[edgeIndex];
-          delete $scope.edgesChildIndex[edgeIndex];
+          //delete $scope.edgesChildIndex[edgeIndex];
+          $scope.edgesChildIndex.remove(edgeIndex);
         }
 
-        delete $scope.edgesParentIndex[tabId];
+        //delete $scope.edgesParentIndex[tabId];
+        $scope.edgesParentIndex.remove(tabId);
       }
-
     }
 
     callback();
   };
 
+  //TODO: deal with edges??
   //this may create some race conditions..... not sure what to do about this
   $scope.tabReplaced = function( tabId, oldTabId ){
     var index = $scope.tabs.valuePropertyIndex( "id", oldTabId );
@@ -421,64 +423,70 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
 
   $scope.edgesRender = function( edgesList ){
 
-    window.requestAnimationFrame(function(){
-      $scope.setWindowSize();
+    $scope.setWindowSize();
 
-      for( var i =0; i< $scope.edges.length; i++ ){
+    console.log("doing render");
 
-        var found = false,
-          tabId = $scope.edges[i].tabId,
-          parentId = $scope.edges[i].parentId;
+    for( var i =0; i< $scope.edges.length; i++ ){
 
-        //get the edge
-        var elem = angular.element( '#line-'+tabId+'-'+parentId ),
-          cir = angular.element( '#circle-'+tabId+'-'+parentId );
+      var found = false;
 
-        //determine if its in the edge list
-        for( var j=0; j < edgesList.length; j++ ){
-          if( edgesList[j].tabId == tabId && edgesList[j].parentId == parentId ){
-            found = true;
-            break;
-          }
-        }
-
-        if( found ){
-
-          //get the positions
-          var edges = $scope.edgeCalc( tabId, parentId, i );
-
-          //if we didnt find any tabs this will return false
-          if( edges ){
-
-            //set the edge
-            //offset it the size of one node and the margin of the edge container
-            angular.element( elem ).attr( "y1", edges.y1 );
-            angular.element( elem ).attr( "x1", edges.x1 );
-            angular.element( elem ).attr( "y2", edges.y2 );
-            angular.element( elem ).attr( "x2", edges.x2 );
-
-            //set the size of the circle depending on how many connections there are
-            //var node_size = Math.abs( edges.offset * 0.02 );
-            var node_size = 0;
-
-            //set a circle at the parent
-            angular.element( cir ).attr( "cy", edges.y2 );
-            angular.element( cir ).attr( "cx", edges.x2 );
-            angular.element( cir ).attr( "r", 5 + node_size );
-
-
-            angular.element( elem ).show();
-            angular.element( cir ).show();
-
-            continue;
-          }
-        }
-
-        //this is what we do anywyas
-        angular.element( elem ).hide();
-        angular.element( cir ).hide();
+      if( !$scope.edges[i] ){
+        console.log("edge render, didnt find");
+        continue;
       }
-    });
+
+      var tabId = $scope.edges[i].tabId,
+        parentId = $scope.edges[i].parentId;
+
+      //get the edge
+      var elem = angular.element( '#line-'+tabId+'-'+parentId ),
+        cir = angular.element( '#circle-'+tabId+'-'+parentId );
+
+      //determine if its in the edge list
+      for( var j=0; j < edgesList.length; j++ ){
+        if( edgesList[j].tabId == tabId && edgesList[j].parentId == parentId ){
+          found = true;
+          break;
+        }
+      }
+
+      if( found ){
+
+        //get the positions
+        var edges = $scope.edgeCalc( tabId, parentId, i );
+
+        //if we didnt find any tabs this will return false
+        if( edges ){
+
+          //set the edge
+          //offset it the size of one node and the margin of the edge container
+          angular.element( elem ).attr( "y1", edges.y1 );
+          angular.element( elem ).attr( "x1", edges.x1 );
+          angular.element( elem ).attr( "y2", edges.y2 );
+          angular.element( elem ).attr( "x2", edges.x2 );
+
+          //set the size of the circle depending on how many connections there are
+          //var node_size = Math.abs( edges.offset * 0.02 );
+          var node_size = 0;
+
+          //set a circle at the parent
+          angular.element( cir ).attr( "cy", edges.y2 );
+          angular.element( cir ).attr( "cx", edges.x2 );
+          angular.element( cir ).attr( "r", 5 + node_size );
+
+
+          angular.element( elem ).show();
+          angular.element( cir ).show();
+
+          continue;
+        }
+      }
+
+      //this is what we do anywyas
+      angular.element( elem ).hide();
+      angular.element( cir ).hide();
+    }
   };
 
   $scope.edgeCalc = function( tabId, parentTabId, edgeIndex ){

@@ -339,6 +339,8 @@ var tabReplaced = function( newTabId, oldTabId ){
   //replace the old tab with the new one
   //console.log("warn", "WARN: XXXXXXX a tab was replaced" );
 
+  //TODO: we might not be able to do a get on oldtabit....
+
   //what kind of race conditions will we get when we are trying to set this???
   lsGet( oldTabId, function( result ){
     if( result && !result.hasOwnProperty( id ) ){

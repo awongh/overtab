@@ -60,7 +60,7 @@ Array.prototype.getByValue = function( val ){
 
 Array.prototype.getByValueProperty = function( key, val ){
   for( var i=0; i < this.length; i++){
-    if( this[i].hasOwnProperty( key ) && this[i][key] == val ){
+    if( this[i] && this[i].hasOwnProperty( key ) && this[i][key] == val ){
       return this[i];
     }
   }
@@ -78,7 +78,7 @@ Array.prototype.hasValueProperty = function( key, val ){
 
 Array.prototype.valuePropertyIndex = function( key, val ){
  for( var i=0; i < this.length; i++){
-    if( this[i].hasOwnProperty( key ) && this[i][key] === val ){
+    if( this[i] && this[i].hasOwnProperty( key ) && this[i][key] === val ){
       return i;
     }
   }
