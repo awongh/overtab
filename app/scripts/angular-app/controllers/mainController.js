@@ -14,15 +14,6 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
     "status"
   ];
 
-  //css margins for calculating horiz scroll:
-  $scope.headerMargin = 80;
-  $scope.nodeTopBottomMargin = 18;
-  $scope.bodyXMargin = 16;
-  $scope.nodeMargin = 38;
-
-  $scope.windowHeight = 0;
-  $scope.windowWidth= 0;
-
   $scope.overtabId;
 
   $scope.tabs = [];
@@ -268,8 +259,6 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
         $scope.tabEdgeRemove( tabId, $scope.currentEdgesRender );
 
         $scope.tabs.remove(tabPosition);
-
-        $scope.setWindowSize();
       }
     }
   };
@@ -384,17 +373,6 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
     tabFocus( tab.id, tab.windowId );
   };
 
-  $scope.setWindowSize = function(){
-    var i = document.getElementById('node-container').scrollWidth;
-    var j = document.getElementById('node-container').scrollHeight;
-
-    $scope.windowWidth = i;
-    $scope.windowHeight = j;
-    //$scope.windowWidth = document.getElementById('node-container').scrollWidth;
-    //$scope.windowHeight = document.getElementById('node-container').scrollHeight;
-    //$scope.apply();
-  };
-
   $scope.catchTabFilter = function( tabs ){
 
     //try to see if there are any edges in this and then set them
@@ -420,8 +398,6 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
   };
 
   $scope.edgesRender = function( edgesList ){
-
-    $scope.setWindowSize();
 
     for( var i =0; i< $scope.edges.length; i++ ){
 
@@ -581,10 +557,6 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
   };
 
   $scope.init = function() {
-
-    //100 is just a guess, we should fix this later with something more scientific
-    $scope.windowHeight = ( window.innerHeight - $scope.headerMargin ) -100; //correct for filter heder
-    $scope.windowWidth = ( window.innerWidth - $scope.bodyXMargin );
 
     //get all the currently open tabs
 
