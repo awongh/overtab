@@ -343,7 +343,7 @@ var tabReplaced = function( newTabId, oldTabId ){
 
   //what kind of race conditions will we get when we are trying to set this???
   lsGet( oldTabId, function( result ){
-    if( result && !result.hasOwnProperty( id ) ){
+    if( result && !result.hasOwnProperty( oldTabId ) ){
 
       //reset the thing
       var setObj = {};
