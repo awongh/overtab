@@ -27,6 +27,11 @@ var tabFilter = function( ) {
         });
 
         //let it know we need to render edges
+        //when this event is recieved it will fire the
+        //edge render function.
+        //*hopefully* this will be after the output is returned
+        //processed by catchtabfilter
+        //and assigned to the scope variable!!
         this.$emit('onLastRepeatEvent');
 
         return output;

@@ -248,6 +248,7 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
     }else{
 
       //set the edge
+      //afterwards render all the edges
       $scope.tabEdgeSet( tab, $scope.currentEdgesRender );
 
       //scroll to the newest tab
@@ -395,6 +396,8 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
   };
 
   $scope.catchTabFilter = function( tabs ){
+
+    //try to see if there are any edges in this and then set them
 
     var output = [];
     angular.forEach( tabs, function( tab, key ){
