@@ -155,7 +155,6 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
     var k = $scope.edges.valuePropertyIndex("tabId", tabId);
 
     if( k ){
-      //delete $scope.edges[k];
       $scope.edges.remove(k);
 
       //look in parent edges
@@ -164,11 +163,9 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
 
           var edgeIndex = $scope.edgesParentIndex[tabId][i];
 
-          //delete $scope.edgesChildIndex[edgeIndex];
           $scope.edgesChildIndex.remove(edgeIndex);
         }
 
-        //delete $scope.edgesParentIndex[tabId];
         $scope.edgesParentIndex.remove(tabId);
       }
     }
@@ -559,12 +556,9 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
   $scope.init = function() {
 
     //get all the currently open tabs
-
     $scope.getAllTabs();
 
     //listen for a message
-    //chrome.runtime.onMessage.addListener( $scope.onMessage );
     setMessageListener( $scope.onMessage );
-
   };
 };
