@@ -33,6 +33,13 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
   $scope.edgesParentIndex = {};
   $scope.currentEdgeFilter = "";
 
+  $scope.edgesToRender = [];
+
+  $scope.$on('onLastRepeatEvent', function(scope, element, attrs){
+    $scope.edgesRender( $scope.edgesToRender );
+  });
+
+
   $scope.onMessage = function(request, sender, sendResponse) {
 
     if( !request.hasOwnProperty( "id" ) || typeof request.id !== "number" ){
@@ -95,39 +102,31 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
   //get the local storage array of tabs
   $scope.getAllTabs = function(){
 
-    lsGet( "OVERTAB_TAB_ID", function( result ){
-      $scope.overtabId = result["OVERTAB_TAB_ID"];
+    lsGet( "OVERTAB_TAB_ID", function( overtabResult ){
+      $scope.overtabId = overtabResult["OVERTAB_TAB_ID"];
 
       var parser = new Parser();
 
       //query for all the tabs
-
       tabsQuery( {}, function( chromeTabs ){
-        for( var i=0; i< chromeTabs.length; i++ ){
-          //see if we are gonna allow it
-          var chromeTab = chromeTabs[i];
 
-          /* do an lsget  == make a closure cause we're in a for loop*/
-          lsGet( chromeTab.id, (function(){
+        angular.forEach( chromeTabs, function( tab, key ){
+          lsGet( tab.id, function( result ){
 
-            var tab = chromeTab;
+            if( result && result.hasOwnProperty( tab.id ) ){
 
-            return function( result ){
-              if( result && result.hasOwnProperty( tab.id ) ){
+              var tabProtocol = parser.href(tab.url).protocol();
+              var hostName = parser.href(tab.url).hostname();
 
-                var tabProtocol = parser.href(tab.url).protocol();
-                var hostName = parser.href(tab.url).hostname();
+              if ( tab.hasOwnProperty("id") && ALLOWED_PROTOCOLS.indexOf( tabProtocol ) !== -1 && tab.id != $scope.overtabId && tab.status === "complete" ){
 
-                if ( tab.hasOwnProperty("id") && ALLOWED_PROTOCOLS.indexOf( tabProtocol ) !== -1 && tab.id != $scope.overtabId && tab.status === "complete" ){
-
-                  $scope.addTab( tab, true );
-                }
+                $scope.addTab( tab, true );
               }
-            };
+            }
 
-          })(chromeTab));
-          /* end do an lsget */
-        }
+          });
+        });
+        /* end do an lsget */
       });
     });
   };
@@ -408,13 +407,9 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
       }
     });
 
-    $scope.delayedEdgesRender( output );
+    $scope.edgesToRender = output;
 
     return tabs;
-  };
-
-  $scope.delayedEdgesRender = function( edgesList ){
-    $scope.edgesRender( edgesList );
   };
 
   $scope.currentEdgesRender = function( ){
@@ -424,8 +419,6 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
   $scope.edgesRender = function( edgesList ){
 
     $scope.setWindowSize();
-
-    console.log("doing render");
 
     for( var i =0; i< $scope.edges.length; i++ ){
 

@@ -14,4 +14,5 @@ overtabApp.config(function($filterProvider, $compileProvider){
     // Angular before v1.2 uses $compileProvider.urlSanitizationWhitelist(...)
 })
 .filter('tabFilter', tabFilter)
-.controller('mainController', ['$scope', '$rootScope', '$timeout', '$filter', mainController]);
+.controller('mainController', ['$scope', '$rootScope', '$timeout', '$filter', mainController])
+.directive('onLastRepeat', onLastRepeat);

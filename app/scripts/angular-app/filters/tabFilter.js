@@ -26,6 +26,9 @@ var tabFilter = function( ) {
 
         });
 
+        //let it know we need to render edges
+        this.$emit('onLastRepeatEvent');
+
         return output;
 
       }else{
