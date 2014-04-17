@@ -83,7 +83,7 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
 
   $scope.overtabFocus = function( id ){
     //we know the id of where we just came from, do some stuff
-    angular.element('#filter-input').focus();
+    angular.element('#filter-input').focus().select();
   };
 
   $scope.tabClose = function( e ){
