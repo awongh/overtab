@@ -317,8 +317,6 @@ var getAllTabs = function(){
       overtabId = result["OVERTAB_TAB_ID"];
     }
 
-    var parser = new Parser();
-
     //query for all the tabs
     tabsQuery( {}, function( chromeTabs ){
       //console.log("notify", "query all tabs", chromeTabs );
@@ -362,25 +360,46 @@ var tabReplaced = function( newTabId, oldTabId ){
   });
 };
 
-var startup = function(){
+var reset = function(){
+  //do some cleanup
   chrome.storage.local.clear();
-  //set some local storage stuff???
-  //console.log("notify", "startup" );
+
+  //doesnt matter which url we are getting, it will
+  //cover whatever exteension things that are open
+  var indexUrl = chrome.extension.getURL('index.html');
+
+  var parser = new Parser();
+
+  var urlString = parser.href(indexUrl).protocol() + "//" + parser.href(indexUrl).hostname() + "/*";
+
+  var urlQuery = {
+    url : urlString
+  };
+
+  //query for these and if they are found, close them
+  tabsQuery(urlQuery, function(result) {
+
+    for( var i=0; i<result.length; i++ ){
+      closeTab( result[i].id );
+    }
+  });
+};
+
+var startup = function(){
+
+  reset();
 
   getAllTabs();
 };
 
 var shutdown = function(){
-  chrome.storage.local.clear();
-  //console.log("notify", "shutdown" );
+  reset();
 };
 
 var install = function( details ){
-  chrome.storage.local.clear();
-  //set some options????
-  getAllTabs();
+  reset();
 
-  //console.log("notify", "installed", details.reason, details.previousVersion );
+  getAllTabs();
 };
 
 ////////////////////////////////////////////////////////////////////////

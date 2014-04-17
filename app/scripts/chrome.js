@@ -91,6 +91,12 @@ var lsRemove = function( tabId, callback ){
 var chromeBadge = function( text ){
   chrome.browserAction.setBadgeText( {text: String(text)} );
 };
+
+var closeTab = function( tabId ){
+  chrome.tabs.remove( tabId, function() {
+    //what should we do here
+  });
+};
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 ////////////////     END SHARED CHROME INTERACTION      ////////////////
