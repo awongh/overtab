@@ -102,7 +102,8 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
   $scope.addSearchValue = function ( tab ) {
     $scope.bloodhoundData.add({
       title: tab.title,
-      url: tab.url
+      url: tab.url,
+      id: tab.id
     });
   };
 

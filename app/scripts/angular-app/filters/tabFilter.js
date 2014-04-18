@@ -19,23 +19,14 @@ var tabFilter = function( ) {
 
       if( input && typeof input != "object" ){
 
-        //setup the regex
-        /*
-        var t=inpu.split('');
-        var h = t.join('\\w*.*');  //replace(/\W/, ""), 'i');
-        var e = h.replace(/\W/, "");
-        var reg = new RegExp(e, 'i');
+        var results = this.bloodhoundData.index.get( input );
 
-        console.log( "error", reg );
-        */
+        var output = results.filter(function(resultTab) {
 
-        var reg = new RegExp(input.split('').join('\\w*.*').replace(/\W/, ""), 'i');
+          var t = tabs.getByValueProperty("id", resultTab.id );
 
-        //array of values
-        var output = tabs.filter(function(tab) {
-
-          if (tab.url.match(reg) || tab.title.match(reg)) {
-            return tab;
+          if (t) {
+            return t;
           }
 
         });
