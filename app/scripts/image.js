@@ -34,9 +34,6 @@ var processImage = function( id, url, blob, width, height ){
   var canvas = document.createElement('canvas'),
     canvasContext = canvas.getContext('2d');
 
-  canvas.width = dimensions.width,
-  canvas.height = dimensions.height;
-
   var my_worker = new Worker("scripts/image-worker.js");
 
   my_worker.onmessage = function(event){
@@ -46,6 +43,7 @@ var processImage = function( id, url, blob, width, height ){
 
     //we put the canvascontext in here and the measurements
     //write everything out to the canvas
+    canvasContext.clearRect( 0, 0, THUMBSIZE, THUMBSIZE);
     canvasContext.clearRect(0, 0, dimensions.width, dimensions.height);
     canvasContext.putImageData(returnedData, 0, 0);
 
@@ -66,19 +64,34 @@ var processImage = function( id, url, blob, width, height ){
 
   if( blob ){
 
-    var imageData = canvasContext.createImageData( dimensions.width, dimensions.height );
+    var img = document.createElement('img');
 
-    my_worker.postMessage({
-      url:blob,
-      imageData:imageData,
-      w2:dimensions.width,
-      h2:dimensions.height
-    });
+    img.onload = function() {
+      canvas.width = this.width,
+      canvas.height = this.height;
+
+      canvasContext.drawImage(this, 0, 0, this.width, this.height);
+
+      var imageData = canvasContext.getImageData(0, 0, this.width, this.height);
+
+      my_worker.postMessage({
+        imageData:imageData,
+        w:this.width,
+        h:this.height,
+        w2:dimensions.width,
+        h2:dimensions.height
+      });
+
+      my_worker = undefined;
+
+    };
+
+    img.src = blob;
+    img = null;
 
   }else{
     //console.log("error", "didnt get blob");
   }
 
-  my_worker = undefined;
   blob = undefined;
 };

@@ -139,7 +139,7 @@ var screenCap = function( tab ){
 
     tabQuery(activeCompleteQuery, function(result) {
       if ( result.id == tab.id && result.windowId == tab.windowId && oldUrl != result.url && DISALLOWED_SCREENCAP_URLS.indexOf(result.url) === -1 ) {
-        generateScreenCap(result.windowId, {format: "png"}, function(blob){
+        generateScreenCap(result.windowId, {format: "jpeg",quality:1}, function(blob){
           processImage( tab.id, result.url, blob, result.width, result.height);
           blob = undefined;
         });
