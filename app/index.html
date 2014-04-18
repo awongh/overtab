@@ -15,7 +15,7 @@
 
       <div ng-controller="mainController" ng-init="init()" id="tab-graph">
             <div class="tab-filter">
-                <input id="filter-input" ng-model="tabFilterInput" type="text" placeholder="filter">
+                <input id="filter-input" class="typeahead" type="text" datasets="typeaheadData" ng-model="tabFilterInput" placeholder="filter" options="typeaheadOptions" sf-typeahead>
             </div>
 
             <div id="node-container" class="node-cont">
@@ -38,9 +38,16 @@
         <!-- build:js({.tmp,app}) scripts/vendor.js -->
         <!-- bower:js -->
         <script src="bower_components/jquery/jquery.js"></script>
-        <script src="bower_components/angular/angular.js"></script>
         <script src="bower_components/json3/lib/json3.min.js"></script>
         <script src="bower_components/png-js/png.js"></script>
+
+        <script src="bower_components/angular/angular.js"></script>
+
+        <script src="bower_components/typeahead.js/dist/typeahead.bundle.js"></script>
+        <script src="bower_components/typeahead.js/dist/bloodhound.js"></script>
+
+        <script src="bower_components/angular-typeahead/angular-typeahead.js"></script>
+
         <!-- endbower -->
         <!-- endbuild -->
 

@@ -26,6 +26,104 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
 
   $scope.edgesToRender = [];
 
+  /**************************************************/
+  /**********      typeahead stuff       ************/
+  /**************************************************/
+
+  $scope.typeaheadOptions = {
+    hint: true,
+    highlight: true,
+    minLength: 1
+  };
+
+  $scope.bloodhoundData = null;
+
+  $scope.typeaheadData = [];
+
+  $scope.dataTokenizer = function( d ){
+
+    var tokenize = "";
+
+    if( d.hasOwnProperty( "url" ) ){
+
+      //concatenate all the fileds
+      var url = d.url;
+      var parser = new Parser().href( url );
+
+      //this hostname doesn't do exactly what it
+      //looks like, but it works ok
+      //news.ycombinator.com -> news ycombinator.com
+      //makes sure ycomb[...] is found
+      var hostname = parser.host().replace("."," ");
+      var path = parser.pathname().replace("/"," ");
+      var search = parser.search().replace("&"," ");
+
+      tokenize = hostname + " " + path + " " + search;
+    }
+
+    if( d.hasOwnProperty( "title" ) ){
+      tokenize += " "+d.title;
+    }
+
+    //console.log( "yes toknizin this: "+tokenize);
+
+    return Bloodhound.tokenizers.whitespace(tokenize);
+  };
+
+  $scope.initTypeahead = function(){
+
+    // Instantiate the bloodhound suggestion engine
+    $scope.bloodhoundData = new Bloodhound({
+      //init both the tokenizers
+      datumTokenizer: $scope.dataTokenizer,
+      queryTokenizer: Bloodhound.tokenizers.whitespace,
+
+      local: $scope.tabs
+    });
+
+    // initialize the bloodhound suggestion engine
+    $scope.bloodhoundData.initialize();
+
+    $scope.typeaheadData = [
+      {
+        displayKey: 'title',
+        source: $scope.bloodhoundData.ttAdapter()
+      }
+    ];
+
+  };
+
+  $scope.indexAllTabs = function(){
+    angular.forEach( $scope.tabs, function( tab, key ){
+      $scope.addSearchValue( tab );
+    });
+  };
+
+  $scope.addSearchValue = function ( tab ) {
+    $scope.bloodhoundData.add({
+      title: tab.title,
+      url: tab.url
+    });
+  };
+
+  //that's right, anytime a tab is removed, reindex the entire thing
+  $scope.resetSearch = function(){
+    $scope.bloodhoundData.clear();
+    $scope.indexAllTabs();
+  };
+
+  //this sest the behaviour that the input resets when electing something
+  //from the input dropdown menu
+  //we are also dealing with this in the tab filter
+  $scope.$on('typeahead:selected', function(scope, element, attrs){
+    $scope.tabFilterInput = angular.element('#filter-input').val();
+    angular.element('#filter-input').typeahead("close");
+  });
+
+  /**************************************************/
+  /**********   end typeahead stuff      ************/
+  /**************************************************/
+
   $scope.$on('onLastRepeatEvent', function(scope, element, attrs){
     $scope.edgesRender( $scope.edgesToRender );
   });
@@ -111,13 +209,19 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
 
               if ( tab.hasOwnProperty("id") && ALLOWED_PROTOCOLS.indexOf( tabProtocol ) !== -1 && tab.id != $scope.overtabId && tab.status === "complete" ){
 
+                //tell add tab we might have a screenshot or something
                 $scope.addTab( tab, true );
               }
             }
 
           });
         });
-        /* end do an lsget */
+        /* end lsget */
+
+        //cheat and use a timeout to start the search indexing of the tabs we just got
+        $timeout( function(){
+          $scope.indexAllTabs();
+        },1);
       });
     });
   };
@@ -256,6 +360,8 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
         $scope.tabEdgeRemove( tabId, $scope.currentEdgesRender );
 
         $scope.tabs.remove(tabPosition);
+
+        $scope.resetSearch();
       }
     }
   };
@@ -554,6 +660,8 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
   };
 
   $scope.init = function() {
+
+    $scope.initTypeahead();
 
     //get all the currently open tabs
     $scope.getAllTabs();

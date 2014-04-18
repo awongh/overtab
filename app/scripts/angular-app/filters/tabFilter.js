@@ -1,9 +1,23 @@
 "use strict";
 
 var tabFilter = function( ) {
+
     return function(tabs, input) {
 
-      if( input ){
+      if( typeof input == "object" ){
+        for( var i=0; i< tabs.length; i++ ){
+          if( tabs[i].url == input.url ){
+
+            //this will only ever have one thing
+            this.switchToTab( tabs[i] );
+
+            //we can do this if we want to display this one tab
+            //return [ tabs[i] ];
+          }
+        }
+      }
+
+      if( input && typeof input != "object" ){
 
         //setup the regex
         /*

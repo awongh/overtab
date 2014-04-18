@@ -1,6 +1,6 @@
 "use strict";
 
-var overtabApp = angular.module('overtab', []);
+var overtabApp = angular.module('overtab', ['siyfion.sfTypeahead']);
 
 overtabApp.config(function($filterProvider, $compileProvider){
 
