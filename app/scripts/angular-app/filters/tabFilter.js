@@ -21,9 +21,9 @@ var tabFilter = function( ) {
 
         var results = this.bloodhoundData.index.get( input );
 
-        var output = results.filter(function(resultTab) {
+        var output = tabs.filter(function(tab) {
 
-          var t = tabs.getByValueProperty("id", resultTab.id );
+          var t = results.getByValueProperty("id", tab.id );
 
           if (t) {
             return t;

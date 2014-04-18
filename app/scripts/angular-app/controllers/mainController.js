@@ -77,7 +77,6 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
       //init both the tokenizers
       datumTokenizer: $scope.dataTokenizer,
       queryTokenizer: Bloodhound.tokenizers.whitespace,
-
       local: $scope.tabs
     });
 
@@ -109,8 +108,11 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
 
   //that's right, anytime a tab is removed, reindex the entire thing
   $scope.resetSearch = function(){
+    //var d = new Date();
+    //console.log( "start:", d.getTime() );
     $scope.bloodhoundData.clear();
     $scope.indexAllTabs();
+    //console.log( "**end:", d.getTime() );
   };
 
   //this sest the behaviour that the input resets when electing something
@@ -128,7 +130,6 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
   $scope.$on('onLastRepeatEvent', function(scope, element, attrs){
     $scope.edgesRender( $scope.edgesToRender );
   });
-
 
   $scope.onMessage = function(request, sender, sendResponse) {
 
@@ -351,6 +352,8 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
 
       $scope.$apply();
     }
+
+    $scope.resetSearch();
   };
 
   $scope.removeTab = function( tabId ) {
@@ -367,6 +370,7 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
     }
   };
 
+  //TODO: change the name of oldtab and newtab - confusing
   $scope.updateLocalTab = function( newTab, oldTab ){
     var parser = new Parser();
 
@@ -415,6 +419,9 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
     //has the domain changed?
     //or something else?
     $scope.tabEdgeSet( oldTab, $scope.currentEdgesRender );
+
+    //$scope.addSearchValue( oldTab );
+    $scope.resetSearch();
 
     $scope.$apply();
   };
