@@ -11,6 +11,8 @@ onmessage = function (oEvent) {
   imageData.data = image_data_array;
 
   postMessage({returnedData:imageData});
+
+  self.close();
 };
 
 function resample_hermite(data, W, H, W2, H2){
