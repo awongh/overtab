@@ -316,7 +316,6 @@ module.exports = function (grunt) {
           cwd: '<%= yeoman.app %>',
           dest: '<%= yeoman.dist %>',
           src: [
-            'scripts/image-worker.js',
             '*.{ico,png,txt}',
             '*.html',
             '_locales/**/*',
@@ -325,18 +324,6 @@ module.exports = function (grunt) {
           ]
 
         //we aren't minimizing this yet, maybe we should
-        }, {
-          expand: false,
-          dest: '<%= yeoman.dist %>/scripts/bower-png.js',
-          src: [
-            '<%= yeoman.app %>/bower_components/png-js/png.js'
-          ]
-        }, {
-          expand: false,
-          dest: '<%= yeoman.dist %>/scripts/bower-zlib.js',
-          src: [
-            '<%= yeoman.app %>/bower_components/png-js/zlib.js'
-          ]
         }, {
           expand: true,
           cwd: '.tmp/images',
@@ -377,7 +364,6 @@ module.exports = function (grunt) {
                         'scripts/chromereload.js',
                         'scripts/angular-app/*',
                         'scripts/angular-chrome.js',
-                        'scripts/image-worker.js',
                         'scripts/worker-bower-components.js',
                         'scripts/options.js'
                     ]
