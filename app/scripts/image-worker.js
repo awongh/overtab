@@ -4,13 +4,16 @@ onmessage = function (oEvent) {
     h2 = oEvent.data.h2,
     w = oEvent.data.w,
     h = oEvent.data.h,
+    rImageData = oEvent.data.rImageData,
     imageData = oEvent.data.imageData;
 
   var image_data_array = resample_hermite( imageData.data, w, h, w2, h2 );
 
-  imageData.data = image_data_array;
+  for (var i=0; i<image_data_array.length; i++) {
+      rImageData.data[i] = image_data_array[i];
+  }
 
-  postMessage({returnedData:imageData});
+  postMessage({rImageData:rImageData});
 
   self.close();
 };

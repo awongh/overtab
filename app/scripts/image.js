@@ -39,18 +39,19 @@ var processImage = function( id, url, blob, width, height ){
   my_worker.onmessage = function(event){
 
     //we've returned with the processed data
-    var returnedData = event.data.returnedData;
+    var returnedImageData = event.data.rImageData;
 
     //we put the canvascontext in here and the measurements
     //write everything out to the canvas
-    canvasContext.clearRect( 0, 0, THUMBSIZE, THUMBSIZE);
-    canvasContext.clearRect(0, 0, dimensions.width, dimensions.height);
-    canvasContext.putImageData(returnedData, 0, 0);
+    canvas.width = dimensions.width,
+    canvas.height = dimensions.height;
+    canvasContext.clearRect( 0, 0, dimensions.width, dimensions.height);
+    canvasContext.putImageData(returnedImageData, 0, 0);
 
     var capId = "screencap-"+id;
     var setObj = {};
 
-    setObj[capId] = canvas.toDataURL("jpeg",0.9);
+    setObj[capId] = canvas.toDataURL("jpeg",0.0);
     setObj["screencap-url-"+id] = url;
 
     lsSet( setObj, function(){
@@ -60,6 +61,7 @@ var processImage = function( id, url, blob, width, height ){
 
     canvasContext = undefined;
     canvas = undefined;
+    event = undefined;
   };
 
   if( blob ){
@@ -73,8 +75,10 @@ var processImage = function( id, url, blob, width, height ){
       canvasContext.drawImage(this, 0, 0, this.width, this.height);
 
       var imageData = canvasContext.getImageData(0, 0, this.width, this.height);
+      var rImageData = canvasContext.createImageData(dimensions.width, dimensions.height);
 
       my_worker.postMessage({
+        rImageData:rImageData,
         imageData:imageData,
         w:this.width,
         h:this.height,
@@ -83,7 +87,8 @@ var processImage = function( id, url, blob, width, height ){
       });
 
       my_worker = undefined;
-
+      imageData = undefined;
+      rImageData = undefined;
     };
 
     img.src = blob;
