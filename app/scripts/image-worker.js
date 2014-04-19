@@ -1,6 +1,3 @@
-//this wont work in prod: figure out how to modify the gruntfile for this
-importScripts('bower-png.js', 'bower-zlib.js');
-
 onmessage = function (oEvent) {
 
   var w2 = oEvent.data.w2,
