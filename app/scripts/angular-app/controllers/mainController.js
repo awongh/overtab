@@ -186,7 +186,7 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
     angular.element('#filter-input').focus().select();
   };
 
-  $scope.tabClose = function( e ){
+  $scope.tabClose = function( ){
     closeTab( this.tab.id );
   };
 

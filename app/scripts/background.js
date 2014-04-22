@@ -8,6 +8,8 @@
   var OVERTAB_TAB_ID = null,
       OVERTAB_WINDOW_ID = null;
 
+  var dontDoScreencap = false;
+
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 ////////////////     START CHROME CALLBACK FUNCTIONS    ////////////////
@@ -111,6 +113,8 @@ var tabUpdated = function( tabId, changeInfo, tab ){
 
 var screenCap = function( tab ){
 
+  var start = new Date().getTime();
+
   //get the current screencap url
   var screenCapUrlId = "screencap-url-"+tab.id;
   lsGet( screenCapUrlId, function( screenCapUrl ){
@@ -139,8 +143,21 @@ var screenCap = function( tab ){
 
     tabQuery(activeCompleteQuery, function(result) {
       if ( result.id == tab.id && result.windowId == tab.windowId && oldUrl != result.url && DISALLOWED_SCREENCAP_URLS.indexOf(result.url) === -1 ) {
+
+        if( dontDoScreencap ) return;
+
         generateScreenCap(result.windowId, {format: "jpeg",quality:1}, function(blob){
-          processImage( tab.id, result.url, blob, result.width, result.height);
+          processImage( tab.id, result.url, blob, result.width, result.height, function(){
+            dontDoScreencap = true;
+
+            //maybe we can delay a screencap if there's too many??
+            setTimeout( function(){
+              //do stuff
+              dontDoScreencap = false;
+            },500);
+
+            //getMemory();
+          });
           blob = undefined;
         });
       }else{
@@ -361,7 +378,12 @@ var tabReplaced = function( newTabId, oldTabId ){
 };
 
 var reset = function(){
+
   //do some cleanup
+
+  var OVERTAB_TAB_ID = null,
+      OVERTAB_WINDOW_ID = null;
+
   chrome.storage.local.clear();
 
   //doesnt matter which url we are getting, it will

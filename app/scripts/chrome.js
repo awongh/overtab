@@ -102,3 +102,56 @@ var closeTab = function( tabId ){
 ////////////////     END SHARED CHROME INTERACTION      ////////////////
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+////////////////     CHROME MEMORY DEV STUFF            ////////////////
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+
+var getMemory = function(){
+  chrome.system.memory.getInfo(function(info){
+    var availableCapacity = info.availableCapacity, capacity = info.capacity;
+    //console.log( "available: "+availableCapacity, "total: "+capacity );
+    console.log( "available: "+availableCapacity );
+
+    if( availableCapacity < 21000000 ){
+      alert( "about to run out of memory" );
+    }
+
+    if( OVERTAB_TAB_ID ){
+
+      chrome.processes.getProcessIdForTab(OVERTAB_TAB_ID, function(processId){
+
+        var pId = processId;
+
+        chrome.processes.getProcessInfo(processId, true, function(processes){
+
+          var ps = [];
+
+          for( var i in processes ){
+            if( processes.hasOwnProperty(i) ){
+              ps.push( processes[i] );
+            }
+          }
+
+          var process = ps[0];
+
+          //console.log( "using:" + process.privateMemory );
+
+        /*
+          console.log( "process"
+           , process.id
+           , process.privateMemory
+           , process.osProcessId
+           , process.tabs.length
+           , process.title
+           , process.type
+          );
+         */
+        });
+      });
+
+    }
+  });
+};

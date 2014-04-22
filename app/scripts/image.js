@@ -25,7 +25,7 @@ var calcDimensions = function( w, h ){
     return { height:Math.round( height ), width:Math.round( width ) };
 };
 
-var processImage = function( id, url, blob, width, height ){
+var processImage = function( id, url, blob, width, height, callback ){
 
   //even though these aren't the pixel dimensions, they are
   //ratio correct so they'll give us an accurate downsize dimension
@@ -53,10 +53,15 @@ var processImage = function( id, url, blob, width, height ){
       setObj["screencap-url-"+id] = url;
 
       lsSet( setObj, function(){
+
+        //should we delay this message??
+
         //storage is set, ready for ng app to get it
         tabEvent( id, "screencap" );
+        callback();
       });
 
+      setObj = undefined;
       canvasContext = undefined;
       canvas = undefined;
     };
