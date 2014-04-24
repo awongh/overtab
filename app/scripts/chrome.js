@@ -113,7 +113,7 @@ var getMemory = function(){
   chrome.system.memory.getInfo(function(info){
     var availableCapacity = info.availableCapacity, capacity = info.capacity;
     //console.log( "available: "+availableCapacity, "total: "+capacity );
-    console.log( "available: "+availableCapacity );
+    //console.log( "available: "+availableCapacity );
 
     if( availableCapacity < 21000000 ){
       alert( "about to run out of memory" );

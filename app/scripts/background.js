@@ -8,8 +8,6 @@
   var OVERTAB_TAB_ID = null,
       OVERTAB_WINDOW_ID = null;
 
-  var dontDoScreencap = false;
-
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 ////////////////     START CHROME CALLBACK FUNCTIONS    ////////////////
@@ -144,21 +142,21 @@ var screenCap = function( tab ){
     tabQuery(activeCompleteQuery, function(result) {
       if ( result.id == tab.id && result.windowId == tab.windowId && oldUrl != result.url && DISALLOWED_SCREENCAP_URLS.indexOf(result.url) === -1 ) {
 
-        if( dontDoScreencap ) return;
+        //get cap count here
 
-        generateScreenCap(result.windowId, {format: "jpeg",quality:1}, function(blob){
-          processImage( tab.id, result.url, blob, result.width, result.height, function(){
-            dontDoScreencap = true;
+        //chrome.tabs.captureVisibleTab( windowId, options, callback );
+        memoryCheck( function(){
+          generateScreenCap(result.windowId, {format: "jpeg",quality:1}, function(blob){
 
-            //maybe we can delay a screencap if there's too many??
-            setTimeout( function(){
-              //do stuff
-              dontDoScreencap = false;
-            },500);
+            var blobLength = blob.length;
 
-            //getMemory();
+            processImage( tab.id, result.url, blob, result.width, result.height, function(){
+
+              //getMemory();
+              setMemoryStatistics( blobLength );
+            });
+            blob = undefined;
           });
-          blob = undefined;
         });
       }else{
         //console.log( "warn", "screencap: no active window found >> result: "+result.id+" tab: "+tab.id+" old url: "+oldUrl);
@@ -432,6 +430,75 @@ var install = function( details ){
 
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
+////////////////      MEMORY CHECKING FOR EXTENSION     ////////////////
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+
+var memoryCheck = function( callback ){
+  //get the average mem usage
+  lsGet( "memory_usage_average", function( result ){
+
+    chrome.system.memory.getInfo(function(info){
+      var availableCapacity = info.availableCapacity, capacity = info.capacity;
+
+      //console.log( "available: "+availableCapacity, "total: "+capacity );
+      //console.log( "available: "+availableCapacity );
+
+      if( result.hasOwnProperty("memory_usage_average") && result.memory_usage_average > 0 ){
+
+        if( availableCapacity < result.memory_usage_average ){
+
+          console.log( "about to run out of memory: "+availableCapacity );
+
+          var r=confirm("about to run out of memory");
+          if (r==true)
+          {
+            callback();
+          }
+          else
+          {
+            console.log( "did nothing" );
+          }
+
+          return;
+        }
+      }
+
+      callback();
+    });
+  });
+};
+
+var setMemoryStatistics = function( blobLength ){
+  lsGet( "memory_usage_average", function( result ){
+
+    var average = 0;
+
+    if( result.hasOwnProperty("memory_usage_average") && result.memory_usage_average > 0 ){
+
+      var old = result.memory_usage_average;
+
+      average = old + ( old - blobLength );
+    }else{
+      average = blobLength;
+    }
+
+    //set
+    lsSet( {"memory_usage_average":average}, function(){
+      //congrats, we set the thing!!!
+    });
+  });
+
+};
+
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+////////////////    END MEMORY CHECKING FOR EXTENSION   ////////////////
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
 ////////////////      START CHROME INTERACTION          ////////////////
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
@@ -451,7 +518,7 @@ chrome.runtime.onMessage.addListener( onMessage );
 //get the tab screencap
 //this needs to run the web worker
 var generateScreenCap = function( windowId, options, callback ){
-  return chrome.tabs.captureVisibleTab( windowId, options, callback );
+  chrome.tabs.captureVisibleTab( windowId, options, callback );
 };
 
 //listen for tab states

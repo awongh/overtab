@@ -40,7 +40,6 @@
         "storage",
         "unlimitedStorage",
         "system.memory",
-        "processes",
         "history",
         "<all_urls>"
     ],
