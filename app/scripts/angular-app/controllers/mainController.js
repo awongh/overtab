@@ -111,7 +111,6 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
   //that's right, anytime a tab is removed, reindex the entire thing
   $scope.resetSearch = function(){
     //var d = new Date();
-    //console.log( "start:", d.getTime() );
     $scope.bloodhoundData.clear();
     $scope.indexAllTabs();
     //console.log( "**end:", d.getTime() );
@@ -253,7 +252,7 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
 
     //make sure it doesnt already exist for some reason??
     if( $scope.tabs.hasValueProperty("id", tab.id ) ){
-      console.log("error", "ERROR: trying to add tab for tabId "+tab.id+" that already exists in scope.tabs");
+      //console.log("error", "ERROR: trying to add tab for tabId "+tab.id+" that already exists in scope.tabs");
       return false;
     }
 
@@ -312,7 +311,6 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
   $scope.removeTab = function( tabId ) {
     if (tabId) {
       var tabPosition = $scope.tabs.valuePropertyIndex("id", tabId);
-      console.log( "at remove tab: "+tabPosition);
       if( tabPosition !== false ){
 
         $scope.tabEdgeRemove( tabId, $scope.currentEdgesRender );
@@ -393,12 +391,12 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
 
           $scope.$apply( function(){});
         }else{
-          console.log( "warn", "couldnt set this records screencap: "+tabId );
+          //console.log( "warn", "couldnt set this records screencap: "+tabId );
         }
 
         screencap = null;
       }else{
-        console.log( "warn", "we dont have this screen cap record: "+tabId );
+        //console.log( "warn", "we dont have this screen cap record: "+tabId );
       }
 
       result = null;
@@ -420,13 +418,13 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
         //what kind of race condition cpould exist here that:
         //we are adding a tab only on update, we got it from a query, then what???
 
-        console.log("warn", "ERROR: in update didnt find tab "+tabId );
+        //console.log("warn", "ERROR: in update didnt find tab "+tabId );
         $scope.addTab( chromeTab );
         return;
       }
 
       if( !chromeTab ){
-        console.log("warn", "didnt find chrome tab: "+tabId );
+        //console.log("warn", "didnt find chrome tab: "+tabId );
         return false;
       }
 
@@ -446,8 +444,12 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
     angular.forEach( tabs, function( tab, key ){
       if( $scope.edgesChildIndex[tab.id] != "undefined" ){
 
+        //if( tab.hasOwnProperty("openerTabId") && $scope.edgesParentIndex[tab.openerTabId] != "undefined" && $scope.tabs.hasValueProperty( "id", tab.openerTabId ) ){
         if( tab.hasOwnProperty("openerTabId") && $scope.edgesParentIndex[tab.openerTabId] != "undefined" ){
           //add it
+          if( tab.id == 560 ){
+            console.log( tab.id, tab.openerTabId, tabs );
+          }
           output.push( {tabId:tab.id,parentId:tab.openerTabId} );
         }
       }
@@ -473,7 +475,10 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
   };
 
   $scope.$on('onLastRepeatEvent', function(scope, element, attrs){
-    $scope.edgesRender( $scope.edgesToRender );
+
+    $timeout( function(){
+      $scope.edgesRender( $scope.edgesToRender );
+    },200);
   });
 
   $scope.tabEdgeSet = function( tab, callback ){
@@ -500,7 +505,6 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
       $scope.edgesParentIndex[tab.openerTabId].push( tab.id );
     }
 
-    console.log("edge tab id: "+ tab.id+" "+tab.openerTabId );
     $scope.edges.push( { tabId: tab.id, parentId: tab.openerTabId } );
 
     callback();
@@ -530,7 +534,7 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
     //make sure it renders, put it in a timeout
     $timeout( function(){
       callback();
-    },1);
+    },300);
   };
 
   $scope.currentEdgesRender = function( ){
@@ -544,7 +548,6 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
       var found = false;
 
       if( !$scope.edges[i] ){
-        console.log("edge render, didnt find");
         continue;
       }
 
@@ -588,16 +591,16 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
           angular.element( cir ).attr( "r", 5 + node_size );
 
 
-          angular.element( elem ).show();
-          angular.element( cir ).show();
+          angular.element( elem ).fadeIn(150);
+          angular.element( cir ).fadeIn(150);
 
           continue;
         }
       }
 
       //this is what we do anywyas
-      angular.element( elem ).hide();
-      angular.element( cir ).hide();
+      angular.element( elem ).fadeOut(150);
+      angular.element( cir ).fadeOut(150);
     }
   };
 

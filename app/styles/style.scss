@@ -339,3 +339,37 @@ svg{
 .tt-suggestion p {
   margin: 0;
 }
+/***************************************************/
+/***************************************************/
+/***************************************************/
+/* angular animations */
+/***************************************************/
+/***************************************************/
+/***************************************************/
+
+.tab-node.ng-enter,
+.tab-node.ng-leave, {
+  -webkit-transition:all linear 0.1s;
+}
+
+.tab-node.ng-leave.tab-node.ng-leave-active,
+.tab-node.ng-enter {
+  opacity:0;
+}
+
+.tab-node.ng-enter.ng-enter-active,
+.tab-node.ng-leave,{
+  opacity:1;
+}
+
+.edge-cont{
+ -webkit-transition: opacity 0.1s linear;
+}
+
+.edge-cont.ng-hide-add, .edge-cont.ng-hide-remove{
+  display:block!important;
+}
+
+.edge-cont.ng-hide{
+  opacity: 0;
+}

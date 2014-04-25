@@ -254,8 +254,9 @@ var openOverTab = function( oldTabId ){
 
       lsSet( { "OVERTAB_TAB_ID" : OVERTAB_TAB_ID, "OVERTAB_WINDOW_ID" : OVERTAB_WINDOW_ID } );
 
+      console.log( "about to do tabevent: "+oldTabId );
       //send a message that says the old tab
-      tabEvent( oldTabId, "overtab" );
+      tabEvent( oldTabId, "opening-overtab" );
     });
 
   });
