@@ -26,6 +26,8 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
 
   $scope.edgesToRender = [];
 
+  $scope.showEdges = true;
+
   /**************************************************/
   /**********      typeahead stuff       ************/
   /**************************************************/
@@ -127,10 +129,6 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
   /**********   end typeahead stuff      ************/
   /**************************************************/
 
-  $scope.$on('onLastRepeatEvent', function(scope, element, attrs){
-    $scope.edgesRender( $scope.edgesToRender );
-  });
-
   $scope.onMessage = function(request, sender, sendResponse) {
 
     if( !request.hasOwnProperty( "id" ) || typeof request.id !== "number" ){
@@ -221,8 +219,10 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
         /* end lsget */
 
         //cheat and use a timeout to start the search indexing of the tabs we just got
+        //also make sure the edges will render
         $timeout( function(){
           $scope.indexAllTabs();
+          $scope.currentEdgesRender();
         },1);
       });
     });
@@ -230,58 +230,6 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
 
   $scope.getChromeTab = function( tabId, callback ){
     getTab( tabId, callback );
-  };
-
-  $scope.tabEdgeSet = function( tab, callback ){
-
-    if( !tab.hasOwnProperty( "id" ) || !tab.hasOwnProperty( "openerTabId" ) ){
-      return false;
-    }
-
-    //see if it already exists
-    if( $scope.edgesChildIndex.hasOwnProperty( tab.id ) ){
-      return false;
-    }
-
-    $scope.edgesChildIndex[tab.id] = tab.openerTabId;
-
-    if (typeof $scope.edgesParentIndex[tab.openerTabId] === 'undefined') {
-
-      $scope.edgesParentIndex[tab.openerTabId] = [];
-      $scope.edgesParentIndex[tab.openerTabId].push( tab.id );
-    }else{
-
-      $scope.edgesParentIndex[tab.openerTabId].push( tab.id );
-    }
-
-    console.log("edge tab id: "+ tab.id+" "+tab.openerTabId );
-    $scope.edges.push( { tabId: tab.id, parentId: tab.openerTabId } );
-
-    callback();
-
-  };
-
-  $scope.tabEdgeRemove = function( tabId, callback ){
-
-    var k = $scope.edges.valuePropertyIndex("tabId", tabId);
-
-    if( k ){
-      $scope.edges.remove(k);
-
-      //look in parent edges
-      if(typeof $scope.edgesParentIndex[tabId] !== 'undefined' ){
-        for( var i=0; i<$scope.edgesParentIndex[tabId].length; i++ ){
-
-          var edgeIndex = $scope.edgesParentIndex[tabId][i];
-
-          $scope.edgesChildIndex.remove(edgeIndex);
-        }
-
-        $scope.edgesParentIndex.remove(tabId);
-      }
-    }
-
-    callback();
   };
 
   //TODO: deal with edges??
@@ -364,6 +312,7 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
   $scope.removeTab = function( tabId ) {
     if (tabId) {
       var tabPosition = $scope.tabs.valuePropertyIndex("id", tabId);
+      console.log( "at remove tab: "+tabPosition);
       if( tabPosition !== false ){
 
         $scope.tabEdgeRemove( tabId, $scope.currentEdgesRender );
@@ -507,6 +456,81 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
     $scope.edgesToRender = output;
 
     return tabs;
+  };
+
+  /**************************************************/
+  /**********         edge stuff         ************/
+  /**************************************************/
+
+  $scope.edgeShow = function(){
+    if( $scope.showEdges == true ){
+      $scope.showEdges = false;
+    }else{
+      //render the edges in case something has changed since we hid them
+      $scope.currentEdgesRender();
+      $scope.showEdges = true;
+    }
+  };
+
+  $scope.$on('onLastRepeatEvent', function(scope, element, attrs){
+    $scope.edgesRender( $scope.edgesToRender );
+  });
+
+  $scope.tabEdgeSet = function( tab, callback ){
+
+    if( !tab.hasOwnProperty( "id" ) || !tab.hasOwnProperty( "openerTabId" ) ){
+      return false;
+    }
+
+    //see if it already exists
+    if( $scope.edgesChildIndex.hasOwnProperty( tab.id ) ){
+      //do the callback anyways (probably edge rendering)
+      callback();
+      return false;
+    }
+
+    $scope.edgesChildIndex[tab.id] = tab.openerTabId;
+
+    if (typeof $scope.edgesParentIndex[tab.openerTabId] === 'undefined') {
+
+      $scope.edgesParentIndex[tab.openerTabId] = [];
+      $scope.edgesParentIndex[tab.openerTabId].push( tab.id );
+    }else{
+
+      $scope.edgesParentIndex[tab.openerTabId].push( tab.id );
+    }
+
+    console.log("edge tab id: "+ tab.id+" "+tab.openerTabId );
+    $scope.edges.push( { tabId: tab.id, parentId: tab.openerTabId } );
+
+    callback();
+
+  };
+
+  $scope.tabEdgeRemove = function( tabId, callback ){
+
+    var k = $scope.edges.valuePropertyIndex("tabId", tabId);
+
+    if( k ){
+      $scope.edges.remove(k);
+
+      //look in parent edges
+      if(typeof $scope.edgesParentIndex[tabId] !== 'undefined' ){
+        for( var i=0; i<$scope.edgesParentIndex[tabId].length; i++ ){
+
+          var edgeIndex = $scope.edgesParentIndex[tabId][i];
+
+          $scope.edgesChildIndex.remove(edgeIndex);
+        }
+
+        $scope.edgesParentIndex.remove(tabId);
+      }
+    }
+
+    //make sure it renders, put it in a timeout
+    $timeout( function(){
+      callback();
+    },1);
   };
 
   $scope.currentEdgesRender = function( ){
@@ -667,6 +691,10 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
       };
     }
   };
+
+  /**************************************************/
+  /**********      end edge stuff        ************/
+  /**************************************************/
 
   $scope.borderColor = function(){
     return rangeConstrict( this.tab.domainInt );
