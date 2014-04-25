@@ -238,6 +238,11 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
       return false;
     }
 
+    //see if it already exists
+    if( $scope.edgesChildIndex.hasOwnProperty( tab.id ) ){
+      return false;
+    }
+
     $scope.edgesChildIndex[tab.id] = tab.openerTabId;
 
     if (typeof $scope.edgesParentIndex[tab.openerTabId] === 'undefined') {
