@@ -142,9 +142,6 @@ var screenCap = function( tab ){
     tabQuery(activeCompleteQuery, function(result) {
       if ( result.id == tab.id && result.windowId == tab.windowId && oldUrl != result.url && DISALLOWED_SCREENCAP_URLS.indexOf(result.url) === -1 ) {
 
-        //get cap count here
-
-        //chrome.tabs.captureVisibleTab( windowId, options, callback );
         memoryCheck( function(){
           generateScreenCap(result.windowId, {format: "jpeg",quality:1}, function(blob){
 
@@ -441,25 +438,17 @@ var memoryCheck = function( callback ){
     chrome.system.memory.getInfo(function(info){
       var availableCapacity = info.availableCapacity, capacity = info.capacity;
 
-      //console.log( "available: "+availableCapacity, "total: "+capacity );
-      //console.log( "available: "+availableCapacity );
+      if( result.hasOwnProperty("memory_usage_average") && result.memory_usage_average.length > 0 ){
 
-      if( result.hasOwnProperty("memory_usage_average") && result.memory_usage_average > 0 ){
+        var average = result.memory_usage_average.intAverage();
 
-        if( availableCapacity < result.memory_usage_average ){
+        //console.log("we have: "+availableCapacity+" and we might use: "+average+" of total: "+capacity);
 
-          console.log( "about to run out of memory: "+availableCapacity );
+        //give us a safety cushion
+        if( availableCapacity < ( average*2 ) ){
 
-          var r=confirm("about to run out of memory");
-          if (r==true)
-          {
-            callback();
-          }
-          else
-          {
-            console.log( "did nothing" );
-          }
-
+          //do some stuff here
+          console.log("not doing screencap");
           return;
         }
       }
@@ -472,23 +461,17 @@ var memoryCheck = function( callback ){
 var setMemoryStatistics = function( blobLength ){
   lsGet( "memory_usage_average", function( result ){
 
-    var average = 0;
+    var average = [];
 
-    if( result.hasOwnProperty("memory_usage_average") && result.memory_usage_average > 0 ){
-
-      var old = result.memory_usage_average;
-
-      average = old + ( old - blobLength );
-    }else{
-      average = blobLength;
+    if( result.hasOwnProperty("memory_usage_average") && result.memory_usage_average.length > 0 ){
+      average = result.memory_usage_average;
     }
 
-    //set
-    lsSet( {"memory_usage_average":average}, function(){
-      //congrats, we set the thing!!!
-    });
-  });
+    average.push( blobLength );
 
+    //set
+    lsSet( {"memory_usage_average":average} );
+  });
 };
 
 ////////////////////////////////////////////////////////////////////////

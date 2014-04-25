@@ -86,6 +86,20 @@ Array.prototype.valuePropertyIndex = function( key, val ){
   return false;
 };
 
+//calculate an integer average given an array of numbers
+Array.prototype.intAverage = function(){
+  var total = 0;
+  var length = 0;
+  for( var i=0; i<this.length; i++ ){
+    if( typeof this[i] == "number" ){
+      length++;
+      total += this[i];
+    }
+  }
+
+  return Math.round( total/length );
+}
+
 var DISALLOWED_SCREENCAP_URLS = [
   "chrome://newtab/"
 ];
