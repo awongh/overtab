@@ -215,7 +215,6 @@ module.exports = function (grunt) {
     // additional tasks can operate on them
     useminPrepare: {
       html: '<%= yeoman.app %>/{,*/}*.html',
-      js: '<%= yeoman.app %>/{,*/}*.js',
       options: {
 
         compress: {

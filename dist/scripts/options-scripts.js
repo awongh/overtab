@@ -60,7 +60,7 @@ Array.prototype.getByValue = function( val ){
 
 Array.prototype.getByValueProperty = function( key, val ){
   for( var i=0; i < this.length; i++){
-    if( this[i].hasOwnProperty( key ) && this[i][key] == val ){
+    if( this[i] && this[i].hasOwnProperty( key ) && this[i][key] == val ){
       return this[i];
     }
   }
@@ -78,13 +78,27 @@ Array.prototype.hasValueProperty = function( key, val ){
 
 Array.prototype.valuePropertyIndex = function( key, val ){
  for( var i=0; i < this.length; i++){
-    if( this[i].hasOwnProperty( key ) && this[i][key] === val ){
+    if( this[i] && this[i].hasOwnProperty( key ) && this[i][key] === val ){
       return i;
     }
   }
 
   return false;
 };
+
+//calculate an integer average given an array of numbers
+Array.prototype.intAverage = function(){
+  var total = 0;
+  var length = 0;
+  for( var i=0; i<this.length; i++ ){
+    if( typeof this[i] == "number" ){
+      length++;
+      total += this[i];
+    }
+  }
+
+  return Math.round( total/length );
+}
 
 var DISALLOWED_SCREENCAP_URLS = [
   "chrome://newtab/"
@@ -265,23 +279,76 @@ var lsRemove = function( tabId, callback ){
 var chromeBadge = function( text ){
   chrome.browserAction.setBadgeText( {text: String(text)} );
 };
+
+var closeTab = function( tabId ){
+  chrome.tabs.remove( tabId, function() {
+    //what should we do here
+  });
+};
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 ////////////////     END SHARED CHROME INTERACTION      ////////////////
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+////////////////     CHROME MEMORY DEV STUFF            ////////////////
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+
+var getMemory = function(){
+  chrome.system.memory.getInfo(function(info){
+    var availableCapacity = info.availableCapacity, capacity = info.capacity;
+    //console.log( "available: "+availableCapacity, "total: "+capacity );
+    //console.log( "available: "+availableCapacity );
+
+    if( availableCapacity < 21000000 ){
+      alert( "about to run out of memory" );
+    }
+
+    if( OVERTAB_TAB_ID ){
+
+      chrome.processes.getProcessIdForTab(OVERTAB_TAB_ID, function(processId){
+
+        var pId = processId;
+
+        chrome.processes.getProcessInfo(processId, true, function(processes){
+
+          var ps = [];
+
+          for( var i in processes ){
+            if( processes.hasOwnProperty(i) ){
+              ps.push( processes[i] );
+            }
+          }
+
+          var process = ps[0];
+
+          //console.log( "using:" + process.privateMemory );
+
+        /*
+          console.log( "process"
+           , process.id
+           , process.privateMemory
+           , process.osProcessId
+           , process.tabs.length
+           , process.title
+           , process.type
+          );
+         */
+        });
+      });
+
+    }
+  });
+};
+
 "use strict";
 
 var setMessageListener = function( callback ){
   //chrome.runtime.onMessage.addListener( $scope.onMessage );
   chrome.runtime.onMessage.addListener( callback );
-};
-
-var closeTab = function( tabId ){
-  chrome.tabs.remove( tabId, function() {
-    //what should we do here
-  });
 };
 
 "use strict";
