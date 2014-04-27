@@ -5,9 +5,6 @@
   var THUMBSIZE = 150,
       SCREEN_CROP_RATIO = 1;
 
-  var OVERTAB_TAB_ID = null,
-      OVERTAB_WINDOW_ID = null;
-
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 ////////////////     START CHROME CALLBACK FUNCTIONS    ////////////////
@@ -26,7 +23,7 @@ var isVerifiedTabUrl = function( tab ){
     if (
       tab.hasOwnProperty( "id" )
       && ALLOWED_PROTOCOLS.indexOf( tabProtocol ) !== -1
-      && tab.id != OVERTAB_TAB_ID )
+      && !isExtensionUrl( tab.url ) )
     {
       return true;
     }
@@ -189,18 +186,16 @@ var tabActivated = function( tabInfo ){
 };
 
 var tabRemoved = function( tabId, removeInfo ){
+  getOvertabId( function( tab ){
 
-  if (tabId === OVERTAB_TAB_ID) {
-    OVERTAB_TAB_ID = null;
-    OVERTAB_WINDOW_ID = null;
-    lsSet( { "OVERTAB_TAB_ID" : null, "OVERTAB_WINDOW_ID" : null } );
-  }else{
-    lsRemove(tabId, function(){
-      tabEvent( tabId, "removed" );
+    if (!tab) {
+      lsRemove(tabId, function(){
+        tabEvent( tabId, "removed" );
 
-      setTabCount();
-    });
-  }
+        setTabCount();
+      });
+    }
+  });
 };
 
 var onMessage = function( request, sender, sendResponse ){
@@ -249,11 +244,6 @@ var openOverTab = function( oldTabId ){
         }
       }
 
-      OVERTAB_TAB_ID = chromeObj.id;
-      OVERTAB_WINDOW_ID = chromeObj.windowId;
-
-      lsSet( { "OVERTAB_TAB_ID" : OVERTAB_TAB_ID, "OVERTAB_WINDOW_ID" : OVERTAB_WINDOW_ID } );
-
       console.log( "about to do tabevent: "+oldTabId );
       //send a message that says the old tab
       tabEvent( oldTabId, "opening-overtab" );
@@ -265,11 +255,7 @@ var openOverTab = function( oldTabId ){
 var browserActionClick = function( ){
 
   //before we change the tab, get the current active tab
-  var query = {
-      active: true
-    };
-
-  tabQuery(query, function(tab) {
+  tabQuery({ active:true }, function(tab) {
 
     var oldTabId = 0;
 
@@ -277,57 +263,27 @@ var browserActionClick = function( ){
       var oldTabId = tab.id;
     }
 
-    //are we in a state where we've set these constants?
-    if ( OVERTAB_TAB_ID === null || OVERTAB_WINDOW_ID === null || OVERTAB_TAB_ID === "undefined" || OVERTAB_WINDOW_ID === "undefined" ) {
+    getOvertabId( function( tab ){
 
-      //try to get these constants
-      lsGet( "OVERTAB_TAB_ID", function( tabIdResult ){
+      if( tab ){
+        tabFocus( tab.id, tab.windowId, oldTabId );
+      }else{
+        //create the tab
+        openOverTab( oldTabId );
+      }
 
-        //yep, they're set
-        if( tabIdResult && tabIdResult !== null && tabIdResult.hasOwnProperty( "OVERTAB_TAB_ID" ) && tabIdResult["OVERTAB_TAB_ID"] !== null ){
-          OVERTAB_TAB_ID = tabIdResult.OVERTAB_TAB_ID;
-
-          getTab( tabIdResult.OVERTAB_TAB_ID, function( tab ){
-
-            //what kind of check do we need here??
-            if( tab && typeof tab.id !== "undefined" ){
-
-              lsGet( "OVERTAB_WINDOW_ID", function( windowIdResult ){
-
-                if( windowIdResult && windowIdResult !== null && windowIdResult.hasOwnProperty( "OVERTAB_WINDOW_ID" ) && windowIdResult["OVERTAB_WINDOW_ID"] !== null ){
-
-                  OVERTAB_WINDOW_ID = windowIdResult.OVERTAB_WINDOW_ID;
-                  tabFocus( OVERTAB_TAB_ID, OVERTAB_WINDOW_ID, oldTabId );
-
-                }else{
-                  //the overtab window id as set doesnt exist
-                  openOverTab( oldTabId );
-                }
-              });
-            }else{
-              //the overtab tab id as set doesn't exist
-              openOverTab( oldTabId );
-            }
-          });
-        }else{
-          //the overtab constants aren't in local storage
-          openOverTab( oldTabId );
-        }
-
-      });
-    }else {
-      tabFocus( OVERTAB_TAB_ID, OVERTAB_WINDOW_ID, oldTabId );
-    }
+    });
   });
 };
 
 var getAllTabs = function(){
-  lsGet( "OVERTAB_TAB_ID", function( result ){
+
+  getOvertabId( function( tab ){
 
     var overtabId = null;
 
-    if( result.hasOwnProperty( "OVERTAB_TAB_ID" ) ){
-      overtabId = result["OVERTAB_TAB_ID"];
+    if( tab ){
+      overtabId = tab.id;
     }
 
     //query for all the tabs
@@ -377,14 +333,11 @@ var reset = function(){
 
   //do some cleanup
 
-  var OVERTAB_TAB_ID = null,
-      OVERTAB_WINDOW_ID = null;
-
   chrome.storage.local.clear();
 
   //doesnt matter which url we are getting, it will
   //cover whatever exteension things that are open
-  var indexUrl = chrome.extension.getURL('index.html');
+  var indexUrl = extensionUrl('index.html');
 
   var parser = new Parser();
 
