@@ -379,7 +379,7 @@ svg{
         -webkit-filter: none;
     }
     50% {
-        -webkit-filter: drop-shadow(0px 0px 16px darken( $text, 30% ));
+        -webkit-filter: drop-shadow(0px 0px 22px $text);
     }
     100% {
         -webkit-filter: none;
