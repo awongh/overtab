@@ -179,17 +179,35 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
   };
 
   $scope.overtabFocus = function( id ){
+
     //we know the id of where we just came from, do some stuff
     angular.element('#filter-input').focus().select();
 
     var tabIndex = $scope.tabs.valuePropertyIndex( "id", id );
     if( id && tabIndex ){
+
       $scope.tabs[tabIndex].fromtab = true;
+
+      $scope.scrollToNode( id );
 
       $timeout(function(){
         $scope.tabs[tabIndex].fromtab = false;;
       },2000);
     }
+  };
+
+  $scope.scrollToNode = function( id, callback ){
+    var offset = 0;
+    var duration = 500;
+    var easing = 'swing';
+
+    var scrollPane = angular.element('html, body');
+    var scrollTo = angular.element('#'+id);
+    var scrollY = scrollTo.offset().top - offset;
+
+    scrollPane.animate({scrollTop : scrollY }, duration, easing, function(){
+      if (typeof callback == 'function') { callback.call(this); }
+    });
   };
 
   $scope.tabClose = function( ){
