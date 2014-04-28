@@ -244,7 +244,6 @@ var openOverTab = function( oldTabId ){
         }
       }
 
-      console.log( "about to do tabevent: "+oldTabId );
       //send a message that says the old tab
       tabEvent( oldTabId, "opening-overtab" );
     });
@@ -256,8 +255,6 @@ var browserActionClick = function( ){
 
   //before we change the tab, get the current active tab
   tabQuery({ active:true }, function(tab) {
-
-    console.log( "eyeyeye: "+ tab.id );
 
     var oldTabId = 0;
 

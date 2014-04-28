@@ -474,12 +474,7 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
     angular.forEach( tabs, function( tab, key ){
       if( $scope.edgesChildIndex[tab.id] != "undefined" ){
 
-        //if( tab.hasOwnProperty("openerTabId") && $scope.edgesParentIndex[tab.openerTabId] != "undefined" && $scope.tabs.hasValueProperty( "id", tab.openerTabId ) ){
         if( tab.hasOwnProperty("openerTabId") && $scope.edgesParentIndex[tab.openerTabId] != "undefined" ){
-          //add it
-          if( tab.id == 560 ){
-            console.log( tab.id, tab.openerTabId, tabs );
-          }
           output.push( {tabId:tab.id,parentId:tab.openerTabId} );
         }
       }
