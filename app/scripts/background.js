@@ -303,17 +303,34 @@ var getAllTabs = function(){
 var tabReplaced = function( newTabId, oldTabId ){
 
   //replace the old tab with the new one
-  //console.log("warn", "WARN: XXXXXXX a tab was replaced" );
+  //console.log("WARN: XXXXXXX a tab was replaced", newTabId, oldTabId );
 
   //TODO: we might not be able to do a get on oldtabit....
 
   //what kind of race conditions will we get when we are trying to set this???
   lsGet( oldTabId, function( result ){
-    if( result && !result.hasOwnProperty( oldTabId ) ){
+    if( result && result.hasOwnProperty( oldTabId ) ){
+
+      lsRemove(oldTabId, function(){
+        tabReplaceSet( newTabId, oldTabId );
+      });
+
+    }else{
+      tabReplaceSet( newTabId, oldTabId );
+    }
+  });
+};
+
+var tabReplaceSet = function( newTabId, oldTabId ){
+
+
+  getTab( newTabId, function( tab ){
+
+    if( tab && typeof tab.id !== "undefined" ){
 
       //reset the thing
       var setObj = {};
-      setObj[newTabId] = result.url;
+      setObj[newTabId] = tab.url;
       setObj["screencap-"+newTabId] = "";
       setObj["screencap-url-"+newTabId] = "";
 
@@ -322,8 +339,10 @@ var tabReplaced = function( newTabId, oldTabId ){
         //ok we set it, send an event
         sendMessage(null, {message: "replaced", id: newTabId, oldId: oldTabId});
       });
+
     }else{
-      //console.log("warn", "couldnt find tab on replace");
+      //are we waiting long enough for this? possible other race conditions??
+      //console.log("tab replace: couldn't get tab with id: "+newTabId);
     }
   });
 };

@@ -17,7 +17,7 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
   $scope.overtabId;
 
   $scope.tabs = [];
-  $scope.tabIndex = {};
+  //$scope.tabIndex = {};
 
   $scope.edges = [];
   $scope.edgesChildIndex = {};
@@ -264,8 +264,11 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
   //TODO: deal with edges??
   //this may create some race conditions..... not sure what to do about this
   $scope.tabReplaced = function( tabId, oldTabId ){
-    var index = $scope.tabs.valuePropertyIndex( "id", oldTabId );
-    $scope.tabs[index].id = tabId;
+    //var index = $scope.tabs.valuePropertyIndex( "id", oldTabId );
+    //$scope.tabs[index].id = tabId;
+    //console.log($scope.tabs[index], tabId, oldTabId);
+    $scope.removeTab( oldTabId );
+    $scope.createTab( tabId );
   };
 
   $scope.createTab = function( tabId ){
@@ -549,7 +552,7 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
 
           var edgeIndex = $scope.edgesParentIndex[tabId][i];
 
-          $scope.edgesChildIndex.remove(edgeIndex);
+          delete $scope.edgesChildIndex[edgeIndex];
         }
 
         $scope.edgesParentIndex.remove(tabId);

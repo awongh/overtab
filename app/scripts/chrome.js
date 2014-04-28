@@ -53,7 +53,7 @@ var tabQuery = function( queryInfo, callback ){
         rtabs.push( tabs[i] );
       }
       i++;
-    }while (i < tabs.length && !isVerifiedTabUrl( tab ) );
+    }while (i < tabs.length && !isVerifiedTabUrl( tabs[i] ) );
 
     if (rtabs.length > 0 ) {
         callback(rtabs[0]);
