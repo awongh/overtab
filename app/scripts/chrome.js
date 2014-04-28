@@ -41,9 +41,22 @@ var extensionUrl = function( path ){
 
 //query for a single tab
 var tabQuery = function( queryInfo, callback ){
-  return chrome.tabs.query( queryInfo, function( tabs ){
-    if (tabs && tabs.length > 0 && tabs[0].id) {
-        callback(tabs[0]);
+  chrome.tabs.query( queryInfo, function( tabs ){
+
+    //this is a hack for when a dev window is open...
+    //make sure we can find one good tab
+    var rtabs = [],
+      i=0;
+
+    do{
+      if (tabs[i] && tabs[i].id) {
+        rtabs.push( tabs[i] );
+      }
+      i++;
+    }while (i < tabs.length && !isVerifiedTabUrl( tab ) );
+
+    if (rtabs.length > 0 ) {
+        callback(rtabs[0]);
     }else{
       //console.log( "warn", "WARNING: your tab query failed", queryInfo, tabs );
       callback(false);

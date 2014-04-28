@@ -181,6 +181,15 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
   $scope.overtabFocus = function( id ){
     //we know the id of where we just came from, do some stuff
     angular.element('#filter-input').focus().select();
+
+    var tabIndex = $scope.tabs.valuePropertyIndex( "id", id );
+    if( id && tabIndex ){
+      $scope.tabs[tabIndex].fromtab = true;
+
+      $timeout(function(){
+        $scope.tabs[tabIndex].fromtab = false;;
+      },2000);
+    }
   };
 
   $scope.tabClose = function( ){

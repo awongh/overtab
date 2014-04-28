@@ -188,7 +188,7 @@ var tabActivated = function( tabInfo ){
 var tabRemoved = function( tabId, removeInfo ){
   getOvertabId( function( tab ){
 
-    if (!tab) {
+    if (tab.id != tabId ) {
       lsRemove(tabId, function(){
         tabEvent( tabId, "removed" );
 
@@ -256,6 +256,8 @@ var browserActionClick = function( ){
 
   //before we change the tab, get the current active tab
   tabQuery({ active:true }, function(tab) {
+
+    console.log( "eyeyeye: "+ tab.id );
 
     var oldTabId = 0;
 
