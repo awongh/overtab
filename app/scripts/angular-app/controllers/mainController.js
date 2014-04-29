@@ -197,12 +197,14 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
   };
 
   $scope.scrollToNode = function( id, callback ){
-    var offset = 0;
     var duration = 500;
     var easing = 'swing';
 
     var scrollPane = angular.element('html, body');
     var scrollTo = angular.element('#'+id);
+
+    var offset = ( angular.element(window).height() ) / 2;
+
     var scrollY = scrollTo.offset().top - offset;
 
     scrollPane.animate({scrollTop : scrollY }, duration, easing, function(){
