@@ -128,6 +128,12 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
     angular.element('#filter-input').typeahead("close");
   });
 
+
+  $scope.$on('typeahead:cursorchanged', function(scope, element, attrs){
+    $scope.tabHighlight( attrs.id );
+  });
+
+
   /**************************************************/
   /**********   end typeahead stuff      ************/
   /**************************************************/
@@ -186,6 +192,11 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
 
     //we know the id of where we just came from, do some stuff
     angular.element('#filter-input').focus().select();
+
+    $scope.tabHighlight( id );
+  };
+
+  $scope.tabHighlight = function( id ){
 
     var tabIndex = $scope.tabs.valuePropertyIndex( "id", id );
     if( id && tabIndex ){
