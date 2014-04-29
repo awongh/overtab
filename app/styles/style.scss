@@ -95,6 +95,14 @@ body {
     .tab-node + .tab-node {
     }
 
+    .node-hover-group{
+      z-index:1;
+    }
+
+    .node-hover-group:hover{
+      opacity:0.7;
+    }
+
     .tab-node {
         cursor: pointer;
         margin: 8px 6px 8px 6px;
@@ -129,6 +137,7 @@ body {
           background-color:#fff;
           border-width:4px;
           border-style:solid;
+          z-index:2;
         }
 
         .title {
@@ -149,6 +158,11 @@ body {
             border-radius:12px;
             height:22px;
           }
+        }
+
+        .close-button:hover img{
+          opacity:0.8;
+          box-shadow:none;
         }
     }
 }

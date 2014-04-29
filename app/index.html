@@ -27,8 +27,10 @@
         <div ng-repeat="tab in catchTabFilter( (tabs | tabFilter:tabFilterInput) )" class="border-color-{{borderColor()}} tab-node" ng-class="{'fromtab':tab.fromtab}" ng-click="switchToTab(tab)" id="{{tab.id}}" on-last-repeat>
             <img class="border-color-{{borderColor()}} favicon" ng-src="{{tab.favIconUrl || '/images/20x20.gif'}}" />
             <a class="close-button" ng-click="tabClose()"><img ng-src="/images/close_button.svg"/></a>
-            <div class="thumbnail"><img class="tab-close-img" width="150px" ng-src="{{tab.screencap || '/images/112x140.gif'}}"></div>
-            <div class="title">{{tab.title}}</div>
+            <div class="node-hover-group">
+              <div class="thumbnail"><img class="tab-close-img" width="150px" ng-src="{{tab.screencap || '/images/112x140.gif'}}"></div>
+              <div class="title">{{tab.title}}</div>
+            </div>
         </div>
       </div>
       <div class="edge-cont" ng-show="showEdges">
