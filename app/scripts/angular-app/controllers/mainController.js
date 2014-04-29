@@ -52,6 +52,9 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
       var url = d.url;
       var parser = new Parser().href( url );
 
+      //include the whole url
+      tokenize = parser.href( url ).hostname();
+
       //this hostname doesn't do exactly what it
       //looks like, but it works ok
       //news.ycombinator.com -> news ycombinator.com
@@ -60,7 +63,8 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
       var path = parser.pathname().replace("/"," ");
       var search = parser.search().replace("&"," ");
 
-      tokenize = hostname + " " + path + " " + search;
+      //include the parsed one
+      tokenize += " "+ hostname + " " + path + " " + search;
     }
 
     if( d.hasOwnProperty( "title" ) ){
@@ -728,6 +732,15 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
   /**************************************************/
   /**********      end edge stuff        ************/
   /**************************************************/
+
+  $scope.domainFilter = function(tab){
+
+    if( tab.hasOwnProperty( "searchDomain" ) && tab.searchDomain ){
+
+      var input = angular.element('#filter-input');
+      input.typeahead('val', tab.searchDomain).trigger('input').select();
+    }
+  };
 
   $scope.borderColor = function(){
     return rangeConstrict( this.tab.domainInt );
