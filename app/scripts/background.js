@@ -108,7 +108,7 @@ var tabUpdated = function( tabId, changeInfo, tab ){
 
 var screenCap = function( tab ){
 
-  var start = new Date().getTime();
+  //var start = new Date().getTime();
 
   //get the current screencap url
   var screenCapUrlId = "screencap-url-"+tab.id;

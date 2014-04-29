@@ -7,7 +7,6 @@
       <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
       <!-- build:css(app,.tmp) styles/style.css -->
       <link rel="stylesheet" href="styles/style.css">
-      <link rel="stylesheet" href="styles/colors.css">
       <!-- endbuild -->
   </head>
 
@@ -24,7 +23,7 @@
       </div>
 
       <div id="node-container" class="node-cont">
-        <div ng-repeat="tab in catchTabFilter( (tabs | tabFilter:tabFilterInput) )" class="border-color-{{borderColor()}} tab-node" ng-class="{'fromtab':tab.fromtab}" id="{{tab.id}}" on-last-repeat>
+        <div ng-repeat="tab in catchTabFilter( (tabs | tabFilter:tabFilterInput) )" class="border-color-{{borderColor()}} tab-node" ng-class="{'fromtab':tab.fromtab}" id="{{tab.id}}" on-last-repeat ng-cloak>
             <a class="border-color-{{borderColor()}} favicon" ng-click="domainFilter(tab)">
                 <img class="favicon-img" ng-src="{{tab.favIconUrl || '/images/20x20.gif'}}" />
             </a>
