@@ -555,7 +555,7 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
           delete $scope.edgesChildIndex[edgeIndex];
         }
 
-        $scope.edgesParentIndex.remove(tabId);
+        delete $scope.edgesParentIndex[tabId];
       }
     }
 
