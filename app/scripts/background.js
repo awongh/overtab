@@ -142,14 +142,18 @@ var screenCap = function( tab ){
         memoryCheck( function(){
           generateScreenCap(result.windowId, {format: "jpeg",quality:1}, function(blob){
 
-            var blobLength = blob.length;
+            if( blob ){
 
-            processImage( tab.id, result.url, blob, result.width, result.height, function(){
+              var blobLength = blob.length;
 
-              //getMemory();
-              setMemoryStatistics( blobLength );
-            });
-            blob = undefined;
+              processImage( tab.id, result.url, blob, result.width, result.height, function(){
+
+                //getMemory();
+                setMemoryStatistics( blobLength );
+              });
+              blob = undefined;
+
+            }
           });
         });
       }else{
