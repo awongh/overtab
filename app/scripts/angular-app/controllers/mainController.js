@@ -209,11 +209,15 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
 
     var offset = ( angular.element(window).height() ) / 2;
 
-    var scrollY = scrollTo.offset().top - offset;
+    var scrollOffset = scrollTo.offset();
 
-    scrollPane.animate({scrollTop : scrollY }, duration, easing, function(){
-      if (typeof callback == 'function') { callback.call(this); }
-    });
+    if( scrollOffset && scrollOffset.hasOwnProperty( top ) && scrollOffset.top ){
+      var scrollY = scrollTo.offset().top - offset;
+
+      scrollPane.animate({scrollTop : scrollY }, duration, easing, function(){
+        if (typeof callback == 'function') { callback.call(this); }
+      });
+    }
   };
 
   $scope.tabClose = function( ){
