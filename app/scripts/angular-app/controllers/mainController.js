@@ -740,9 +740,11 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
   $scope.domainFilter = function(tab){
 
     if( tab.hasOwnProperty( "searchDomain" ) && tab.searchDomain ){
+      $timeout( function(){
 
-      var input = angular.element('#filter-input');
-      input.typeahead('val', tab.searchDomain).trigger('input').select();
+        var input = angular.element('#filter-input');
+        input.typeahead('val', tab.searchDomain).trigger('input').select();
+      });
     }
   };
 
