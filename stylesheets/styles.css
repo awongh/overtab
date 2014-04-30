@@ -849,3 +849,8 @@ section #title .credits.right {
     display: none;
   }
 }
+
+.video-cont{
+  margin:20px auto 20px auto;
+}
+
