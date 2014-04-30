@@ -206,7 +206,9 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
       $scope.scrollToNode( id );
 
       $timeout(function(){
-        $scope.tabs[tabIndex].fromtab = false;;
+        if( $scope.tabs.hasOwnProperty( tabIndex ) ){
+          $scope.tabs[tabIndex].fromtab = false;
+        }
       },2000);
     }
   };
