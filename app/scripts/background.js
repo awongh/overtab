@@ -421,7 +421,7 @@ var memoryCheck = function( callback ){
         //console.log("we have: "+availableCapacity+" and we might use: "+average+" of total: "+capacity);
 
         //give us a safety cushion
-        if( availableCapacity < ( average*5 ) ){
+        if( availableCapacity < ( average*10 ) ){
 
           //do some stuff here
           console.log("not doing screencap");
