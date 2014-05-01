@@ -147,9 +147,8 @@ var screenCap = function( tab ){
               var blobLength = blob.length;
 
               processImage( tab.id, result.url, blob, result.width, result.height, function(){
+                //what goes here?
 
-                //getMemory();
-                setMemoryStatistics( blobLength );
               });
               blob = undefined;
 
@@ -408,45 +407,21 @@ var install = function( details ){
 ////////////////////////////////////////////////////////////////////////
 
 var memoryCheck = function( callback ){
-  //get the average mem usage
-  lsGet( "memory_usage_average", function( result ){
+  chrome.system.memory.getInfo(function(info){
+    var availableCapacity = info.availableCapacity, capacity = info.capacity;
 
-    chrome.system.memory.getInfo(function(info){
-      var availableCapacity = info.availableCapacity, capacity = info.capacity;
+    //assume 4-16gb memory - 4294967296 - 17179869184
 
-      if( result.hasOwnProperty("memory_usage_average") && result.memory_usage_average.length > 0 ){
+    //give us a safety cushion
+    if( availableCapacity < ( capacity / 7 ) ){
 
-        var average = result.memory_usage_average.intAverage();
-
-        //console.log("we have: "+availableCapacity+" and we might use: "+average+" of total: "+capacity);
-
-        //give us a safety cushion
-        if( availableCapacity < ( average*10 ) ){
-
-          //do some stuff here
-          console.log("not doing screencap");
-          return;
-        }
-      }
-
-      callback();
-    });
-  });
-};
-
-var setMemoryStatistics = function( blobLength ){
-  lsGet( "memory_usage_average", function( result ){
-
-    var average = [];
-
-    if( result.hasOwnProperty("memory_usage_average") && result.memory_usage_average.length > 0 ){
-      average = result.memory_usage_average;
+      //alert("not doing screencap. avail:"+availableCapacity+" for: " +(capacity/7) );
+      //do some stuff here
+      console.log("not doing screencap");
+      return;
     }
 
-    average.push( blobLength );
-
-    //set
-    lsSet( {"memory_usage_average":average} );
+    callback();
   });
 };
 
