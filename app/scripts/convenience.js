@@ -163,13 +163,13 @@ var stringToInt = function( str ){
 
 //make the domainInt a number in the range
 //of colors we've specified
-function rangeConstrict(num ){
+function rangeConstrict( num ){
   //max1 == number of colors
   //max2 == given spec, possible maximum of url stringtoint given <2048 chars
   //http://stackoverflow.com/questions/417142/what-is-the-maximum-length-of-a-url-in-different-browsers
 
   var min1 = 1,
-    max1 = 59,
+    max1 = 61,
     min2 = 1,
     max2 = 1638;
 
