@@ -25,11 +25,11 @@
       <div id="node-container" class="node-cont">
         <div ng-repeat="tab in catchTabFilter( (tabs | tabFilter:tabFilterInput) )" class="border-color-{{borderColor()}} tab-node" ng-class="{'fromtab':tab.fromtab}" id="{{tab.id}}" on-last-repeat ng-cloak>
             <a class="border-color-{{borderColor()}} favicon" ng-click="domainFilter(tab)">
-                <img class="favicon-img" ng-src="{{tab.favIconUrl || '/images/20x20.gif'}}" />
+                <img class="favicon-img" ng-src="{{tab.favIconUrl || '/images/favicon-placeholder.png'}}" />
             </a>
             <a class="close-button" ng-click="tabClose()"><img ng-src="/images/close_button.svg"/></a>
             <div class="node-hover-group" ng-click="switchToTab(tab)">
-              <div class="thumbnail"><img class="tab-close-img" width="150px" ng-src="{{tab.screencap || '/images/112x140.gif'}}"></div>
+              <div class="thumbnail"><img class="tab-close-img" width="150px" ng-src="{{tab.screencap || '/images/overtab-placeholder.png'}}"></div>
               <div class="title">{{tab.title}}</div>
             </div>
         </div>
