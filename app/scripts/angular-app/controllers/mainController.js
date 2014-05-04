@@ -141,7 +141,7 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
   $scope.onMessage = function(request, sender, sendResponse) {
 
     if( !request.hasOwnProperty( "id" ) || typeof request.id !== "number" ){
-      console.log("error", "message was lacking an id", request );
+      console.log("this message is misformed.", request);
       return;
     }
 
@@ -181,7 +181,7 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
         break;
 
       default:
-          console.log("warn", "unkown message");
+          console.log("we aren't doing anything for this message: "+request.message, resuest);
         break;
     }
 
