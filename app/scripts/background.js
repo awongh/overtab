@@ -408,16 +408,18 @@ var install = function( details ){
 
 var memoryCheck = function( callback ){
   chrome.system.memory.getInfo(function(info){
-    var availableCapacity = info.availableCapacity, capacity = info.capacity;
+    var availableCapacity = info.availableCapacity;
+    var capacity = info.capacity;
 
     //assume 4-16gb memory - 4294967296 - 17179869184
+    //console.log("doing screencap. avail:"+availableCapacity+" for: " +(capacity/3) );
 
     //give us a safety cushion
-    if( availableCapacity < ( capacity / 7 ) ){
+    if( availableCapacity < ( capacity / 2.5 ) ){
 
-      //alert("not doing screencap. avail:"+availableCapacity+" for: " +(capacity/7) );
+      console.log("not doing screencap. avail:"+availableCapacity+" for: " +(capacity/2.5) );
+      //alert("not doing screencap. avail:"+availableCapacity+" for: " +(capacity/2.5) );
       //do some stuff here
-      console.log("not doing screencap");
       return;
     }
 
