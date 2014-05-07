@@ -181,7 +181,7 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
         break;
 
       default:
-          console.log("we aren't doing anything for this message: "+request.message, resuest);
+          console.log("we aren't doing anything for this message: "+request.message, request);
         break;
     }
 
@@ -275,6 +275,7 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
         $timeout( function(){
           $scope.indexAllTabs();
           $scope.currentEdgesRender();
+          angular.element('#filter-input').focus().select();
         },1);
       });
     });
@@ -443,9 +444,13 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
         if( ( tab.hasOwnProperty( "screencap" ) && tab.screencap != screencap ) || !tab.hasOwnProperty( "screencap" ) || !tab.screencap ){
           var tabIndex = $scope.tabs.valuePropertyIndex( "id", tabId );
 
-          $scope.tabs[tabIndex]['screencap'] = screencap;
+          if( tabIndex ){
 
-          $scope.$apply( function(){});
+            $scope.tabs[tabIndex]['screencap'] = screencap;
+
+            $scope.$apply( function(){});
+
+          }
         }else{
           //console.log( "warn", "couldnt set this records screencap: "+tabId );
         }
