@@ -78,7 +78,9 @@ var tabFocus = function( tabId, windowId, oldTabId ){
     chrome.windows.update(windowId, {'focused': true}, function() {
       chrome.tabs.update(tabId, {'active': true}, function() {
         //message the thing to say the tab
-        tabEvent( oldTabId, "overtab" );
+        if( oldTabId ){
+          tabEvent( oldTabId, "overtab" );
+        }
       });
     });
 };

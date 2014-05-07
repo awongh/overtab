@@ -412,7 +412,7 @@ var memoryCheck = function( callback ){
     var capacity = info.capacity;
 
     //assume 4-16gb memory - 4294967296 - 17179869184
-    //console.log("doing screencap. avail:"+availableCapacity+" for: " +(capacity/3) );
+    //console.log("doing screencap. avail:"+availableCapacity+" for: " +(capacity/2.5) );
 
     //give us a safety cushion
     if( availableCapacity < ( capacity / 2.5 ) ){

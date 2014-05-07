@@ -163,10 +163,13 @@ var stringToInt = function( str ){
 
 //make the domainInt a number in the range
 //of colors we've specified
-function rangeConstrict(num ){
+function rangeConstrict( num ){
+  //max1 == number of colors
+  //max2 == given spec, possible maximum of url stringtoint given <2048 chars
+  //http://stackoverflow.com/questions/417142/what-is-the-maximum-length-of-a-url-in-different-browsers
 
   var min1 = 1,
-    max1 = 42,
+    max1 = 61,
     min2 = 1,
     max2 = 1638;
 
@@ -215,12 +218,36 @@ var options = [
 ////////////////      SHARED CHROME INTERACTION         ////////////////
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
+var isExtensionUrl = function( url ){
+  if( url == extensionUrl("index.html") || url == extensionUrl("options.html") ){
+    return true;
+  }
+
+  return false;
+}
+
+var extensionUrl = function( path ){
+  return chrome.extension.getURL( path );
+};
 
 //query for a single tab
 var tabQuery = function( queryInfo, callback ){
-  return chrome.tabs.query( queryInfo, function( tabs ){
-    if (tabs && tabs.length > 0 && tabs[0].id) {
-        callback(tabs[0]);
+  chrome.tabs.query( queryInfo, function( tabs ){
+
+    //this is a hack for when a dev window is open...
+    //make sure we can find one good tab
+    var rtabs = [],
+      i=0;
+
+    do{
+      if (tabs[i] && tabs[i].id) {
+        rtabs.push( tabs[i] );
+      }
+      i++;
+    }while (i < tabs.length && !isVerifiedTabUrl( tabs[i] ) );
+
+    if (rtabs.length > 0 ) {
+        callback(rtabs[0]);
     }else{
       //console.log( "warn", "WARNING: your tab query failed", queryInfo, tabs );
       callback(false);
@@ -242,8 +269,9 @@ var tabFocus = function( tabId, windowId, oldTabId ){
     chrome.windows.update(windowId, {'focused': true}, function() {
       chrome.tabs.update(tabId, {'active': true}, function() {
         //message the thing to say the tab
-        //send a message with this thing
-        tabEvent( oldTabId, "overtab" );
+        if( oldTabId ){
+          tabEvent( oldTabId, "overtab" );
+        }
       });
     });
 };
@@ -288,6 +316,33 @@ var closeTab = function( tabId ){
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 ////////////////     END SHARED CHROME INTERACTION      ////////////////
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+////////////////            GET OVERTAB TAB ID          ////////////////
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+
+var getOvertabId = function( callback ){
+  var query = {
+    url: extensionUrl('index.html')
+  };
+
+  tabQuery(query, function(tab) {
+
+    if( tab ){
+      callback( tab );
+    }else{
+      callback( false );
+    }
+  });
+}
+
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+////////////////          END GET OVERTAB TAB ID        ////////////////
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 

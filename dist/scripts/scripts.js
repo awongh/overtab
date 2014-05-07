@@ -163,10 +163,13 @@ var stringToInt = function( str ){
 
 //make the domainInt a number in the range
 //of colors we've specified
-function rangeConstrict(num ){
+function rangeConstrict( num ){
+  //max1 == number of colors
+  //max2 == given spec, possible maximum of url stringtoint given <2048 chars
+  //http://stackoverflow.com/questions/417142/what-is-the-maximum-length-of-a-url-in-different-browsers
 
   var min1 = 1,
-    max1 = 42,
+    max1 = 61,
     min2 = 1,
     max2 = 1638;
 
@@ -215,12 +218,36 @@ var options = [
 ////////////////      SHARED CHROME INTERACTION         ////////////////
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
+var isExtensionUrl = function( url ){
+  if( url == extensionUrl("index.html") || url == extensionUrl("options.html") ){
+    return true;
+  }
+
+  return false;
+}
+
+var extensionUrl = function( path ){
+  return chrome.extension.getURL( path );
+};
 
 //query for a single tab
 var tabQuery = function( queryInfo, callback ){
-  return chrome.tabs.query( queryInfo, function( tabs ){
-    if (tabs && tabs.length > 0 && tabs[0].id) {
-        callback(tabs[0]);
+  chrome.tabs.query( queryInfo, function( tabs ){
+
+    //this is a hack for when a dev window is open...
+    //make sure we can find one good tab
+    var rtabs = [],
+      i=0;
+
+    do{
+      if (tabs[i] && tabs[i].id) {
+        rtabs.push( tabs[i] );
+      }
+      i++;
+    }while (i < tabs.length && !isVerifiedTabUrl( tabs[i] ) );
+
+    if (rtabs.length > 0 ) {
+        callback(rtabs[0]);
     }else{
       //console.log( "warn", "WARNING: your tab query failed", queryInfo, tabs );
       callback(false);
@@ -242,8 +269,9 @@ var tabFocus = function( tabId, windowId, oldTabId ){
     chrome.windows.update(windowId, {'focused': true}, function() {
       chrome.tabs.update(tabId, {'active': true}, function() {
         //message the thing to say the tab
-        //send a message with this thing
-        tabEvent( oldTabId, "overtab" );
+        if( oldTabId ){
+          tabEvent( oldTabId, "overtab" );
+        }
       });
     });
 };
@@ -288,6 +316,33 @@ var closeTab = function( tabId ){
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 ////////////////     END SHARED CHROME INTERACTION      ////////////////
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+////////////////            GET OVERTAB TAB ID          ////////////////
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+
+var getOvertabId = function( callback ){
+  var query = {
+    url: extensionUrl('index.html')
+  };
+
+  tabQuery(query, function(tab) {
+
+    if( tab ){
+      callback( tab );
+    }else{
+      callback( false );
+    }
+  });
+}
+
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+////////////////          END GET OVERTAB TAB ID        ////////////////
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 
@@ -370,7 +425,7 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
   $scope.overtabId;
 
   $scope.tabs = [];
-  $scope.tabIndex = {};
+  //$scope.tabIndex = {};
 
   $scope.edges = [];
   $scope.edgesChildIndex = {};
@@ -378,6 +433,8 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
   $scope.currentEdgeFilter = "";
 
   $scope.edgesToRender = [];
+
+  $scope.showEdges = true;
 
   /**************************************************/
   /**********      typeahead stuff       ************/
@@ -403,6 +460,9 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
       var url = d.url;
       var parser = new Parser().href( url );
 
+      //include the whole url
+      tokenize = parser.href( url ).hostname();
+
       //this hostname doesn't do exactly what it
       //looks like, but it works ok
       //news.ycombinator.com -> news ycombinator.com
@@ -411,7 +471,8 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
       var path = parser.pathname().replace("/"," ");
       var search = parser.search().replace("&"," ");
 
-      tokenize = hostname + " " + path + " " + search;
+      //include the parsed one
+      tokenize += " "+ hostname + " " + path + " " + search;
     }
 
     if( d.hasOwnProperty( "title" ) ){
@@ -462,7 +523,6 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
   //that's right, anytime a tab is removed, reindex the entire thing
   $scope.resetSearch = function(){
     //var d = new Date();
-    //console.log( "start:", d.getTime() );
     $scope.bloodhoundData.clear();
     $scope.indexAllTabs();
     //console.log( "**end:", d.getTime() );
@@ -476,18 +536,20 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
     angular.element('#filter-input').typeahead("close");
   });
 
+
+  $scope.$on('typeahead:cursorchanged', function(scope, element, attrs){
+    $scope.tabHighlight( attrs.id );
+  });
+
+
   /**************************************************/
   /**********   end typeahead stuff      ************/
   /**************************************************/
 
-  $scope.$on('onLastRepeatEvent', function(scope, element, attrs){
-    $scope.edgesRender( $scope.edgesToRender );
-  });
-
   $scope.onMessage = function(request, sender, sendResponse) {
 
     if( !request.hasOwnProperty( "id" ) || typeof request.id !== "number" ){
-      console.log("error", "message was lacking an id", request );
+      console.log("this message is misformed.", request);
       return;
     }
 
@@ -527,7 +589,7 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
         break;
 
       default:
-          console.log("warn", "unkown message");
+          console.log("we aren't doing anything for this message: "+request.message, request);
         break;
     }
 
@@ -535,8 +597,50 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
   };
 
   $scope.overtabFocus = function( id ){
+
     //we know the id of where we just came from, do some stuff
     angular.element('#filter-input').focus().select();
+
+    $scope.tabHighlight( id );
+  };
+
+  $scope.tabHighlight = function( id ){
+
+    var tabIndex = $scope.tabs.valuePropertyIndex( "id", id );
+    if( id && typeof tabIndex == "number" && tabIndex != -1 ){
+
+      $scope.tabs[tabIndex].fromtab = true;
+
+      $scope.scrollToNode( id );
+
+      $timeout(function(){
+        if( $scope.tabs.hasOwnProperty( tabIndex ) ){
+          $scope.tabs[tabIndex].fromtab = false;
+        }
+      },2000);
+    }else{
+      console.log("WKUHIURIUEYIUIEW: "+id+" "+tabIndex);
+    }
+  };
+
+  $scope.scrollToNode = function( id, callback ){
+    var duration = 500;
+    var easing = 'swing';
+
+    var scrollPane = angular.element('html, body');
+    var scrollTo = angular.element('#'+id);
+
+    var offset = ( angular.element(window).height() ) / 2;
+
+    var scrollOffset = scrollTo.offset();
+
+    if( scrollOffset && scrollOffset.hasOwnProperty( top ) && scrollOffset.top ){
+      var scrollY = scrollTo.offset().top - offset;
+
+      scrollPane.animate({scrollTop : scrollY }, duration, easing, function(){
+        if (typeof callback == 'function') { callback.call(this); }
+      });
+    }
   };
 
   $scope.tabClose = function( ){
@@ -546,8 +650,11 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
   //get the local storage array of tabs
   $scope.getAllTabs = function(){
 
-    lsGet( "OVERTAB_TAB_ID", function( overtabResult ){
-      $scope.overtabId = overtabResult["OVERTAB_TAB_ID"];
+    getOvertabId( function( tab ){
+
+      if( tab ){
+        $scope.overtabId = tab.id;
+      }
 
       var parser = new Parser();
 
@@ -574,8 +681,11 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
         /* end lsget */
 
         //cheat and use a timeout to start the search indexing of the tabs we just got
+        //also make sure the edges will render
         $timeout( function(){
           $scope.indexAllTabs();
+          $scope.currentEdgesRender();
+          angular.element('#filter-input').focus().select();
         },1);
       });
     });
@@ -585,63 +695,14 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
     getTab( tabId, callback );
   };
 
-  $scope.tabEdgeSet = function( tab, callback ){
-
-    if( !tab.hasOwnProperty( "id" ) || !tab.hasOwnProperty( "openerTabId" ) ){
-      return false;
-    }
-
-    //see if it already exists
-    if( $scope.edgesChildIndex.hasOwnProperty( tab.id ) ){
-      return false;
-    }
-
-    $scope.edgesChildIndex[tab.id] = tab.openerTabId;
-
-    if (typeof $scope.edgesParentIndex[tab.openerTabId] === 'undefined') {
-
-      $scope.edgesParentIndex[tab.openerTabId] = [];
-      $scope.edgesParentIndex[tab.openerTabId].push( tab.id );
-    }else{
-
-      $scope.edgesParentIndex[tab.openerTabId].push( tab.id );
-    }
-
-    console.log("edge tab id: "+ tab.id+" "+tab.openerTabId );
-    $scope.edges.push( { tabId: tab.id, parentId: tab.openerTabId } );
-
-    callback();
-
-  };
-
-  $scope.tabEdgeRemove = function( tabId, callback ){
-
-    var k = $scope.edges.valuePropertyIndex("tabId", tabId);
-
-    if( k ){
-      $scope.edges.remove(k);
-
-      //look in parent edges
-      if(typeof $scope.edgesParentIndex[tabId] !== 'undefined' ){
-        for( var i=0; i<$scope.edgesParentIndex[tabId].length; i++ ){
-
-          var edgeIndex = $scope.edgesParentIndex[tabId][i];
-
-          $scope.edgesChildIndex.remove(edgeIndex);
-        }
-
-        $scope.edgesParentIndex.remove(tabId);
-      }
-    }
-
-    callback();
-  };
-
   //TODO: deal with edges??
   //this may create some race conditions..... not sure what to do about this
   $scope.tabReplaced = function( tabId, oldTabId ){
-    var index = $scope.tabs.valuePropertyIndex( "id", oldTabId );
-    $scope.tabs[index].id = tabId;
+    //var index = $scope.tabs.valuePropertyIndex( "id", oldTabId );
+    //$scope.tabs[index].id = tabId;
+    //console.log($scope.tabs[index], tabId, oldTabId);
+    $scope.removeTab( oldTabId );
+    $scope.createTab( tabId );
   };
 
   $scope.createTab = function( tabId ){
@@ -658,7 +719,7 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
 
     //make sure it doesnt already exist for some reason??
     if( $scope.tabs.hasValueProperty("id", tab.id ) ){
-      console.log("error", "ERROR: trying to add tab for tabId "+tab.id+" that already exists in scope.tabs");
+      //console.log("error", "ERROR: trying to add tab for tabId "+tab.id+" that already exists in scope.tabs");
       return false;
     }
 
@@ -793,16 +854,20 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
         if( ( tab.hasOwnProperty( "screencap" ) && tab.screencap != screencap ) || !tab.hasOwnProperty( "screencap" ) || !tab.screencap ){
           var tabIndex = $scope.tabs.valuePropertyIndex( "id", tabId );
 
-          $scope.tabs[tabIndex]['screencap'] = screencap;
+          if( typeof tabIndex == "number" && tabIndex != -1 ){
 
-          $scope.$apply( function(){});
+            $scope.tabs[tabIndex]['screencap'] = screencap;
+
+            $scope.$apply( function(){});
+
+          }
         }else{
-          console.log( "warn", "couldnt set this records screencap: "+tabId );
+          //console.log( "warn", "couldnt set this records screencap: "+tabId );
         }
 
         screencap = null;
       }else{
-        console.log( "warn", "we dont have this screen cap record: "+tabId );
+        //console.log( "warn", "we dont have this screen cap record: "+tabId );
       }
 
       result = null;
@@ -824,13 +889,13 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
         //what kind of race condition cpould exist here that:
         //we are adding a tab only on update, we got it from a query, then what???
 
-        console.log("warn", "ERROR: in update didnt find tab "+tabId );
+        //console.log("warn", "ERROR: in update didnt find tab "+tabId );
         $scope.addTab( chromeTab );
         return;
       }
 
       if( !chromeTab ){
-        console.log("warn", "didnt find chrome tab: "+tabId );
+        //console.log("warn", "didnt find chrome tab: "+tabId );
         return false;
       }
 
@@ -851,7 +916,6 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
       if( $scope.edgesChildIndex[tab.id] != "undefined" ){
 
         if( tab.hasOwnProperty("openerTabId") && $scope.edgesParentIndex[tab.openerTabId] != "undefined" ){
-          //add it
           output.push( {tabId:tab.id,parentId:tab.openerTabId} );
         }
       }
@@ -860,6 +924,83 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
     $scope.edgesToRender = output;
 
     return tabs;
+  };
+
+  /**************************************************/
+  /**********         edge stuff         ************/
+  /**************************************************/
+
+  $scope.edgeShow = function(){
+    if( $scope.showEdges == true ){
+      $scope.showEdges = false;
+    }else{
+      //render the edges in case something has changed since we hid them
+      $scope.currentEdgesRender();
+      $scope.showEdges = true;
+    }
+  };
+
+  $scope.$on('onLastRepeatEvent', function(scope, element, attrs){
+
+    $timeout( function(){
+      $scope.edgesRender( $scope.edgesToRender );
+    },200);
+  });
+
+  $scope.tabEdgeSet = function( tab, callback ){
+
+    if( !tab.hasOwnProperty( "id" ) || !tab.hasOwnProperty( "openerTabId" ) ){
+      return false;
+    }
+
+    //see if it already exists
+    if( $scope.edgesChildIndex.hasOwnProperty( tab.id ) ){
+      //do the callback anyways (probably edge rendering)
+      callback();
+      return false;
+    }
+
+    $scope.edgesChildIndex[tab.id] = tab.openerTabId;
+
+    if (typeof $scope.edgesParentIndex[tab.openerTabId] === 'undefined') {
+
+      $scope.edgesParentIndex[tab.openerTabId] = [];
+      $scope.edgesParentIndex[tab.openerTabId].push( tab.id );
+    }else{
+
+      $scope.edgesParentIndex[tab.openerTabId].push( tab.id );
+    }
+
+    $scope.edges.push( { tabId: tab.id, parentId: tab.openerTabId } );
+
+    callback();
+
+  };
+
+  $scope.tabEdgeRemove = function( tabId, callback ){
+
+    var k = $scope.edges.valuePropertyIndex("tabId", tabId);
+
+    if( k ){
+      $scope.edges.remove(k);
+
+      //look in parent edges
+      if(typeof $scope.edgesParentIndex[tabId] !== 'undefined' ){
+        for( var i=0; i<$scope.edgesParentIndex[tabId].length; i++ ){
+
+          var edgeIndex = $scope.edgesParentIndex[tabId][i];
+
+          delete $scope.edgesChildIndex[edgeIndex];
+        }
+
+        delete $scope.edgesParentIndex[tabId];
+      }
+    }
+
+    //make sure it renders, put it in a timeout
+    $timeout( function(){
+      callback();
+    },300);
   };
 
   $scope.currentEdgesRender = function( ){
@@ -873,7 +1014,6 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
       var found = false;
 
       if( !$scope.edges[i] ){
-        console.log("edge render, didnt find");
         continue;
       }
 
@@ -917,16 +1057,16 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
           angular.element( cir ).attr( "r", 5 + node_size );
 
 
-          angular.element( elem ).show();
-          angular.element( cir ).show();
+          angular.element( elem ).fadeIn(150);
+          angular.element( cir ).fadeIn(150);
 
           continue;
         }
       }
 
       //this is what we do anywyas
-      angular.element( elem ).hide();
-      angular.element( cir ).hide();
+      angular.element( elem ).fadeOut(150);
+      angular.element( cir ).fadeOut(150);
     }
   };
 
@@ -1021,6 +1161,21 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
     }
   };
 
+  /**************************************************/
+  /**********      end edge stuff        ************/
+  /**************************************************/
+
+  $scope.domainFilter = function(tab){
+
+    if( tab.hasOwnProperty( "searchDomain" ) && tab.searchDomain ){
+      $timeout( function(){
+
+        var input = angular.element('#filter-input');
+        input.typeahead('val', tab.searchDomain).trigger('input').select();
+      });
+    }
+  };
+
   $scope.borderColor = function(){
     return rangeConstrict( this.tab.domainInt );
   };
@@ -1101,7 +1256,7 @@ var onLastRepeat = function(){
 
 "use strict";
 
-var overtabApp = angular.module('overtab', ['siyfion.sfTypeahead']);
+var overtabApp = angular.module('overtab', ['siyfion.sfTypeahead','ngAnimate']);
 
 overtabApp.config(function($filterProvider, $compileProvider){
 

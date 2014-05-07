@@ -199,16 +199,16 @@ module.exports = function (grunt) {
     },
 
     // Renames files for browser caching purposes
-    rev: {
-      dist: {
-        files: {
-          src: [
-            '<%= yeoman.dist %>/scripts/vendor.js',
-            '<%= yeoman.dist %>/scripts/scripts.js'
-          ]
-        }
-      }
-    },
+    //rev: {
+    //  dist: {
+    //    files: {
+    //      src: [
+    //        '<%= yeoman.dist %>/scripts/vendor.js',
+    //        '<%= yeoman.dist %>/scripts/scripts.js'
+    //      ]
+    //    }
+    //  }
+    //},
 
     // Reads HTML for usemin blocks to enable smart builds that automatically
     // concat, minify and revision files. Creates configurations in memory so
@@ -356,7 +356,6 @@ module.exports = function (grunt) {
     chromeManifest: {
         dist: {
             options: {
-                buildnumber: true,
                 background: {
                     target: 'scripts/background.js',
                     exclude: [
@@ -451,7 +450,6 @@ module.exports = function (grunt) {
     'copy:dist',
     'cssmin',
     'uglify',
-    'rev',
     'usemin',
     'htmlmin',
     'compress:dist',
