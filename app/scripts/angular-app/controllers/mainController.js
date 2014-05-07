@@ -199,7 +199,7 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
   $scope.tabHighlight = function( id ){
 
     var tabIndex = $scope.tabs.valuePropertyIndex( "id", id );
-    if( id && tabIndex ){
+    if( id && typeof tabIndex == "number" && tabIndex != -1 ){
 
       $scope.tabs[tabIndex].fromtab = true;
 
@@ -210,6 +210,8 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
           $scope.tabs[tabIndex].fromtab = false;
         }
       },2000);
+    }else{
+      console.log("WKUHIURIUEYIUIEW: "+id+" "+tabIndex);
     }
   };
 
@@ -444,7 +446,7 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
         if( ( tab.hasOwnProperty( "screencap" ) && tab.screencap != screencap ) || !tab.hasOwnProperty( "screencap" ) || !tab.screencap ){
           var tabIndex = $scope.tabs.valuePropertyIndex( "id", tabId );
 
-          if( tabIndex ){
+          if( typeof tabIndex == "number" && tabIndex != -1 ){
 
             $scope.tabs[tabIndex]['screencap'] = screencap;
 
