@@ -5,14 +5,18 @@
     "version": "0.9.1",
     "default_locale": "en",
     "icons": {
-        "19": "images/OverTab_19.png",
-        "32": "images/OverTab_32.png",
-        "48": "images/OverTab_48.png",
-        "128": "images/OverTab_128.png"
+        "19": "images/overtab-compact-logo-19.png",
+        "38": "images/overtab-compact-logo-38.png",
+        "32": "images/overtab-logo-32.png",
+        "48": "images/overtab-logo-48.png",
+        "128": "images/overtab-logo-128.png"
     },
     "browser_action": {
         "default_title": "tabs",
-        "default_icon": "images/OverTab_32.png"
+        "default_icon": {
+          "19": "images/overtab-compact-logo-19.png",
+          "38": "images/overtab-logo-38.png"
+        }
     },
     "background": {
         "persistent": false,
