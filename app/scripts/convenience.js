@@ -105,6 +105,7 @@ var DISALLOWED_SCREENCAP_URLS = [
 ];
 
 var ALLOWED_PROTOCOLS = [
+  "file:",
   "http:",
   "https:",
   "chrome:"
