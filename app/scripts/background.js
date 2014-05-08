@@ -440,7 +440,7 @@ var memoryCheck = function( callback ){
 ////////////////////////////////////////////////////////////////////////
 
 chrome.runtime.onStartup.addListener( startup );
-chrome.runtime.onSuspend.addListener( shutdown );
+//chrome.runtime.onSuspend.addListener( shutdown );
 chrome.runtime.onInstalled.addListener( install );
 
 //get extension html url
