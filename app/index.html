@@ -23,7 +23,7 @@
       </div>
 
       <div id="node-container" class="node-cont">
-        <div ng-repeat="tab in catchTabFilter( (tabs | tabFilter:tabFilterInput) )" class="border-color-{{borderColor()}} tab-node" ng-class="{'fromtab':tab.fromtab}" id="{{tab.id}}" on-last-repeat ng-cloak>
+        <div ng-repeat="tab in catchTabFilter( (tabs | tabFilter:tabFilterInput) )" class="border-color-{{borderColor()}} tab-node" ng-class="{'fromtab':tab.fromtab}" id="{{tab.id}}" on-last-repeat>
             <a class="border-color-{{borderColor()}} favicon" ng-click="domainFilter(tab)">
                 <img class="favicon-img" ng-src="{{tab.favIconUrl || '/images/favicon-placeholder.png'}}" />
             </a>
