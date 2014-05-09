@@ -280,12 +280,12 @@ var browserActionClick = function( ){
 
 var getAllTabs = function(){
 
-  getOvertabId( function( tab ){
+  getOvertabId( function( overtabTab ){
 
     var overtabId = null;
 
-    if( tab ){
-      overtabId = tab.id;
+    if( overtabTab ){
+      overtabId = overtabTab.id;
     }
 
     //query for all the tabs
@@ -415,9 +415,9 @@ var memoryCheck = function( callback ){
     //console.log("doing screencap. avail:"+availableCapacity+" for: " +(capacity/2.5) );
 
     //give us a safety cushion
-    if( availableCapacity < ( capacity / 2.5 ) ){
+    if( availableCapacity < ( capacity / 2 ) ){
 
-      console.log("not doing screencap. avail:"+availableCapacity+" for: " +(capacity/2.5) );
+      console.log("not doing screencap. avail:"+availableCapacity+" for: " +(capacity/2) );
       //alert("not doing screencap. avail:"+availableCapacity+" for: " +(capacity/2.5) );
       //do some stuff here
       return;

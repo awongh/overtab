@@ -242,10 +242,10 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
   //get the local storage array of tabs
   $scope.getAllTabs = function(){
 
-    getOvertabId( function( tab ){
+    getOvertabId( function( overtabTab ){
 
-      if( tab ){
-        $scope.overtabId = tab.id;
+      if( overtabTab ){
+        $scope.overtabId = overtabTab.id;
       }
 
       var parser = new Parser();
