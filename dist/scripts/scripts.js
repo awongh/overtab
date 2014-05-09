@@ -105,6 +105,7 @@ var DISALLOWED_SCREENCAP_URLS = [
 ];
 
 var ALLOWED_PROTOCOLS = [
+  "file:",
   "http:",
   "https:",
   "chrome:"
@@ -218,13 +219,51 @@ var options = [
 ////////////////      SHARED CHROME INTERACTION         ////////////////
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
+
+var getTabCount = function( callback ){
+
+  tabsQuery({}, function(result) {
+
+    var count = 0;
+
+    for( var i = 0; i< result.length; i++ ){
+      if( isVerifiedTabUrl( result[i] ) ){
+        count++;
+      }
+    }
+
+    callback( count );
+  });
+};
+
+//make sure it's a real tab, not dev-tools, or something
+var isVerifiedTabUrl = function( tab ){
+  if( tab.hasOwnProperty( "url" ) ){
+    var parser = new Parser();
+
+    var tabProtocol = parser.href(tab.url).protocol();
+    var hostName = parser.href(tab.url).hostname();
+
+    //what conditions do we want to accept add adding a tab?
+    if (
+      tab.hasOwnProperty( "id" )
+      && ALLOWED_PROTOCOLS.indexOf( tabProtocol ) !== -1
+      && !isExtensionUrl( tab.url ) )
+    {
+      return true;
+    }
+  }
+
+  return false;
+};
+
 var isExtensionUrl = function( url ){
   if( url == extensionUrl("index.html") || url == extensionUrl("options.html") ){
     return true;
   }
 
   return false;
-}
+};
 
 var extensionUrl = function( path ){
   return chrome.extension.getURL( path );
@@ -491,6 +530,8 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
       //init both the tokenizers
       datumTokenizer: $scope.dataTokenizer,
       queryTokenizer: Bloodhound.tokenizers.whitespace,
+      //the max number of suggestions in the dropdown:
+      limit:10,
       local: $scope.tabs
     });
 
@@ -650,10 +691,10 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
   //get the local storage array of tabs
   $scope.getAllTabs = function(){
 
-    getOvertabId( function( tab ){
+    getOvertabId( function( overtabTab ){
 
-      if( tab ){
-        $scope.overtabId = tab.id;
+      if( overtabTab ){
+        $scope.overtabId = overtabTab.id;
       }
 
       var parser = new Parser();
