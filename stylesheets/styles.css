@@ -390,7 +390,7 @@ fieldset {
 
 /*
  * 1. Corrects color not being inherited in IE6/7/8/9
- * 2. Corrects text not wrapping in FF3 
+ * 2. Corrects text not wrapping in FF3
  * 3. Corrects alignment displayed oddly in IE6/7
  */
 legend {
@@ -852,5 +852,11 @@ section #title .credits.right {
 
 .video-cont{
   margin:20px auto 20px auto;
+}
+
+.header-img{
+  display:block;
+  width:213px;
+  margin:0 auto 11px auto;
 }
 
