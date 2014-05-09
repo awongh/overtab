@@ -423,9 +423,9 @@ var memoryCheck = function( callback ){
         //assume 4-16gb memory - 4294967296 - 17179869184
         //console.log("doing screencap. avail:"+availableCapacity+" for: " +(capacity/2.5) );
 
-        if( window.devicePixelRatio > 1 && platformInfo && platformInfo.hasOwnProperty( "os" ) && platformInfo.os == "mac" && tabCount > 30 && availableCapacity < ( capacity / 5 ) ){
+        if( window.devicePixelRatio > 1 && platformInfo && platformInfo.hasOwnProperty( "os" ) && platformInfo.os == "mac" && tabCount > 30 && availableCapacity < ( capacity / 2 ) ){
 
-          console.log("not doing screencap. avail:"+availableCapacity+" for: " +(capacity/5) );
+          console.log("not doing screencap. avail:"+availableCapacity+" for: " +(capacity/2) );
           //alert("not doing screencap. avail:"+availableCapacity+" for: " +(capacity/5) );
           return;
         }
