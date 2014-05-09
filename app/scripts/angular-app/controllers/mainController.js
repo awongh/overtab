@@ -83,6 +83,8 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
       //init both the tokenizers
       datumTokenizer: $scope.dataTokenizer,
       queryTokenizer: Bloodhound.tokenizers.whitespace,
+      //the max number of suggestions in the dropdown:
+      limit:10,
       local: $scope.tabs
     });
 
