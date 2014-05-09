@@ -27,13 +27,51 @@ var options = [
 ////////////////      SHARED CHROME INTERACTION         ////////////////
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
+
+var getTabCount = function( callback ){
+
+  tabsQuery({}, function(result) {
+
+    var count = 0;
+
+    for( var i = 0; i< result.length; i++ ){
+      if( isVerifiedTabUrl( result[i] ) ){
+        count++;
+      }
+    }
+
+    callback( count );
+  });
+};
+
+//make sure it's a real tab, not dev-tools, or something
+var isVerifiedTabUrl = function( tab ){
+  if( tab.hasOwnProperty( "url" ) ){
+    var parser = new Parser();
+
+    var tabProtocol = parser.href(tab.url).protocol();
+    var hostName = parser.href(tab.url).hostname();
+
+    //what conditions do we want to accept add adding a tab?
+    if (
+      tab.hasOwnProperty( "id" )
+      && ALLOWED_PROTOCOLS.indexOf( tabProtocol ) !== -1
+      && !isExtensionUrl( tab.url ) )
+    {
+      return true;
+    }
+  }
+
+  return false;
+};
+
 var isExtensionUrl = function( url ){
   if( url == extensionUrl("index.html") || url == extensionUrl("options.html") ){
     return true;
   }
 
   return false;
-}
+};
 
 var extensionUrl = function( path ){
   return chrome.extension.getURL( path );

@@ -11,40 +11,8 @@
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 
-//make sure it's a real tab, not dev-tools, or something
-var isVerifiedTabUrl = function( tab ){
-  if( tab.hasOwnProperty( "url" ) ){
-    var parser = new Parser();
-
-    var tabProtocol = parser.href(tab.url).protocol();
-    var hostName = parser.href(tab.url).hostname();
-
-    //what conditions do we want to accept add adding a tab?
-    if (
-      tab.hasOwnProperty( "id" )
-      && ALLOWED_PROTOCOLS.indexOf( tabProtocol ) !== -1
-      && !isExtensionUrl( tab.url ) )
-    {
-      return true;
-    }
-  }
-
-  return false;
-};
-
 var setTabCount = function(){
-  tabsQuery({}, function(result) {
-
-    var count = 0;
-
-    for( var i = 0; i< result.length; i++ ){
-      if( isVerifiedTabUrl( result[i] ) ){
-        count++;
-      }
-    }
-
-    chromeBadge( count );
-  });
+  getTabCount( chromeBadge );
 };
 
 var tabCreated = function( tab ){
@@ -406,24 +374,65 @@ var install = function( details ){
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 
-var memoryCheck = function( callback ){
-  chrome.system.memory.getInfo(function(info){
-    var availableCapacity = info.availableCapacity;
-    var capacity = info.capacity;
+var getTabScreenCount = function( callback ){
 
-    //assume 4-16gb memory - 4294967296 - 17179869184
-    //console.log("doing screencap. avail:"+availableCapacity+" for: " +(capacity/2.5) );
+  //get all the tabs, see if they have screencaps in local storage
+  tabsQuery( {}, function( chromeTabs ){
 
-    //give us a safety cushion
-    if( availableCapacity < ( capacity / 2 ) ){
+    var last = chromeTabs.length -1;
+    var screenCount = 0;
 
-      console.log("not doing screencap. avail:"+availableCapacity+" for: " +(capacity/2) );
-      //alert("not doing screencap. avail:"+availableCapacity+" for: " +(capacity/2.5) );
-      //do some stuff here
-      return;
+    for( var i=0; i< chromeTabs.length; i++ ){
+
+      var tabId = chromeTabs[i].id;
+
+      //for loop closure, rename things for clarity
+      (function outer(id, ci){
+        lsGet( "screencap-"+id, function(result){
+          //do we have a result
+          if( result.hasOwnProperty( "screencap-"+id ) && result["screencap-"+id] ){
+            screenCount++;
+          }
+
+          //on the last element do the callback
+          if( last == ci ){
+            callback( screenCount );
+          }
+        });
+      })(tabId, i)
     }
+  });
+};
 
-    callback();
+var memoryCheck = function( callback ){
+
+  chrome.runtime.getPlatformInfo( function ( platformInfo ) {
+
+    getTabScreenCount( function ( tabCount ){
+
+      chrome.system.memory.getInfo(function (info){
+        var availableCapacity = info.availableCapacity;
+        var capacity = info.capacity;
+
+        //should we do a screencap??
+        //its a mac
+        //we have more than 30 tabs open
+        //we have a retina screen
+        //whats the available memory??
+
+        //assume 4-16gb memory - 4294967296 - 17179869184
+        //console.log("doing screencap. avail:"+availableCapacity+" for: " +(capacity/2.5) );
+
+        if( window.devicePixelRatio > 1 && platformInfo && platformInfo.hasOwnProperty( "os" ) && platformInfo.os == "mac" && tabCount > 30 && availableCapacity < ( capacity / 5 ) ){
+
+          console.log("not doing screencap. avail:"+availableCapacity+" for: " +(capacity/5) );
+          //alert("not doing screencap. avail:"+availableCapacity+" for: " +(capacity/5) );
+          return;
+        }
+
+        callback();
+      });
+    });
   });
 };
 
