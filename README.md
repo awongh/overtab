@@ -5,17 +5,17 @@ Chrome extension that manages your open tabs.
 Find and manipulate your open tabs, no more searching through minimized open tabs for a particular tab.
 
 ### Find it on the chrome store: [here](https://chrome.google.com/webstore/detail/leceanmnoanolhdkonbapdkplgikipon)
+
 ## Prequisites
 
-  ##### yeoman:
+##### yeoman
+  
   ```
     npm install -g yo
-  ```
 
-  ##### compass
+#### compass
   ```
     gem install compass
-  ```
 
   ```
     npm install
@@ -24,10 +24,10 @@ Find and manipulate your open tabs, no more searching through minimized open tab
 
 ## Installing
 
-  #### Goto:
+#### Goto:
   > chrome://extensions
 
-  #### Click:
+#### Click:
 
   > check the "developer mode" checkbox
 
