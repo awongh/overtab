@@ -13,17 +13,18 @@ Find and manipulate your open tabs, no more searching through minimized open tab
   ```
     npm install -g yo
   ```
-#### compass
+##### compass
   ```
     gem install compass
 
   ```
-
     npm install
     bower install
     grunt build
 
 ## Installing
+
+##### You don't need to install node or compass if you want to install the build from this repo go to /dist.
 
 #### Goto:
   > chrome://extensions
@@ -34,7 +35,7 @@ Find and manipulate your open tabs, no more searching through minimized open tab
 
   > Load unpacked extension
 
-  > Select overtab directory. /dist or, if building with grunt /app
+  > Select overtab directory. /dist or, if building with Grunt (as above), /app
 
 ## Note
   On retina macs overtab may experience this [bug](https://code.google.com/p/chromium/issues/detail?id=367931). If you see excessive memory consumption on your machine consider making a comment on this issue to the chromium team. Overtab currently limits the number of screencaps done on these machines to avoid problems.
