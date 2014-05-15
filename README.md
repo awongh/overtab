@@ -12,12 +12,13 @@ Find and manipulate your open tabs, no more searching through minimized open tab
   
   ```
     npm install -g yo
-
+  ```
 #### compass
   ```
     gem install compass
 
   ```
+
     npm install
     bower install
     grunt build
