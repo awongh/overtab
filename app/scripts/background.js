@@ -1,6 +1,6 @@
 "use strict";
 
-//VARIABLES
+//VARIABLE
 
   var THUMBSIZE = 150,
       SCREEN_CROP_RATIO = 1;
