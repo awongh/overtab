@@ -7,7 +7,13 @@ var options = [
   {
     name : "opener",
     type : "radio"
+  },
+  {
+    name : "analytics",
+    type : "checkbox"
   }
+
+
 
   //example other kinds of inputs for options
   //name == class on individual

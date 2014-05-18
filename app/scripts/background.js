@@ -346,6 +346,7 @@ var reset = function(){
 };
 
 var startup = function(){
+  analyticsEvent( "startup" );
 
   reset();
 
@@ -357,6 +358,8 @@ var shutdown = function(){
 };
 
 var install = function( details ){
+  analyticsEvent( "install" );
+
   reset();
 
   getAllTabs();

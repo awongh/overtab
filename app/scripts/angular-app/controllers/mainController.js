@@ -776,6 +776,8 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
 
   $scope.init = function() {
 
+    analyticsEvent( "overtabApp" );
+
     $scope.initTypeahead();
 
     //get all the currently open tabs

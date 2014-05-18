@@ -6,7 +6,8 @@
     "angular-animate": "1.2.6",
     "json3": "~3.2.6",
     "jquery": "2.1.0",
-    "angular-typeahead":"0.1.4"
+    "angular-typeahead":"0.1.4",
+    "chrome-platform-analytics": "git@github.com:GoogleChrome/chrome-platform-analytics.git"
   },
   "devDependencies": {
     "angular-mocks": "1.2.6",
