@@ -199,7 +199,13 @@ var options = [
   {
     name : "opener",
     type : "radio"
+  },
+  {
+    name : "analytics",
+    type : "checkbox"
   }
+
+
 
   //example other kinds of inputs for options
   //name == class on individual
@@ -489,7 +495,13 @@ function setAllOptions(){
     //set the elem to the name
     if( elem ){
 
-      var value = $(elem).val();
+      var value = false;
+
+      if( type == "checkbox" ){
+        value = elem.checked;
+      }else{
+        value = $(elem).val();
+      }
 
       var setObj = {};
 
@@ -540,6 +552,10 @@ function restore_options() {
         switch( opt.type ){
           //get the thing with the value we set
           case "checkbox":
+            var selector = "."+opt.name;
+
+            $(selector).prop( "checked", value );
+            break;
           case "radio":
             var selector = "."+opt.name+"[value='"+value+"']";
             $(selector).prop( "checked", true );

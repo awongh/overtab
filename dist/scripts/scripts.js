@@ -190,6 +190,31 @@ function rangeConstrict( num ){
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 
+var service, tracker;
+
+function initAnalyticsConfig(config) {
+  //do options stuff here
+
+  lsGet( "analytics", function( result ){
+    var permitted = ( result ) ? true : false;
+
+    config.setTrackingPermitted(permitted);
+  });
+}
+
+function analyticsEvent( viewName ) {
+  // Initialize the Analytics service object with the name of your app.
+  service = analytics.getService('overtab.com');
+  service.getConfig().addCallback(initAnalyticsConfig);
+
+  // Get a Tracker using your Google Analytics app Tracking ID.
+  tracker = service.getTracker('UA-51085352-1');
+
+  // Record an "appView" each time the user launches your app or goes to a new
+  // screen within the app.
+  tracker.sendAppView(viewName);
+}
+
 "use strict";
 
 //options array
@@ -199,7 +224,13 @@ var options = [
   {
     name : "opener",
     type : "radio"
+  },
+  {
+    name : "analytics",
+    type : "checkbox"
   }
+
+
 
   //example other kinds of inputs for options
   //name == class on individual
@@ -1222,6 +1253,8 @@ var mainController = function($scope, $rootScope, $timeout, $filter) {
   };
 
   $scope.init = function() {
+
+    analyticsEvent( "overtabApp" );
 
     $scope.initTypeahead();
 
