@@ -4,7 +4,11 @@ function initAnalyticsConfig(config) {
   //do options stuff here
 
   lsGet( "analytics", function( result ){
-    var permitted = ( result ) ? true : false;
+    var permitted = true;
+
+    if( result && result.hasOwnProperty( "analytics" ) && result.analytics == false ){
+      permitted = false;
+    }
 
     config.setTrackingPermitted(permitted);
   });
