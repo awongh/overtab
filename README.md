@@ -20,6 +20,10 @@ Find and manipulate your open tabs, no more searching through minimized open tab
   ```
     npm install
     bower install
+
+  For some reason the conditional @ wiredep/lib/detect-dependencies.js line 119 can't find the "main" key in the auto generated .bower.json file in the chrome-platform-analytics dependency. To get analytics working add this line to .bower.json in the app/bower_components/chrome-platform-analytics dir before doing grunt build: "main": "google-analytics-bundle.js",
+
+  ```
     grunt build
 
 ## Installing
