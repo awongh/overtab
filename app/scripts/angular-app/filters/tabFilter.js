@@ -37,7 +37,7 @@ var tabFilter = function( ) {
         //*hopefully* this will be after the output is returned
         //processed by catchtabfilter
         //and assigned to the scope variable!!
-        this.$emit('onLastRepeatEvent');
+        //this.$emit('onLastRepeatEvent');
 
         return output;
 
