@@ -49,7 +49,7 @@ var processImage = function( id, url, blob, width, height, callback ){
       var capId = "screencap-"+id;
       var setObj = {};
 
-      setObj[capId] = canvas.toDataURL("jpeg",0.0);
+      setObj[capId] = canvas.toDataURL("image/jpeg",1.0);
       setObj["screencap-url-"+id] = url;
 
       lsSet( setObj, function(){
