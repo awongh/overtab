@@ -2,7 +2,7 @@
     "manifest_version": 2,
     "name": "Overtab",
     "description": "Visual chrome tab manager that respects your context.",
-    "version": "0.8.23",
+    "version": "0.8.24",
     "default_locale": "en",
     "icons": {
         "19": "images/overtab-compact-logo-19.png",

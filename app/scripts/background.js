@@ -107,21 +107,19 @@ var screenCap = function( tab ){
     tabQuery(activeCompleteQuery, function(result) {
       if ( result.id == tab.id && result.windowId == tab.windowId && oldUrl != result.url && DISALLOWED_SCREENCAP_URLS.indexOf(result.url) === -1 ) {
 
-        memoryCheck( function(){
-          generateScreenCap(result.windowId, {format: "jpeg",quality:1}, function(blob){
+        generateScreenCap(result.windowId, {format: "jpeg",quality:1}, function(blob){
 
-            if( blob ){
+          if( blob ){
 
-              var blobLength = blob.length;
+            var blobLength = blob.length;
 
-              processImage( tab.id, result.url, blob, result.width, result.height, function(){
-                //what goes here?
+            processImage( tab.id, result.url, blob, result.width, result.height, function(){
+              //what goes here?
 
-              });
-              blob = undefined;
+            });
+            blob = undefined;
 
-            }
-          });
+          }
         });
       }else{
         //console.log( "warn", "screencap: no active window found >> result: "+result.id+" tab: "+tab.id+" old url: "+oldUrl);
