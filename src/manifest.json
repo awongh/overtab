@@ -1,0 +1,47 @@
+{
+    "manifest_version": 2,
+    "name": "Overtab",
+    "description": "Visual chrome tab manager that respects your context.",
+    "version": "0.8.24",
+    "icons": {
+        "19": "images/overtab-compact-logo-19.png",
+        "38": "images/overtab-compact-logo-38.png",
+        "32": "images/overtab-logo-32.png",
+        "48": "images/overtab-logo-48.png",
+        "128": "images/overtab-logo-128.png"
+    },
+    "browser_action": {
+        "default_title": "tabs",
+        "default_icon": {
+          "19": "$assets/overtab-compact-logo-19.png",
+          "38": "$assets/overtab-compact-logo-38.png"
+        }
+    },
+    "background": {
+        "persistent": false,
+        "scripts": [
+          "scripts/backapp.js"
+        ]
+    },
+    "homepage_url": "http://awongh.github.io/overtab",
+    "minimum_chrome_version": "25.0",
+    "commands": {
+        "open-overtab": {
+            "suggested_key": {
+                "default": "Ctrl+Shift+A"
+            },
+            "description": "Open overTab."
+        }
+    },
+    "permissions": [
+        "background",
+        "tabs",
+        "storage",
+        "unlimitedStorage",
+        "system.memory",
+        "history",
+        "<all_urls>"
+    ],
+
+    "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'"
+}
