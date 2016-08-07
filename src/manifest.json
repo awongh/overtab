@@ -16,7 +16,7 @@
     "background": {
         "persistent": false,
         "scripts": [
-          "scripts/backapp.js"
+          "scripts/background.js"
         ]
     },
     "homepage_url": "http://awongh.github.io/overtab",
