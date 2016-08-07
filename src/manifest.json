@@ -11,11 +11,7 @@
         "128": "images/overtab-logo-128.png"
     },
     "browser_action": {
-        "default_title": "tabs",
-        "default_icon": {
-          "19": "$assets/overtab-compact-logo-19.png",
-          "38": "$assets/overtab-compact-logo-38.png"
-        }
+        "default_title": "overtab"
     },
     "background": {
         "persistent": false,

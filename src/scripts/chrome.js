@@ -157,8 +157,7 @@ var lsRemove = function( tabId, callback ){
   }
 };
 
-var chromeBadge = function( text ){
-  chrome.browserAction.setBadgeText( {text: String(text)} );
+var chromeBadge = function( text ){ chrome.browserAction.setBadgeText( {text: String(text)} );
 };
 
 var closeTab = function( tabId ){

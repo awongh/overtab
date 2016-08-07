@@ -1,3 +1,3 @@
-import chrome from 'scripts/shared/chrome'
+import foo from 'scripts/shared/chrome'
 
-chrome('foobar')
+foo('foobar')
