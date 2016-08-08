@@ -5,6 +5,7 @@ import Action      from './processor/action'
 import Background  from './processor/background'
 import Content     from './processor/content'
 import Overrides   from './processor/overrides'
+import Basse       from './processor/basse'
 
 
 const processors = [
@@ -20,6 +21,8 @@ const processors = [
   Background,
   // Process content script
   Content,
+  // base stuff
+  Basse,
   // Process overrides
   Overrides
 ]
