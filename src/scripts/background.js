@@ -17,7 +17,6 @@ chrome.tabs.onRemoved.addListener( undertab.tabRemoved );
 
 //clicking on the browser menu item
 chrome.browserAction.onClicked.addListener( undertab.actionClick );
-console.log( undertab );
 
 //if a tab is replaced (only for prerender)
 chrome.tabs.onReplaced.addListener( undertab.tabReplaced );

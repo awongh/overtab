@@ -18,6 +18,7 @@ export default function() {
         }
       }
 
+      console.log( `tab count ${count}` );
       callback( count );
     });
   };
@@ -107,6 +108,8 @@ export default function() {
 
   //send message
   var sendMessage = function( tabId, message, callback ){
+
+    console.log( `message ${message}` );
     return chrome.runtime.sendMessage( tabId, message, callback );
   };
 

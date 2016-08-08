@@ -115,6 +115,7 @@ let ggg = function() {
   };
 
   var tabEvent = function( id, message ){
+    console.log( message );
     sendMessage(null, {message: message, id: id});
   }
 

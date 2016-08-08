@@ -3,6 +3,10 @@ import image from 'scripts/image'
 
 let ggg = function(){
 
+  var DISALLOWED_SCREENCAP_URLS = [
+    "chrome://newtab/"
+  ];
+
   //VARIABLES
 
     var THUMBSIZE = 150,
@@ -15,7 +19,7 @@ let ggg = function(){
   ////////////////////////////////////////////////////////////////////////
 
   var setTabCount = function(){
-    chromeHelper.getTabCount( chromeBadge );
+    chromeHelper.getTabCount( chromeHelper.chromeBadge );
   };
 
   var tabCreated = function( tab ){
@@ -147,9 +151,9 @@ let ggg = function(){
 
     chromeHelper.lsGet( id, function( result ){
       if( result && result !== null && result.hasOwnProperty( id ) ){
-          tabEvent( id, "activated" );
+          chromeHelper.tabEvent( id, "activated" );
 
-          getTab( id, function( tab ){
+          chromeHelper.getTab( id, function( tab ){
 
             //what kind of check do we need here??
             if( tab && typeof tab.id !== "undefined" ){
