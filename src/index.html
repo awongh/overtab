@@ -1,70 +1,32 @@
-<!DOCTYPE html>
-<html>
-  <head>
-      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-      <title>OverTab | Be over your tabs.</title>
+<!doctype html>
+<html lang="en">
 
-      <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
-      <!-- build:css(app,.tmp) styles/style.css -->
-      <link rel="stylesheet" href="styles/style.css">
-      <!-- endbuild -->
-  </head>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>React Redux React-Router with Webpack Boilerplate</title>
+    <meta name="description" content="React Redux React-Router with Webpack Boilerplate">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
 
-  <body ng-app="overtab">
+<body class="view-login">
+    <div id="root"></div>
+</body>
 
-    <div ng-controller="mainController" ng-init="init()" id="tab-graph">
-      <div class="tab-filter-cont">
-        <div class="tab-filter">
-          <input id="filter-input" class="typeahead" type="text" datasets="typeaheadData" ng-model="tabFilterInput" placeholder="filter" options="typeaheadOptions" sf-typeahead>
-        </div>
-        <div class="filter-ctrl-cont">
-          <button ng-click="edgeShow()"><img title="Show/Hide Edges" ng-class="{'show-edges' : showEdges}" class="edge-button-img" src="images/edge_button.svg"/></button>
-        </div>
-      </div>
+</html>
+	<html lang="en">
 
-      <div id="node-container" class="node-cont">
-        <div ng-repeat="tab in catchTabFilter( (tabs | tabFilter:tabFilterInput) )" class="border-color-{{borderColor()}} tab-node" ng-class="{'fromtab':tab.fromtab}" id="{{tab.id}}" on-last-repeat>
-            <a class="border-color-{{borderColor()}} favicon" ng-click="domainFilter(tab)">
-                <img class="favicon-img" ng-src="{{tab.favIconUrl || '/images/favicon-placeholder.png'}}" />
-            </a>
-            <a class="close-button" ng-click="tabClose()"><img ng-src="/images/close_button.svg"/></a>
-            <div class="node-hover-group" ng-click="switchToTab(tab)" title="{{tab.title}}">
-              <div class="thumbnail"><img class="tab-close-img" ng-src="{{tab.screencap || '/images/overtab-placeholder.png'}}"></div>
-              <div class="title">{{tab.title}}</div>
-            </div>
-        </div>
-      </div>
-      <div class="edge-cont" ng-show="showEdges">
-        <svg xmlns="http://www.w3.org/2000/svg" version="1.1">
-        <g ng-repeat="edge in edges" id="{{edge.tabId}}-{{edge.parentId}}" class="edge" edge-render>
-          <line id="line-{{edge.tabId}}-{{edge.parentId}}" class="edge-line"></line>
-          <circle id="circle-{{edge.tabId}}-{{edge.parentId}}" class="edge-circle"></circle>
-        </g>
-        </svg>
-      </div>
-    </div>
-    <!-- build:js({.tmp,app}) scripts/vendor.js -->
-    <!-- bower:js -->
-    <script src="bower_components/jquery/jquery.js"></script>
-    <script src="bower_components/angular/angular.js"></script>
-    <script src="bower_components/angular-animate/angular-animate.js"></script>
-    <script src="bower_components/json3/lib/json3.min.js"></script>
-    <script src="bower_components/typeahead.js/dist/typeahead.bundle.js"></script>
-    <script src="bower_components/angular-typeahead/angular-typeahead.js"></script>
-    <script src="bower_components/chrome-platform-analytics/google-analytics-bundle.js"></script>
-    <!-- endbower -->
-    <!-- endbuild -->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>React Redux React-Router with Webpack Boilerplate</title>
+    <meta name="description" content="React Redux React-Router with Webpack Boilerplate">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
 
-    <!-- build:js({.tmp,app}) scripts/scripts.js -->
-    <script src="scripts/convenience.js"></script>
-    <script src="scripts/analytics.js"></script>
-    <script src="scripts/chrome.js"></script>
-    <script src="scripts/angular-chrome.js"></script>
-    <script src="scripts/angular-app/controllers/mainController.js"></script>
-    <script src="scripts/angular-app/filters/tabFilter.js"></script>
-    <script src="scripts/angular-app/directives/onLastRepeat.js"></script>
-    <script src="scripts/angular-app/modules/app.js"></script>
-    <!-- endbuild -->
+<body class="view-login">
+    <div id="root"></div>
+    <script src="index.js"></script>
+</body>
 
-  </body>
 </html>
